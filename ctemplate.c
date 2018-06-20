@@ -67,4 +67,3 @@ int main(int argc, const char *argv[]) {
     fclose(f);
     return 0;
 }
->>>>>>> 42b4b35e8a69c8e6aff9f40454ad8df1d6652564
