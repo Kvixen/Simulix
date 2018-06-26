@@ -1,139 +1,111 @@
-<<<<<<< HEAD
+/*
+Copyright (C) 2018 Scania
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+#include "DEFAULT.h"
+#include "DEFAULT_capi.h"
+#define REAL_TIME_MODEL DEFAULT_M
 #include <stdlib.h>
 #include <stdio.h>
-#include "bil.h"
-#include "bil_capi.h"
-#define NAME_LENGTH_MAX         63 //The currently longest variable name according to Mathworks (ref/namelengthmax)
+#include "capi_utils.h"
+#include "cJSON.h"
 
+#define NAME_LENGTH_MAX             63 //The currently longest variable name according to Mathworks (ref/namelengthmax)
 
-//rtw-C-API nonsense defines
-//Input
-#define GetNumInputs            rtwCAPI_GetNumRootInputsFromStaticMap(bil_GetCAPIStaticMap())
-#define GetInputs               rtwCAPI_GetRootInputsFromStaticMap(bil_GetCAPIStaticMap())
-//Parameter
-#define GetNumParameters        rtwCAPI_GetNumModelParametersFromStaticMap(bil_GetCAPIStaticMap())
-#define GetParameters           rtwCAPI_GetModelParametersFromStaticMap(bil_GetCAPIStaticMap())
-//Output
-#define GetNumOutputs           rtwCAPI_GetNumRootOutputsFromStaticMap(bil_GetCAPIStaticMap())
-#define GetOutputs              rtwCAPI_GetRootOutputsFromStaticMap(bil_GetCAPIStaticMap())
+#define GetNumInputs(mmi)            rtwCAPI_GetNumRootInputs(mmi)
+#define GetNumParameters(mmi)        rtwCAPI_GetNumModelParameters(mmi)
+#define GetNumOutputs(mmi)           rtwCAPI_GetNumRootOutputs(mmi)
 
+#define GetInputs(mmi)               rtwCAPI_GetRootInputs(mmi)
+#define GetParameters(mmi)           rtwCAPI_GetModelParameters(mmi)
+#define GetOutputs(mmi)              rtwCAPI_GetRootOutputs(mmi)
 
+static const char *strings[] = { "SS_DOUBLE",
+                                 "SS_SINGLE", 
+                                 "SS_INT8", 
+                                 "SS_UINT8",
+                                 "SS_INT16",
+                                 "SS_UINT16",
+                                 "SS_INT32",
+                                 "SS_UINT32",
+                                 "SS_BOOLEAN"
+};
 
-
+#define GetDataType(num)              strings[num]
 
 int main(int argc, const char *argv[]) {
 
-    FILE *f = fopen("ModelOutputs.txt", "w");
+    bil_initialize();
+    bil_step();
+    rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo(REAL_TIME_MODEL).mmi);
+    
+
+
+    FILE *f = fopen("ModelOutputs.json", "w");
     if(!f){
         printf("Error opening file");
         exit(13);
     }
     
-    const int numRootInputs = GetNumInputs;
-    const int numModelParameters = GetNumParameters;
-    const int numRootOutputs = GetNumOutputs;
+    const int numRootInputs = GetNumInputs(capiMap);
+    const int numModelParameters = GetNumParameters(capiMap);
+    const int numRootOutputs = GetNumOutputs(capiMap);
+    struct ScalarVariable sVariable;
     char name[NAME_LENGTH_MAX] = "";
-  
+    int i;
+    char *string = NULL;
 
-    fprintf(f, "Inputs");
-    for(int i = 0; i < numRootInputs; i++){
-        strcpy(name, GetInputs[i].blockPath);
-        if(name && strcmp("", name) != 0){
-            fprintf(f, ",%s",name);
-        }
+    cJSON *root = cJSON_CreateObject();
+    cJSON *fmt = NULL;
+
+    for (i=0; i < numRootInputs; i++) {
+        sVariable = GetVariable(capiMap, i, ROOT_INPUT_FLAG);
+        cJSON_AddItemToObject(root, "Input", fmt = cJSON_CreateObject());
+        cJSON_AddStringToObject(fmt, "name", sVariable.name);
+        cJSON_AddNumberToObject(fmt, "start", sVariable.value);
+        cJSON_AddStringToObject(fmt, "type", GetDataType(sVariable.DataID));
     }
-    fprintf(f, "\n");
 
-    fprintf(f, "Parameters");
-    for(int i = 0; i < numModelParameters; i++){
-        strcpy(name, GetParameters[i].varName);
-        if(name && strcmp("", name) != 0){
-            fprintf(f, ",%s",name);
-        }
-
+    for (i=0; i < numModelParameters; i++) {
+        sVariable = GetVariable(capiMap, i, MODEL_PARAMETER_FLAG);
+        cJSON_AddItemToObject(root, "Parameter", fmt = cJSON_CreateObject());
+        cJSON_AddStringToObject(fmt, "name", sVariable.name);
+        cJSON_AddNumberToObject(fmt, "start", sVariable.value);
+        cJSON_AddStringToObject(fmt, "type", GetDataType(sVariable.DataID));
     }
-    fprintf(f, "\n");
 
-    fprintf(f,"Outputs");
-    for(int i = 0; i < numRootOutputs; i++){
-        strcpy(name, GetOutputs[i].blockPath);
-        if(name && strcmp("", name) != 0){
-            fprintf(f, ",%s",name);
-        }
+    for (i=0; i < numRootOutputs; i++) {
+        sVariable = GetVariable(capiMap, i, ROOT_OUTPUT_FLAG);
+        cJSON_AddItemToObject(root, "Output", fmt = cJSON_CreateObject());
+        cJSON_AddStringToObject(fmt, "name", sVariable.name);
+        cJSON_AddNumberToObject(fmt, "start", sVariable.value);
+        cJSON_AddStringToObject(fmt, "type", GetDataType(sVariable.DataID));
     }
-    fprintf(f, "\n");
 
+    string = cJSON_Print(root);
+    if (string == NULL) {
+        fprintf(stderr, "Failed to print cJSON.\n");
+        exit(12);
+    }
+
+    cJSON_Delete(root);
+    fprintf(f, "%s",string);
+
+    bil_terminate();
 
     fclose(f);
     return 0;
 }
-=======
-#include <stdlib.h>
-#include <stdio.h>
-#include "bil.h"
-#include "bil_capi.h"
-#define NAME_LENGTH_MAX         63 //The currently longest variable name according to Mathworks (ref/namelengthmax)
-
-
-//rtw-C-API nonsense defines
-//Input
-#define GetNumInputs            rtwCAPI_GetNumRootInputsFromStaticMap(bil_GetCAPIStaticMap())
-#define GetInputs               rtwCAPI_GetRootInputsFromStaticMap(bil_GetCAPIStaticMap())
-//Parameter
-#define GetNumParameters        rtwCAPI_GetNumModelParametersFromStaticMap(bil_GetCAPIStaticMap())
-#define GetParameters           rtwCAPI_GetModelParametersFromStaticMap(bil_GetCAPIStaticMap())
-//Output
-#define GetNumOutputs           rtwCAPI_GetNumRootOutputsFromStaticMap(bil_GetCAPIStaticMap())
-#define GetOutputs              rtwCAPI_GetRootOutputsFromStaticMap(bil_GetCAPIStaticMap())
-
-
-
-
-
-int main(int argc, const char *argv[]) {
-
-    FILE *f = fopen("ModelOutputs.txt", "w");
-    if(!f){
-        printf("Error opening file");
-        exit(13);
-    }
-    
-    const int numRootInputs = GetNumInputs;
-    const int numModelParameters = GetNumParameters;
-    const int numRootOutputs = GetNumOutputs;
-    char name[NAME_LENGTH_MAX] = "";
-  
-
-    fprintf(f, "Inputs");
-    for(int i = 0; i < numRootInputs; i++){
-        strcpy(name, GetInputs[i].blockPath);
-        if(name && strcmp("", name) != 0){
-            fprintf(f, ",%s",name);
-        }
-    }
-    fprintf(f, "\n");
-
-    fprintf(f, "Parameters");
-    for(int i = 0; i < numModelParameters; i++){
-        strcpy(name, GetParameters[i].varName);
-        if(name && strcmp("", name) != 0){
-            fprintf(f, ",%s",name);
-        }
-
-    }
-    fprintf(f, "\n");
-
-    fprintf(f,"Outputs");
-    for(int i = 0; i < numRootOutputs; i++){
-        strcpy(name, GetOutputs[i].blockPath);
-        if(name && strcmp("", name) != 0){
-            fprintf(f, ",%s",name);
-        }
-    }
-    fprintf(f, "\n");
-
-
-    fclose(f);
-    return 0;
-}
->>>>>>> d6ee857bb1e58a317cbd04839cc777aa3ad883eb

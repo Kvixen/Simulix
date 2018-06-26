@@ -1,4 +1,3 @@
-#include "bil.h"
 #include <stddef.h>
 #include <assert.h>
 #include "capi_utils.h"
@@ -106,7 +105,7 @@ void GetValueFromAdress(const char_T*  paramName,
 }
 
 void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
-                              uint_T                    paramIdx) {
+                        uint_T                    paramIdx) {
     
     const rtwCAPI_ModelParameters* modelParams;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
@@ -247,8 +246,8 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
 }
 
 void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
-                       uint_T                    signalIdx,
-                       uint_T                    signalTypeFlag) {
+                uint_T                    signalIdx,
+                uint_T                    signalTypeFlag) {
     
     const rtwCAPI_Signals*         signals;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
