@@ -7,6 +7,7 @@ import argparse
 templateReplace = {
 }
 
+
 #region Parser
 parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="cgen",usage="%(prog)s [options]")
 parser.add_argument('Path', nargs=1, default='', help='Path for generated C file (Defaults to executing folder')
@@ -48,6 +49,7 @@ def generatefile(templatePath, filePath, fileName):
 
 
 
+
 def main():
     templateReplace['classname'] = args.MN
     generatefile(args.TFP, args.Path[0], args.FN)
@@ -55,6 +57,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 

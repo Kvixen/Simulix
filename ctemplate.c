@@ -88,7 +88,6 @@ int main(int argc, const char *argv[]) {
 
     cJSON_Delete(root);
     fprintf(f, "%s",string);
-    
 
     bil_terminate();
 
