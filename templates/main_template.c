@@ -27,10 +27,9 @@ static const char *strings[] = { "SS_DOUBLE",
 
 #define GetDataType(num)              strings[num]
 
-void objectCreator(int FLAG, cJSON *Croot, rtwCAPI_ModelMappingInfo* capiMap) {
+void objectCreator(int FLAG, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* capiMap) {
     
     int number, i;
-    cJSON *fmt = NULL;
     struct ScalarVariable sVariable;
     
     switch(FLAG) {
@@ -47,11 +46,13 @@ void objectCreator(int FLAG, cJSON *Croot, rtwCAPI_ModelMappingInfo* capiMap) {
     
     for (i=0; i < number; i++) {
         sVariable = GetVariable(capiMap, i, FLAG);
-        cJSON_AddItemToObject(Croot, "ScalarVariable", fmt = cJSON_CreateObject());
-        cJSON_AddStringToObject(fmt, "name", sVariable.name);
-        cJSON_AddNumberToObject(fmt, "start", sVariable.value);
-        cJSON_AddStringToObject(fmt, "type", GetDataType(sVariable.DataID));
-        cJSON_AddStringToObject(fmt, "causality", sVariable.type); 
+        cJSON *ScalarVariable = cJSON_CreateObject();
+
+        cJSON_AddStringToObject(ScalarVariable, "name", sVariable.name);
+        cJSON_AddNumberToObject(ScalarVariable, "start", sVariable.value);
+        cJSON_AddStringToObject(ScalarVariable, "type", GetDataType(sVariable.DataID));
+        cJSON_AddStringToObject(ScalarVariable, "causality", sVariable.type);
+        cJSON_AddItemToArray(ScalarVariables, ScalarVariable); 
     }
 }
 
@@ -73,12 +74,14 @@ int main(int argc, const char *argv[]) {
     char name[NAME_LENGTH_MAX] = "";
     int i;
     char *string = NULL;
+    cJSON *ScalarVariables = NULL;
 
     cJSON *root = cJSON_CreateObject();
+    ScalarVariables = cJSON_AddArrayToObject(root, "ScalarVariable");
 
-    objectCreator(ROOT_INPUT_FLAG, root, capiMap);
-    objectCreator(ROOT_OUTPUT_FLAG, root, capiMap);
-    objectCreator(MODEL_PARAMETER_FLAG, root, capiMap);
+    objectCreator(ROOT_INPUT_FLAG, ScalarVariables, capiMap);
+    objectCreator(ROOT_OUTPUT_FLAG, ScalarVariables, capiMap);
+    objectCreator(MODEL_PARAMETER_FLAG, ScalarVariables, capiMap);
 
     string = cJSON_Print(root);
     if (string == NULL) {
