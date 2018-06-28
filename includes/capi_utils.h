@@ -28,6 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 extern "C" {
 #endif
 
+#define ROOT_INPUT_FLAG 1
+#define MODEL_PARAMETER_FLAG 0
+#define ROOT_OUTPUT_FLAG 2
+
 struct ScalarVariable{
     char name[63];
     float value;
@@ -35,10 +39,7 @@ struct ScalarVariable{
     char type[50];
 };
 static const struct ScalarVariable EmptyStruct;
-//signalTypeFlags
-static const int MODEL_PARAMETER_FLAG = 0;
-static const int ROOT_INPUT_FLAG = 1;
-static const int ROOT_OUTPUT_FLAG = 2;
+
 
 extern void GetValueFromAdress(const char_T*  paramName,
                                 void*          paramAddress,

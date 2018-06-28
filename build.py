@@ -1,16 +1,20 @@
-from subprocess import call
+from os import mkdir, path, getcwd, chdir, system
+from subprocess import call, Popen
 
-compprog = '"MinGW Makefiles"'
-makeprog = '"mingw32-make"'
-
-def build(compile_program,make_program):
+def _build(compile_program,make_program):
     call("cmake -G " + compile_program + " ..", shell=True)
     call(make_program, shell=True)
-    call("main", shell=True)
+    Popen([r"main.exe", "call"], shell=True)
 
-def hejare():
-    call("python hej.py", shell=True)
-
-#hejare()
-build(compprog,makeprog)
+def prepare_build_directory(folderName):
+    if not folderName:
+        folderName = "build"
+    if not path.isdir(path.join(getcwd(), folderName)):
+        mkdir(folderName)
     
+    chdir("build")
+
+
+def build(compprog, makeprog, folderName=None):
+    prepare_build_directory(folderName)
+    _build(compprog, makeprog)
