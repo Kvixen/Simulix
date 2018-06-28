@@ -6,7 +6,7 @@ Fgen is a program to compile a [simulink](https://mathworks.com/products/simulin
 
 Almost everything in this project is currently work in progress, even the project name. Feel free to contribute all you want. 
 
-#TODO+
+# TODO+
 
 TODO+ is a vscode extension that adds customization for easy tracking of TODO's. The settings we use is included in the projects .vscode files.
 
