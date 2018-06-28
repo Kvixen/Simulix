@@ -56,7 +56,7 @@ void GetValueFromAdress(const char_T*  paramName,
                 for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
                     for(colIdx = 0; colIdx < numCols; colIdx++) {
                         //printf("%.4f\n", paramVal[colIdx*numRows + rowIdx]);
-                        sVariable.value = (float)paramVal[colIdx*numRows + rowIdx];
+                        sVariable.value = (double)paramVal[colIdx*numRows + rowIdx];
                     }
                     //putchar('\n');
                 }

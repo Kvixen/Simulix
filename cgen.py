@@ -9,18 +9,14 @@ import re
 
 templateReplace = {
 }
+
+
 pattern = re.compile(r"^(R20)\d\d[a-b]")
+#Includes for capi_utils.c. Only one line made it unnecessary for an entire file. If this gets appended, please make a template file for it instead
 CONST_CAPI_UTILS_INCLUDE = '#include "{modelName}.h"\n'
 
 
-#region Parser
-parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="cgen",usage="%(prog)s [options]")
-parser.add_argument('Path', nargs='?', default=getcwd(), help='Path for generated C file')
-parser.add_argument('--TP', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
-parser.add_argument('--ZN', help='Name of zipfile generated from matlab', default='default.zip')
-parser.add_argument('--ZP', help='Path to zipfile, if not executing folder', default=getcwd())
-args = parser.parse_args()
-#endregion
+
 
 def _gen_capi_utils(src, dst):
     with open(path.join(dst,"capi_utils.c"), 'w') as capiFile:
@@ -48,7 +44,7 @@ def _copy_files(src, dst):
             copytree(s, d, False, None)
         else:
             copy2(s,d)
-
+    
 def _gen_cmakelists(src, dst):
     with open(path.join(dst, 'CMakeLists.txt'),'w') as CMakeFile:
         with open(path.join(src,'CMakeListsTemplate.txt'),'r') as templateFile:
@@ -67,10 +63,18 @@ def _handle_zip(dst, zipPath):
     for line in root_dirs:
         if pattern.match(line):
             templateReplace['matlabVersion'] = line
-        else:
+        elif line != "otherFiles":
             templateReplace['folderName'] = line
             tempList = listdir(line)[0].split('_')
             templateReplace['modelName'] = '_'.join(tempList[:-2])
+            if len(templateReplace['modelName']) > 28:
+                templateReplace['modelNameS'] = templateReplace['modelName'][:28]
+            else:
+                templateReplace['modelNameS'] = templateReplace['modelName']
+        
+
+
+
 
 def generate_files(src, dst, zipPath):
     """
@@ -104,9 +108,14 @@ def generate_files(src, dst, zipPath):
 
 def main():
     generate_files(args.TP, args.Path, path.join(args.ZP, args.ZN))
-
-
+    
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="cgen",usage="%(prog)s [options]")
+    parser.add_argument('Path', nargs='?', default=getcwd(), help='Path for generated C file')
+    parser.add_argument('--TP', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
+    parser.add_argument('--ZN', help='Name of zipfile generated from matlab', default='default.zip')
+    parser.add_argument('--ZP', help='Path to zipfile, if not executing folder', default=getcwd())
+    args = parser.parse_args()
     main()
 
