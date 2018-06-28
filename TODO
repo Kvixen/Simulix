@@ -3,10 +3,11 @@ For easier TODO file handling, download Todo+ for vscode
 TODO:
     Things not yet existing, but should or need to be implemented.
     ☐ Add and support PATH argument for build so user can build outside source directory @low 
+    ☐ JSON to XML
 
 FIXME:
     Optimization.
-    ☐ Make variables arrays instead of same object key (ModelOutput.json) @low @started(18-06-28 10:17)
+    ✔ Make variables arrays instead of same object key (ModelOutput.json) @low @started(18-06-28 10:17) @done(18-06-28 14:12) @lasted(3h55m36s)
     ☐ Fix handle_error in build.py. Currently, not optimal solution. @low 
 
 BUG:
