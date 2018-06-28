@@ -1,0 +1,25 @@
+{
+    "python.pythonPath": "C:\\Users\\ewaxcy\\AppData\\Local\\Continuum\\anaconda3\\python.exe",
+    "todo.colors.comment": "#006600",
+    "todo.tags.names": [
+        "critical",
+        "high",
+        "low",
+        "today",
+        "bug"
+    ],
+    "todo.tags.foregroundColors": [
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000",
+        "#000000"
+    ],
+    "todo.tags.backgroundColors": [
+        "#e54545",
+        "#e59f45",
+        "#e5d145",
+        "#ae81ff",
+        "#cc3300"
+    ]
+}
