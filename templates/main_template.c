@@ -37,13 +37,15 @@ char *_getDataType(uint8_T index){
 #define GetDataType(num)              _getDataType(num)
 
 void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* capiMap) {
-    
+
     int number, i;
     struct ScalarVariable sVariable;
     cJSON *jsonSV = NULL;
     cJSON *startArray = NULL;
     cJSON *startObject = NULL;
-    cJSON *outputArray = NULL;
+    cJSON *outputParentArray = NULL;
+    cJSON *outputChildObject = NULL;
+    cJSON *outputChildArray = NULL;
     cJSON *outputObject = NULL;
     char outputIndex[5];
     char valueReference[5];
@@ -68,10 +70,11 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             number = GetNumOutputs(capiMap);
             strcpy(variability, "discrete");
             strcpy(causality, "output");
-            outputarray = cJSON_AddArrayToObject(cJSON_AddArrayToObject(root, "ModelStructure"), "Outputs");
+            outputParentArray = cJSON_AddArrayToObject(root, "ModelStructure");
+            outputChildObject = cJSON_CreateObject();
+            outputChildArray = cJSON_AddArrayToObject(outputChildObject, "Outputs");
             break;		
     }
-
     for (i=0; i < number; i++) {
         sVariable = GetVariable(capiMap, i, FLAG);
         jsonSV = cJSON_CreateObject();
@@ -79,7 +82,7 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
         cJSON_AddStringToObject(jsonSV, "causality", causality);
         cJSON_AddStringToObject(jsonSV, "description", sVariable.name);
         cJSON_AddStringToObject(jsonSV, "variability", variability);
-        startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
+
         if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){
             sprintf(valueReference, "%i", numReal++);
         } else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {
@@ -89,6 +92,8 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
         }
         cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
         
+        startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
+
         if(FLAG != ROOT_OUTPUT_FLAG){
             cJSON_AddStringToObject(jsonSV, "initial", initial);
             startObject = cJSON_CreateObject();
@@ -96,19 +101,19 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             cJSON_AddItemToArray(startArray, startObject);
         } else {
             if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){
-                sprintf(outputIndex, "%i", numReal++);
+                sprintf(outputIndex, "%i", numReal);
             } else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {
-                sprintf(outputIndex, "%i", numInt++);
+                sprintf(outputIndex, "%i", numInt);
             } else {
-                sprintf(outputIndex, "%i", numBoolean++);
+                sprintf(outputIndex, "%i", numBoolean);
             }
             outputObject = cJSON_CreateObject();
             cJSON_AddStringToObject(outputObject, "Unknown", outputIndex);
-            cJSON_AddItemToArray(outputArray, outputObject);
+            cJSON_AddItemToArray(outputChildArray, outputObject);
         }
         cJSON_AddItemToArray(ScalarVariables, jsonSV); 
-        if(FLAG = ROOT_OUTPUT_FLAG){
-            cJSON_AddItemToArray(root, outputArray);
+        if(FLAG == ROOT_OUTPUT_FLAG){
+            cJSON_AddItemToArray(outputParentArray, outputChildObject);
         }
     }
 }
@@ -134,7 +139,7 @@ int main(int argc, const char *argv[]) {
     cJSON *ScalarVariables = NULL;
 
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, MODEL_NAME);
+    cJSON_AddStringToObject(root, "Model", MODEL_NAME);
     ScalarVariables = cJSON_AddArrayToObject(root, "ScalarVariable");
 
     objectCreator(ROOT_INPUT_FLAG, root, ScalarVariables, capiMap);
