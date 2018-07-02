@@ -43,9 +43,11 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
     cJSON *jsonSV = NULL;
     cJSON *startArray = NULL;
     cJSON *startObject = NULL;
-    cJSON *outputParentArray = NULL;
+    cJSON *ModelStructure = NULL;
     cJSON *outputChildObject = NULL;
-    cJSON *outputChildArray = NULL;
+    cJSON *Outputs = NULL;
+    cJSON *Unknown = NULL;
+    cJSON *UnknownChildObject = NULL;
     cJSON *outputObject = NULL;
     char outputIndex[5];
     char valueReference[5];
@@ -70,9 +72,11 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             number = GetNumOutputs(capiMap);
             strcpy(variability, "discrete");
             strcpy(causality, "output");
-            outputParentArray = cJSON_AddArrayToObject(root, "ModelStructure");
+            ModelStructure = cJSON_AddArrayToObject(root, "ModelStructure");
             outputChildObject = cJSON_CreateObject();
-            outputChildArray = cJSON_AddArrayToObject(outputChildObject, "Outputs");
+            Outputs = cJSON_AddArrayToObject(outputChildObject, "Outputs");
+            UnknownChildObject = cJSON_CreateObject();
+            Unknown = cJSON_AddArrayToObject(UnknownChildObject, "Unknown");
             break;		
     }
     for (i=0; i < number; i++) {
@@ -108,12 +112,13 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
                 sprintf(outputIndex, "%i", numBoolean);
             }
             outputObject = cJSON_CreateObject();
-            cJSON_AddStringToObject(outputObject, "Unknown", outputIndex);
-            cJSON_AddItemToArray(outputChildArray, outputObject);
+            cJSON_AddStringToObject(outputObject, "index", outputIndex);
+            cJSON_AddItemToArray(Unknown, outputObject);
         }
         cJSON_AddItemToArray(ScalarVariables, jsonSV); 
         if(FLAG == ROOT_OUTPUT_FLAG){
-            cJSON_AddItemToArray(outputParentArray, outputChildObject);
+            cJSON_AddItemToArray(Outputs, UnknownChildObject);
+            cJSON_AddItemToArray(ModelStructure, outputChildObject);
         }
     }
 }
@@ -140,11 +145,16 @@ int main(int argc, const char *argv[]) {
 
     cJSON *root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "Model", MODEL_NAME);
-    ScalarVariables = cJSON_AddArrayToObject(root, "ScalarVariable");
+    cJSON *ModelVariablesObject = cJSON_CreateObject();
+    ScalarVariables = cJSON_AddArrayToObject(ModelVariablesObject, "ScalarVariable");
 
     objectCreator(ROOT_INPUT_FLAG, root, ScalarVariables, capiMap);
     objectCreator(ROOT_OUTPUT_FLAG, root, ScalarVariables, capiMap);
     objectCreator(MODEL_PARAMETER_FLAG, root, ScalarVariables, capiMap);
+    cJSON *ModelVariables = cJSON_AddArrayToObject(root, "ModelVariables");
+    cJSON_AddItemToArray(ModelVariables, ModelVariablesObject);
+
+
 
     string = cJSON_Print(root);
     if (string == NULL) {
