@@ -4,21 +4,20 @@ TODO:
     Things not yet existing, but should or need to be implemented.
     ☐ Add and support PATH argument for build so user can build outside source directory @low 
     ☐ JSON to XML
+    ☐ Extend the switch-case to other Simulink DataIds
 
 FIXME:
     Optimization.
-    ✔ Make variables arrays instead of same object key (ModelOutput.json) @low @started(18-06-28 10:17) @done(18-06-28 14:12) @lasted(3h55m36s)
     ☐ Fix handle_error in build.py. Currently, not optimal solution. @low 
 
-BUG:
-    Errors inside our program.
-    
 GOALS:
     Milestones for our project. When there's nothing else to do, aim to implement support for these bulletpoints.
     ☐ Handle Scanias Simulink_lib models @low 
-    ☐ Handle all different variable types matlab generates @high 
+    ☐ Handle all different variable types matlab generates @high @started(18-06-29 08:16)
 
 Archive:
+    FIXME:
+        ✔ Make variables arrays instead of same object key (ModelOutput.json) @low @started(18-06-28 10:17) @done(18-06-28 14:12) @lasted(3h55m36s) @project(FIXME)
     BUG:
         ✔ Fix the program @critical @done(18-06-28 12:22)
         ✔ Floats not handled correctly when written inside CAPI_Utils.c `Github issue #2` @critical @today @started(18-06-28 07:39) @project(BUG) @done(18-06-28 11:40) @lasted(4h1m29s)

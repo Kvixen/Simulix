@@ -15,23 +15,33 @@
 #define GetNumOutputs(mmi)           rtwCAPI_GetNumRootOutputs(mmi)
 #define GetOutputs(mmi)              rtwCAPI_GetRootOutputs(mmi)
 
-static const char *strings[] = { "SS_DOUBLE",
-                                 "SS_SINGLE", 
-                                 "SS_INT8", 
-                                 "SS_UINT8",
-                                 "SS_INT16",
-                                 "SS_UINT16",
-                                 "SS_INT32",
-                                 "SS_UINT32",
-                                 "SS_BOOLEAN"};
+char *_getDataType(uint8_T index){
+    switch(index){
+        case 0:
+        case 1:
+            return "Real";
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            return "Integer";
+        case 8:
+            return "Boolean";
+    }
+}
 
-#define GetDataType(num)              strings[num]
+#define GetDataType(num)              _getDataType(num)
 
 void objectCreator(int FLAG, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* capiMap) {
     
     int number, i;
     struct ScalarVariable sVariable;
-    
+    cJSON *jsonSV = NULL;
+    cJSON *startArray = NULL;
+    cJSON *startObject = NULL;
+
     switch(FLAG) {
         case ROOT_INPUT_FLAG:
             number = GetNumInputs(capiMap);
@@ -43,16 +53,18 @@ void objectCreator(int FLAG, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* c
             number = GetNumOutputs(capiMap);
             break;		
     }
-    
+
     for (i=0; i < number; i++) {
         sVariable = GetVariable(capiMap, i, FLAG);
-        cJSON *ScalarVariable = cJSON_CreateObject();
-
-        cJSON_AddStringToObject(ScalarVariable, "name", sVariable.name);
-        cJSON_AddNumberToObject(ScalarVariable, "start", sVariable.value);
-        cJSON_AddStringToObject(ScalarVariable, "type", GetDataType(sVariable.DataID));
-        cJSON_AddStringToObject(ScalarVariable, "causality", sVariable.type);
-        cJSON_AddItemToArray(ScalarVariables, ScalarVariable); 
+        jsonSV = cJSON_CreateObject();
+        cJSON_AddStringToObject(jsonSV, "name", sVariable.name);
+        cJSON_AddStringToObject(jsonSV, "causality", sVariable.type);
+        cJSON_AddStringToObject(jsonSV, "description", sVariable.name);
+        startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
+        startObject = cJSON_CreateObject();
+        cJSON_AddStringToObject(startObject, "start", sVariable.value);
+        cJSON_AddItemToArray(startArray, startObject);
+        cJSON_AddItemToArray(ScalarVariables, jsonSV); 
     }
 }
 

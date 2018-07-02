@@ -24,84 +24,102 @@ void GetValueFromAdress(const char_T*  paramName,
     int colIdx;
     int pageIdx;
     if (numDims == 3) numPages = actualDims[2];
-    switch(slDataID) {
-      case SS_DOUBLE :
-        if (isComplex) {
-            /* If is Complex and SS_DOUBLE, the data is of type creal_T */
-            creal_T* paramVal = (creal_T *) paramAddress;
-            for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
-                for(colIdx = 0; colIdx < numCols; colIdx++) {
-                    printf("\t%.4g + %.4g*i", 
-                           paramVal[colIdx*numRows + rowIdx].re,
-                           paramVal[colIdx*numRows + rowIdx].im);
-                }
-                putchar('\n');
-            }
-        } else {
-            real_T* paramVal = (real_T *) paramAddress;
-            if (numDims == 3) {
-                for (pageIdx = 0; pageIdx < numPages; pageIdx++) {
-                    printf("ans(:,:,%d) =\n", pageIdx+1); 
-                    for (rowIdx = 0; rowIdx < numRows; rowIdx++) {
-                        for (colIdx = 0; colIdx < numCols; colIdx++) {
-                            uint_T idx = rowIdx + numRows * colIdx +
-                                numRows * numCols * pageIdx;
-                            printf("\t%.4g", paramVal[idx]);
-                        }
-                        putchar('\n');
-                    }
-                    putchar('\n');
-                }
-            } else {
+    switch(slDataID){
+        case SS_DOUBLE:
+            if(!isComplex){
+                real_T* paramVal = (real_T *) paramAddress;
                 for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
-                    for(colIdx = 0; colIdx < numCols; colIdx++) {
-                        //printf("%.4f\n", paramVal[colIdx*numRows + rowIdx]);
-                        sVariable.value = (double)paramVal[colIdx*numRows + rowIdx];
-                    }
-                    //putchar('\n');
-                }
+                     for(colIdx = 0; colIdx < numCols; colIdx++) {
+                         sprintf(sVariable.value, "%f", paramVal[colIdx*numRows + rowIdx]);
+                     }
+                 }
+
+            } else {
+                strcpy(sVariable.name, "DATA IS COMPLEX CAPI_UTILS.C, ERROR 1");
+                strcpy(sVariable.value, "Data is complex, not handled.");
             }
-        }
-        break;
-      case SS_INT32 :
-        if (isComplex) {
-            cint32_T* paramVal = (cint32_T *) paramAddress;
-            for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
-                for(colIdx = 0; colIdx < numCols; colIdx++) {
-                    printf("\t%d + %d*i", 
-                           paramVal[colIdx*numRows + rowIdx].re,
-                           paramVal[colIdx*numRows + rowIdx].im);
-                }						
-                putchar('\n');
-            }
-        } else {
-            int32_T* paramVal = (int32_T *) paramAddress;
-            for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
-                for(colIdx = 0; colIdx < numCols; colIdx++) {
-                    int32_T intVal  = paramVal[colIdx*numRows + rowIdx];
-                    /* Real world value = (slope * stored integer) + bias */
-                    real_T  realVal = slope*(intVal) + bias;
-                    printf("\t%.4g", realVal);
-                }
-                putchar('\n');
-            }
-        }
-        break;
-      default :
-        /* TODO: extend the switch-case to other Simulink DataIds
-         * case SS_SINGLE:
-         * case SS_UINT32:
-         * case SS_INT16:
-         * case SS_UINT16:
-         * case SS_INT8:
-         * case SS_UINT8:
-         * case SS_BOOLEAN
-         * Remove from list if you have extended the switch.
-         * This function currently doesn't support these Datatypes. */
-        printf("Unhandled Data Type: %s is skipped\n", paramName);
-        break;
+            break;
+        default:
+            strcpy(sVariable.name, "Type not handled, CAPI_UTILS ERROR 2");
     }
-    return;
+    // switch(slDataID) {
+    //   case SS_DOUBLE :
+    //     if (isComplex) {
+    //         /* If is Complex and SS_DOUBLE, the data is of type creal_T */
+    //         creal_T* paramVal = (creal_T *) paramAddress;
+    //         for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
+    //             for(colIdx = 0; colIdx < numCols; colIdx++) {
+    //                 printf("\t%.4g + %.4g*i", 
+    //                        paramVal[colIdx*numRows + rowIdx].re,
+    //                        paramVal[colIdx*numRows + rowIdx].im);
+    //             }
+    //             putchar('\n');
+    //         }
+    //     } else {
+    //         real_T* paramVal = (real_T *) paramAddress;
+    //         if (numDims == 3) {
+    //             for (pageIdx = 0; pageIdx < numPages; pageIdx++) {
+    //                 printf("ans(:,:,%d) =\n", pageIdx+1); 
+    //                 for (rowIdx = 0; rowIdx < numRows; rowIdx++) {
+    //                     for (colIdx = 0; colIdx < numCols; colIdx++) {
+    //                         uint_T idx = rowIdx + numRows * colIdx +
+    //                             numRows * numCols * pageIdx;
+    //                         printf("\t%.4g", paramVal[idx]);
+    //                     }
+    //                     putchar('\n');
+    //                 }
+    //                 putchar('\n');
+    //             }
+    //         } else {
+    //             for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
+    //                 for(colIdx = 0; colIdx < numCols; colIdx++) {
+    //                     //printf("%.4f\n", paramVal[colIdx*numRows + rowIdx]);
+    //                     sVariable.value = (double)paramVal[colIdx*numRows + rowIdx];
+    //                 }
+    //                 //putchar('\n');
+    //             }
+    //         }
+    //     }
+    //     break;
+    //   case SS_INT32 :
+    //     if (isComplex) {
+    //         cint32_T* paramVal = (cint32_T *) paramAddress;
+    //         for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
+    //             for(colIdx = 0; colIdx < numCols; colIdx++) {
+    //                 printf("\t%d + %d*i", 
+    //                        paramVal[colIdx*numRows + rowIdx].re,
+    //                        paramVal[colIdx*numRows + rowIdx].im);
+    //             }						
+    //             putchar('\n');
+    //         }
+    //     } else {
+    //         int32_T* paramVal = (int32_T *) paramAddress;
+    //         for(rowIdx = 0; rowIdx < numRows; rowIdx++) {
+    //             for(colIdx = 0; colIdx < numCols; colIdx++) {
+    //                 int32_T intVal  = paramVal[colIdx*numRows + rowIdx];
+    //                 /* Real world value = (slope * stored integer) + bias */
+    //                 real_T  realVal = slope*(intVal) + bias;
+    //                 printf("\t%.4g", realVal);
+    //             }
+    //             putchar('\n');
+    //         }
+    //     }
+    //     break;
+    //   default :
+    //     /* TODO: extend the switch-case to other Simulink DataIds
+    //      * case SS_SINGLE:
+    //      * case SS_UINT32:
+    //      * case SS_INT16:
+    //      * case SS_UINT16:
+    //      * case SS_INT8:
+    //      * case SS_UINT8:
+    //      * case SS_BOOLEAN
+    //      * Remove from list if you have extended the switch.
+    //      * This function currently doesn't support these Datatypes. */
+    //     printf("Unhandled Data Type: %s is skipped\n", paramName);
+    //     break;
+    // }
+    // return;
 }
 
 void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,

@@ -34,7 +34,7 @@ extern "C" {
 
 struct ScalarVariable{
     char name[63];
-    double value;
+    char value[50];
     uint8_T DataID;
     char type[50];
 };

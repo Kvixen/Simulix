@@ -24,9 +24,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 Backup/
-Test/
-Test2/
-drivetrain_test/
+Tests/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
