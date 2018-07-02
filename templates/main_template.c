@@ -118,6 +118,8 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
         cJSON_AddItemToArray(ScalarVariables, jsonSV); 
         if(FLAG == ROOT_OUTPUT_FLAG){
             cJSON_AddItemToArray(Outputs, UnknownChildObject);
+            cJSON_AddArrayToObject(outputChildObject, "Derivatives");
+            cJSON_AddArrayToObject(outputChildObject, "InitialUnknowns");
             cJSON_AddItemToArray(ModelStructure, outputChildObject);
         }
     }
