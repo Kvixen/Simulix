@@ -144,9 +144,13 @@ int main(int argc, const char *argv[]) {
     int i;
     char *string = NULL;
     cJSON *ScalarVariables = NULL;
+    char stepSize[15];
 
     cJSON *root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "Model", MODEL_NAME);
+    sprintf(stepSize, "%f", (double) REAL_TIME_MODEL->Timing.stepSize0);
+    cJSON_AddStringToObject(root, "StepSize", stepSize);
+
     cJSON *ModelVariablesObject = cJSON_CreateObject();
     ScalarVariables = cJSON_AddArrayToObject(ModelVariablesObject, "ScalarVariable");
 
