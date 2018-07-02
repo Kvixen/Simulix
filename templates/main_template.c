@@ -155,8 +155,8 @@ int main(int argc, const char *argv[]) {
     ScalarVariables = cJSON_AddArrayToObject(ModelVariablesObject, "ScalarVariable");
 
     objectCreator(ROOT_INPUT_FLAG, root, ScalarVariables, capiMap);
-    objectCreator(ROOT_OUTPUT_FLAG, root, ScalarVariables, capiMap);
     objectCreator(MODEL_PARAMETER_FLAG, root, ScalarVariables, capiMap);
+    objectCreator(ROOT_OUTPUT_FLAG, root, ScalarVariables, capiMap);
     cJSON *ModelVariables = cJSON_AddArrayToObject(root, "ModelVariables");
     cJSON_AddItemToArray(ModelVariables, ModelVariablesObject);
 
