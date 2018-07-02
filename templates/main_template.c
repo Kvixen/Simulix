@@ -44,21 +44,26 @@ void objectCreator(int FLAG, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* c
     char valueReference[5];
     char variability[10];
     char initial[10];
+    char causality[15];
+    int numReal, numInt, numBoolean = 0;
 
     switch(FLAG) {
         case ROOT_INPUT_FLAG:
             number = GetNumInputs(capiMap);
             strcpy(variability, "discrete");
             strcpy(initial, "approx");
+            strcpy(causality, "input");
             break;
         case MODEL_PARAMETER_FLAG:
             number = GetNumParameters(capiMap);
             strcpy(variability, "tunable");
             strcpy(initial, "exact");
+            strcpy(causality, "parameter");
             break;
         case ROOT_OUTPUT_FLAG:
             number = GetNumOutputs(capiMap);
             strcpy(variability, "discrete");
+            strcpy(causality, "output");
             break;		
     }
 
@@ -67,11 +72,19 @@ void objectCreator(int FLAG, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* c
         sVariable = GetVariable(capiMap, i, FLAG);
         jsonSV = cJSON_CreateObject();
         cJSON_AddStringToObject(jsonSV, "name", sVariable.name);
-        cJSON_AddStringToObject(jsonSV, "causality", sVariable.type);
+        cJSON_AddStringToObject(jsonSV, "causality", causality);
         cJSON_AddStringToObject(jsonSV, "description", sVariable.name);
-        cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
         cJSON_AddStringToObject(jsonSV, "variability", variability);
         startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
+        if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){
+            sprintf(valueReference, "%i", numReal++);
+        } else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {
+            sprintf(valueReference, "%i", numInt++);
+        } else {
+            sprintf(valueReference, "%i", numBoolean++);
+        }
+        cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
+        
         if(FLAG != ROOT_OUTPUT_FLAG){
             cJSON_AddStringToObject(jsonSV, "initial", initial);
             startObject = cJSON_CreateObject();
