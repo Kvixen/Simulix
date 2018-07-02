@@ -31,7 +31,6 @@ def build_XML_tree(data):
 
     step_size = data["StepSize"]
     name = data["Model"]
-    unkowns_index = "3"
     guid = str(uuid.uuid4())
 
     fmiMD = {"fmiVersion":"2.0", "modelName":name, "guid":guid, "numberOfEventIndicators":"0"}
