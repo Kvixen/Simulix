@@ -42,16 +42,23 @@ void objectCreator(int FLAG, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* c
     cJSON *startArray = NULL;
     cJSON *startObject = NULL;
     char valueReference[5];
+    char variability[10];
+    char initial[10];
 
     switch(FLAG) {
         case ROOT_INPUT_FLAG:
             number = GetNumInputs(capiMap);
+            strcpy(variability, "discrete");
+            strcpy(initial, "approx");
             break;
         case MODEL_PARAMETER_FLAG:
             number = GetNumParameters(capiMap);
+            strcpy(variability, "tunable");
+            strcpy(initial, "exact");
             break;
         case ROOT_OUTPUT_FLAG:
             number = GetNumOutputs(capiMap);
+            strcpy(variability, "discrete");
             break;		
     }
 
@@ -63,10 +70,10 @@ void objectCreator(int FLAG, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* c
         cJSON_AddStringToObject(jsonSV, "causality", sVariable.type);
         cJSON_AddStringToObject(jsonSV, "description", sVariable.name);
         cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
-        cJSON_AddStringToObject(jsonSV, "variability", "discrete");
+        cJSON_AddStringToObject(jsonSV, "variability", variability);
+        startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
         if(FLAG != ROOT_OUTPUT_FLAG){
-            cJSON_AddStringToObject(jsonSV, "initial", "approx");
-            startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
+            cJSON_AddStringToObject(jsonSV, "initial", initial);
             startObject = cJSON_CreateObject();
             cJSON_AddStringToObject(startObject, "start", sVariable.value);
             cJSON_AddItemToArray(startArray, startObject);
