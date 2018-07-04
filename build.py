@@ -26,16 +26,14 @@ from sys import exit
 BUILD_ONLY = False
 
 def _build(compile_program,make_program,dst):
-    print(dst)
     dstlist = dst.split("\\")
-    print(dstlist)
     chdir('..')
     for i, _ in enumerate(dstlist):
         chdir(dstlist[i])
-    # mkdir("build")
-    # chdir("build")
-    command = "cmake -G {0}".format(compile_program)
-    # command = "cmake -G {0} ..".format(compile_program)
+    mkdir("build")
+    chdir("build")
+    # command = "cmake -G {0}".format(compile_program)
+    command = "cmake -G {0} ..".format(compile_program)
     print("Executing {0}".format(command))
     p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     errs = p.communicate()[1]
