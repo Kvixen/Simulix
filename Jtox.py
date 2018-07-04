@@ -3,6 +3,7 @@ import json
 import uuid
 from pprint import pprint
 from xml.dom import minidom
+guid = ""
 
 def read_json_file(src):
 	with open((src),'r') as json_file:
@@ -58,7 +59,16 @@ def build_XML_tree(data):
 def main():
     data = read_json_file("ModelOutputs.json")
 
+    data["GUID"] = guid
+
+    with open('ModelOutputs.json', 'w') as jsonF:
+        json.dump(data, jsonF)
+
     XML_tree = build_XML_tree(data)
 
     with open('modelDescription.xml', 'w') as output:
         output.write(prettify(XML_tree))
+
+
+if __name__ == '__main__':
+    main()

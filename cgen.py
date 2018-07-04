@@ -46,7 +46,7 @@ def _gen_capi_utils(src, dst):
             capiFile.write(capiTemplate.read())
 
 def _gen_main(src, dst):
-    with open(path.join(dst, 'main.c'),'w') as mainFile:
+    with open(path.join(dst, 'exemain.c'),'w') as mainFile:
         with open(path.join(src,'LicenseTemplate'),'r') as licenseFile:
             mainFile.write(licenseFile.read())
         with open(path.join(src,'mainIncludes'),'r') as mainIncludes:
@@ -112,6 +112,7 @@ def generate_files(src, dst, zipPath, zipName):
         zipPath:
             Path to generated Zip.
     """
+    templateReplace['path'] = path.realpath(__file__)
     if zipName.split('.')[-1] == "zip":
         zipPath = path.join(zipPath, zipName)
     else:
