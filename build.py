@@ -34,19 +34,6 @@ def _build(compile_program,make_program,dst):
         print("Something went wrong with CMake. Error message = \n")
         print(errs)
         #handle_error(errs)
-    else:
-        print("CMake successfully created Makefile")
-    command = "{0}".format(make_program)
-    print("Executing {0}".format(command))
-    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    errs = p.communicate()[1]
-    if errs:
-        print("Something went wrong with CMake. Error message = \n")
-        print(errs)
-        #handle_error(errs)
-    else:
-        print("CMake successfully created Makefile")
-    subprocess.Popen([r"main.exe", "call"], shell=True)
 
 def prepare_build_directory(dst, folderName):
     if not folderName:
