@@ -79,6 +79,11 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             Unknown = cJSON_AddArrayToObject(UnknownChildObject, "Unknown");
             break;		
     }
+
+    #ifdef FDEBUG
+    printf("Debug in MAIN.c, function objectCreator:\n\
+    Number of %s    = %i,\n", FLAG == ROOT_INPUT_FLAG ? "inputs" : FLAG == ROOT_OUTPUT_FLAG ? "outputs" : "parameters", number);
+    #endif
     for (i=0; i < number; i++) {
         sVariable = GetVariable(capiMap, i, FLAG);
         jsonSV = cJSON_CreateObject();

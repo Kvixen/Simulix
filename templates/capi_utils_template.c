@@ -39,9 +39,14 @@ void GetValueFromAdress(const char_T*  paramName,
 
     switch(slDataID) {
         case SS_DOUBLE :
-        case SS_SINGLE :
         {
             real_T* paramVal = (real_T *) paramAddress;
+            sprintf(sVariable.value, "%f", paramVal[0]);
+            break;
+        }
+        case SS_SINGLE :
+        {
+            real32_T* paramVal = (real32_T *) paramAddress;
             sprintf(sVariable.value, "%f", paramVal[0]);
             break;
         }
@@ -405,20 +410,15 @@ struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
     sVariable = EmptyStruct; 
                  
     switch(flag){
-        case 0:
-            strcpy(sVariable.type, "Parameter");
+        case MODEL_PARAMETER_FLAG:
             GetModelParameter(capiMap, index);
             break;
-        case 1:
-            strcpy(sVariable.type, "Input");
-            GetSignal(capiMap, index, flag);
-            break;
-        case 2:
-            strcpy(sVariable.type, "Output");
+        case ROOT_INPUT_FLAG:
+        case ROOT_OUTPUT_FLAG:
             GetSignal(capiMap, index, flag);
             break;
         default:
-            printf("Flag passed to getVariable was not 0 nor 1-2");
+            printf("Flag passed to GetVariable() was %i, not handled.", flag);
     }
 
     return sVariable;
