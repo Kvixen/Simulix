@@ -137,14 +137,6 @@ int main(int argc, const char *argv[]) {
     STEP_MODEL;
     rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo(REAL_TIME_MODEL).mmi);
     
-
-
-    FILE *f = fopen("ModelOutputs.json", "w");
-    if(!f){
-        printf("Error opening file");
-        exit(13);
-    }
-    
     char name[NAME_LENGTH_MAX] = "";
     int i;
     char *string = NULL;
@@ -171,13 +163,18 @@ int main(int argc, const char *argv[]) {
     if (string == NULL) {
         fprintf(stderr, "Failed to print cJSON.\n");
     }
-
     cJSON_Delete(root);
+
+    FILE *f = fopen("ModelOutputs.json", "w");
+    if(!f){
+        printf("Error opening file");
+        exit(13);
+    }
     fprintf(f, "%s",string);
+    fclose(f);
     
 
     TERMINATE_MODEL;
 
-    fclose(f);
     return 0;
 }

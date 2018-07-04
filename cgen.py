@@ -83,10 +83,8 @@ def _handle_zip(dst, zipPath):
         if pattern.match(line):
             templateReplace['matlabVersion'] = line
         elif line != "otherFiles":
-            # print(line)
             templateReplace['folderName'] = line
-            # print(listdir(dst + "\\" + line))
-            tempList = listdir(dst + "\\" + line)[0].split('_')
+            tempList = listdir(path.join(dst, line))[0].split('_')
             templateReplace['modelName'] = '_'.join(tempList[:-2])
             if len(templateReplace['modelName']) > 28:
                 templateReplace['modelNameS'] = templateReplace['modelName'][:28]
@@ -97,7 +95,7 @@ def _handle_zip(dst, zipPath):
 
 
 
-def generate_files(src, dst, zipPath):
+def generate_files(src, dst, zipPath, zipName):
     """
     Extracts content from zip in zipPath
     Generates and copies neccesary files
@@ -114,6 +112,10 @@ def generate_files(src, dst, zipPath):
         zipPath:
             Path to generated Zip.
     """
+    if zipName.split('.')[-1] == "zip":
+        zipPath = path.join(zipPath, zipName)
+    else:
+        zipPath = path.join(zipPath, zipName + ".zip")
     _handle_zip(dst, zipPath)
     templatePath = path.join(src, 'templates')
     includeDst = path.join(dst, 'includes')
@@ -128,14 +130,14 @@ def generate_files(src, dst, zipPath):
 
 
 def main():
-    generate_files(args.TP, args.Path, path.join(args.ZP, args.ZN))
+    generate_files(args.TP, args.Path, args.ZP, args.ZN)
     
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="cgen",usage="%(prog)s [options]")
     parser.add_argument('Path', nargs='?', default=getcwd(), help='Path for generated C file')
     parser.add_argument('--TP', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
-    parser.add_argument('--ZN', help='Name of zipfile generated from matlab', default='default.zip')
+    parser.add_argument('--ZN', help='Name of zipfile generated from matlab', default='default')
     parser.add_argument('--ZP', help='Path to zipfile, if not executing folder', default=getcwd())
     args = parser.parse_args()
     main()

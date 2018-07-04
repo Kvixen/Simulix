@@ -26,38 +26,42 @@ from sys import exit
 BUILD_ONLY = False
 
 def _build(compile_program,make_program,dst):
-    dstlist = dst.split("\\")
-    chdir('..')
-    for i, _ in enumerate(dstlist):
-        chdir(dstlist[i])
-    mkdir("build")
-    chdir("build")
-    # command = "cmake -G {0}".format(compile_program)
     command = "cmake -G {0} ..".format(compile_program)
     print("Executing {0}".format(command))
     p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     errs = p.communicate()[1]
     if errs:
-        handle_error(errs)
-
-    subprocess.call(make_program, shell=True)
+        print("Something went wrong with CMake. Error message = \n")
+        print(errs)
+        #handle_error(errs)
+    else:
+        print("CMake successfully created Makefile")
+    command = "{0}".format(make_program)
+    print("Executing {0}".format(command))
+    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    errs = p.communicate()[1]
+    if errs:
+        print("Something went wrong with CMake. Error message = \n")
+        print(errs)
+        #handle_error(errs)
+    else:
+        print("CMake successfully created Makefile")
     subprocess.Popen([r"main.exe", "call"], shell=True)
 
-def prepare_build_directory(folderName):
+def prepare_build_directory(dst, folderName):
     if not folderName:
         folderName = "build"
-    if not path.isdir(path.join(getcwd(), folderName)) and getcwd().split('/')[-1:] != folderName:
-        mkdir(folderName)
-        chdir(folderName)
-    elif getcwd().split('/')[-1:] != folderName:
-        chdir(folderName)
+    if not path.isdir(path.join(dst, folderName)) and dst.split('/')[-1:] != folderName:
+        mkdir(path.join(dst, folderName))
+        chdir(path.join(dst, folderName))
+    elif dst.split('/')[-1:] != folderName:
+        chdir(path.join(dst, folderName))
 
     
 
-def build(compprog, makeprog, CML, folderName=None):
-    if not BUILD_ONLY:  
-        prepare_build_directory(folderName)
-    _build(compprog, makeprog, CML)
+def build(compprog, makeprog, dst, folderName=None):  
+    prepare_build_directory(dst, folderName)
+    _build(compprog, makeprog, dst)
 
 def handle_error(err):
     err_msg = str(err).split(r'\n')
@@ -84,10 +88,9 @@ if __name__ == "__main__":
     parser.add_argument('--G', help='Cmake supported makefile generator (Ex. MinGW Makefiles)', default="MinGW Makefiles")
     parser.add_argument('--M', help='Make program that supports generated makefile', default="mingw32-make")
     parser.add_argument('--FN', help='Build folder name', default='build')
-    parser.add_argument('--ONLY_BUILD', help='Only build, dont make build directory', action='store_true')
     args = parser.parse_args()
     BUILD_ONLY = args.ONLY_BUILD
-    build(args.G, args.M, args.FN)
+    #build(args.G, args.M, args.FN)
 
 
 
