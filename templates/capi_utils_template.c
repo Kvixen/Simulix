@@ -288,10 +288,10 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
 
     switch(signalTypeFlag)
     {
-        case 1:
+        case ROOT_INPUT_FLAG:
             signals = rtwCAPI_GetRootInputs(capiMap);
             break;
-        case 2:
+        case ROOT_OUTPUT_FLAG:
             signals = rtwCAPI_GetRootOutputs(capiMap);
             break;
     }
