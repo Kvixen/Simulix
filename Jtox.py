@@ -85,5 +85,3 @@ def XML_attribute_orderer(XML):
                 else:
                     newXML.write(line)
                     print(attribute_list)
-
-main()
