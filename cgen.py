@@ -83,8 +83,10 @@ def _handle_zip(dst, zipPath):
         if pattern.match(line):
             templateReplace['matlabVersion'] = line
         elif line != "otherFiles":
+            # print(line)
             templateReplace['folderName'] = line
-            tempList = listdir(line)[0].split('_')
+            # print(listdir(dst + "\\" + line))
+            tempList = listdir(dst + "\\" + line)[0].split('_')
             templateReplace['modelName'] = '_'.join(tempList[:-2])
             if len(templateReplace['modelName']) > 28:
                 templateReplace['modelNameS'] = templateReplace['modelName'][:28]

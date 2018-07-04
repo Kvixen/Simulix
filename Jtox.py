@@ -55,9 +55,10 @@ def build_XML_tree(data):
     return root
 
 
-data = read_json_file("ModelOutputs.json")
+def main():
+    data = read_json_file("ModelOutputs.json")
 
-XML_tree = build_XML_tree(data)
+    XML_tree = build_XML_tree(data)
 
-with open('modelDescription.xml', 'w') as output:
-    output.write(prettify(XML_tree))
+    with open('modelDescription.xml', 'w') as output:
+        output.write(prettify(XML_tree))

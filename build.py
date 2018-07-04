@@ -25,8 +25,17 @@ from sys import exit
 
 BUILD_ONLY = False
 
-def _build(compile_program,make_program):
-    command = "cmake -G {0} ..".format(compile_program)
+def _build(compile_program,make_program,dst):
+    print(dst)
+    dstlist = dst.split("\\")
+    print(dstlist)
+    chdir('..')
+    for i, _ in enumerate(dstlist):
+        chdir(dstlist[i])
+    # mkdir("build")
+    # chdir("build")
+    command = "cmake -G {0}".format(compile_program)
+    # command = "cmake -G {0} ..".format(compile_program)
     print("Executing {0}".format(command))
     p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     errs = p.communicate()[1]
@@ -47,10 +56,10 @@ def prepare_build_directory(folderName):
 
     
 
-def build(compprog, makeprog, folderName=None):
+def build(compprog, makeprog, CML, folderName=None):
     if not BUILD_ONLY:  
         prepare_build_directory(folderName)
-    _build(compprog, makeprog)
+    _build(compprog, makeprog, CML)
 
 def handle_error(err):
     err_msg = str(err).split(r'\n')

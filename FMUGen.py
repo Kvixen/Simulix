@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from cgen import generate_files
 from build import build
+from Jtox import main as jm
 import argparse
+import time
 from os import getcwd, path
 import sys
 
@@ -31,7 +33,11 @@ makeprog = '"mingw32-make"'
 
 def main():
     generate_files(args.TP, args.Path, path.join(args.ZP, args.ZN))
-    build(compprog, makeprog)
+    print("building")
+    build(compprog, makeprog, args.Path)
+    print("Creating XML from ModelOutputs.json")
+    time.sleep(5) # Needed to make sure ModelOutputs.json had time to be created
+    jm()
     
 
 
@@ -46,4 +52,3 @@ if __name__ == "__main__":
     parser.add_argument('--ZP', help='Path to zipfile, if not executing folder', default=getcwd())
     args = parser.parse_args()
     main()
-
