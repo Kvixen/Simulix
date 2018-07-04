@@ -28,15 +28,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 extern "C" {
 #endif
 
-#define ROOT_INPUT_FLAG 1
-#define MODEL_PARAMETER_FLAG 0
+#define ROOT_INPUT_FLAG 0
+#define MODEL_PARAMETER_FLAG 1
 #define ROOT_OUTPUT_FLAG 2
 
 struct ScalarVariable{
     char name[63];
     char value[50];
     uint8_T DataID;
-    char type[50];
 };
 static const struct ScalarVariable EmptyStruct;
 
