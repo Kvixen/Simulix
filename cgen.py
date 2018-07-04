@@ -112,7 +112,7 @@ def generate_files(src, dst, zipPath, zipName):
         zipPath:
             Path to generated Zip.
     """
-    templateReplace['path'] = path.realpath(__file__)
+    templateReplace['path'] = path.dirname(path.realpath(__file__)).replace('\\','/')
     if zipName.split('.')[-1] == "zip":
         zipPath = path.join(zipPath, zipName)
     else:
