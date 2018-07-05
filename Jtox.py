@@ -16,21 +16,26 @@ def prettify(elem):
 	return reparsed.toprettyxml(indent="".join([' '] * 4))
 
 def create_xml_subtree(root, name, dict_tree):
-	if type(dict_tree) == list and not dict_tree:
-		k1_ele = ET.SubElement(root, name)
-	elif type(dict_tree) == list:
-		for i in dict_tree:
-			k1_ele = ET.SubElement(root, name)
-			for k2, v2 in i.items():
-				if type(v2) == list:
-					create_xml_subtree(k1_ele, k2, v2)
-				else:
-					k1_ele.set(k2, v2)
-	return root
+    if type(dict_tree) == list and not dict_tree:
+        k1_ele = ET.SubElement(root, name)
+    elif type(dict_tree) == list:
+        for i in dict_tree:
+            k1_ele = ET.SubElement(root, name)
+            for k2, v2 in i.items():
+                if type(v2) == list:
+                    create_xml_subtree(k1_ele, k2, v2)
+                else:
+                    if k2 == 'start':
+                        try:
+                            v2 = str(float(v2))
+                        except:
+                            break
+                    k1_ele.set(k2, v2)
+    return root
 			
 def build_XML_tree(data):
 
-    step_size = data["StepSize"]
+    step_size = str(float(data["StepSize"]))
     name = data["Model"]
     guid = str(uuid.uuid4())
 
@@ -69,6 +74,21 @@ def main():
     with open('modelDescription.xml', 'w') as output:
         output.write(prettify(XML_tree))
 
+def XML_attribute_orderer(XML):
+    with open("newXML.xml", "w") as newXML:
+        with open(XML, "r") as oldXML:
+            for line in oldXML:
+                unfiltered_list = line.split(' ')
+                attribute_list = []
+                for i in unfiltered_list:
+                    if i != '':
+                        attribute_list.append(i)
+                if len(attribute_list) == 1:
+                    newXML.write(line)
+                else:
+                    newXML.write(line)
+                    print(attribute_list)
 
 if __name__ == '__main__':
     main()
+    # XML_attribute_orderer("modelDescription.xml")
