@@ -13,7 +13,7 @@ FIXME:
 GOALS:
     Milestones for our project. When there's nothing else to do, aim to implement support for these bulletpoints.
     ☐ Handle Scanias Simulink_lib models @low 
-    ☐ Handle all different variable types matlab generates @high @started(18-06-29 08:16)
+    ✔ Handle all different variable types matlab generates @high @started(18-07-05 12:18) @done(18-07-05 12:18) @lasted(17s)
 
 Archive:
     FIXME:

@@ -1,8 +1,15 @@
+set(PYTHON_SOURCE_DIR {path})
+project({modelName})
+set(PROJECT_DIR ${{{modelName}_SOURCE_DIR}})
+set(MATLAB_VERSION {matlabVersion})
+set(FOLDER_NAME {folderName})
+set(MODEL_FOLDER_NAME {modelName}_grt_rtw)
+
 cmake_minimum_required(VERSION 3.0)
 file(GLOB_RECURSE SOURCES_NORMAL ${{PROJECT_DIR}} "${{FOLDER_NAME}}/*.c")
 file(GLOB_RECURSE SOURCES_MATLAB ${{PROJECT_DIR}} "${{MATLAB_VERSION}}/*.c")
 file(GLOB_RECURSE SOURCES_INCLUDES ${{PROJECT_DIR}} "includes/*.c")
-file(GLOB_RECURSE SOURCES_LIBRARY ${{PROJECT_DIR}} "librarysources/*.c")
+file(GLOB_RECURSE SOURCES_LIBRARY ${{PROJECT_DIR}} "libraryincludes/*.c")
 list(REMOVE_ITEM SOURCES_MATLAB ${{PROJECT_DIR}}/${{MATLAB_VERSION}}/rtw/c/src/common/rt_main.c)
 set(SOURCE exemain.c)
 
@@ -11,7 +18,7 @@ include_directories(${{PROJECT_DIR}}/${{MATLAB_VERSION}}/extern/include)
 include_directories(${{PROJECT_DIR}}/${{MATLAB_VERSION}}/rtw/c/src)
 include_directories(${{PROJECT_DIR}}/${{MATLAB_VERSION}}/simulink/include)
 include_directories(${{PROJECT_DIR}}/includes)
-include_directories(${{PROJECT_DIR}}/librarysources)
+include_directories(${{PROJECT_DIR}}/libraryincludes)
 add_executable(main ${{SOURCE}} ${{SOURCES_NORMAL}} ${{SOURCES_MATLAB}} ${{SOURCES_INCLUDES}})
 
 add_custom_command(
@@ -30,8 +37,7 @@ add_library(
     ${{PROJECT_DIR}}/dllmain.c
     "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}.c"
     "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_data.c"
-    "${{PROJECT_DIR}}/${{FO
-    LDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_capi.c"
+    "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_capi.c"
     "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rt_nonfinite.c"
     "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rtGetNaN.c"
     "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rtGetInf.c"
@@ -46,7 +52,7 @@ target_link_libraries(
 set_target_properties(${{CMAKE_PROJECT_NAME}} PROPERTIES PREFIX "")
 find_file(
 		ZIP_PROG_PATH 
-		NAMES "7za.exe" 
+		NAMES "7z.exe" 
 		HINTS ENV PATH
 )
 set(FMU_OUT_DIR ${{PROJECT_BINARY_DIR}}/fmu)
@@ -63,13 +69,13 @@ add_custom_command(
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/build/${{CMAKE_PROJECT_NAME}}.dll ${{FMU_OUT_DIR}}/dist/binaries/win64
     
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/build/modelDescription.xml ${{FMU_OUT_DIR}}/dist
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/build/documentation/model.png ${{FMU_OUT_DIR}}/dist
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/model.png ${{FMU_OUT_DIR}}/dist
     COMMAND ${{CMAKE_COMMAND}} -E copy_directory ${{PROJECT_DIR}}/documentation ${{FMU_OUT_DIR}}/dist/documentation
     #COMMAND ${{CMAKE_COMMAND}} -E copy ${{FMUSDK_DIR}}/../../doc/fmusdk_license.txt ${{FMU_OUT_DIR}}/dist/documentation
     COMMAND ${{CMAKE_COMMAND}} -E remove ${{FMU_OUT_DIR}}/dist/documentation/model.png
     #COMMAND ${{CMAKE_COMMAND}} -E copy_directory ${{PROJECT_DIR}}/sources ${{FMU_OUT_DIR}}/dist/sources
     #COMMAND ${{CMAKE_COMMAND}} -E copy_directory ${{PROJECT_DIR}}/resources ${{FMU_OUT_DIR}}/dist/resources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/main.c ${{FMU_OUT_DIR}}/dist/sources
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/exemain.c ${{FMU_OUT_DIR}}/dist/sources
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/CMakeLists.txt ${{FMU_OUT_DIR}}/dist/sources
     COMMAND ${{ZIP_PROG_PATH}} a -tzip ${{FMU_OUT_DIR}}/${{CMAKE_PROJECT_NAME}}.fmu ${{FMU_OUT_DIR}}/dist/*
 )

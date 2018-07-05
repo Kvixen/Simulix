@@ -144,9 +144,7 @@ int main(int argc, const char *argv[]) {
     char stepSize[15];
 
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "Model", MODEL_NAME);
     sprintf(stepSize, "%f", (double) REAL_TIME_MODEL->Timing.stepSize0);
-    cJSON_AddStringToObject(root, "StepSize", stepSize);
 
     cJSON *ModelVariablesObject = cJSON_CreateObject();
     ScalarVariables = cJSON_AddArrayToObject(ModelVariablesObject, "ScalarVariable");
@@ -156,6 +154,14 @@ int main(int argc, const char *argv[]) {
     objectCreator(ROOT_OUTPUT_FLAG, root, ScalarVariables, capiMap);
     cJSON *ModelVariables = cJSON_AddArrayToObject(root, "ModelVariables");
     cJSON_AddItemToArray(ModelVariables, ModelVariablesObject);
+
+
+    //Information used in various python scripts
+    cJSON_AddStringToObject(root, "Model", MODEL_NAME);
+    cJSON_AddStringToObject(root, "StepSize", stepSize);
+    cJSON_AddNumberToObject(root, "numReal", numReal);
+    cJSON_AddNumberToObject(root, "numInt", numInt);
+    cJSON_AddNumberToObject(root, "numBoolean", numBoolean);
 
 
 
