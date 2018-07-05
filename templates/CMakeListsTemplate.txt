@@ -15,9 +15,7 @@ include_directories(${{PROJECT_DIR}}/librarysources)
 add_executable(main ${{SOURCE}} ${{SOURCES_NORMAL}} ${{SOURCES_MATLAB}} ${{SOURCES_INCLUDES}})
 
 add_custom_command(
-    OUTPUT ${PROJECT_DIR}/dllmain.c
-	TARGET main
-	POST_BUILD
+    OUTPUT ${{PROJECT_DIR}}/dllmain.c
 	COMMAND echo "Executing main.exe"
 	COMMAND main.exe
 	#Sleep to make sure main.exe has generated json file
@@ -25,17 +23,13 @@ add_custom_command(
 	COMMAND echo "JSON to XML with Python"
 	COMMAND python ${{PYTHON_SOURCE_DIR}}/jtox.py
     COMMAND ${{CMAKE_COMMAND}} -E sleep 1
-    COMMAND python ${{PYTHON_SOURCE_DIR}}/dllgen.py
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/build/dllmain.c ${{PROJECT_DIR}}
-
+    COMMAND python ${{PYTHON_SOURCE_DIR}}/dllgen.py -o ${{PROJECT_DIR}}
 )
-
-set(LIBSOURCE dllmain.c)
 
 add_library(
     ${{CMAKE_PROJECT_NAME}}
     SHARED
-    ${{PROJECT_DIR}}/main.c
+    ${{PROJECT_DIR}}/dllmain.c
     "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}.c"
     "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_data.c"
     "${{PROJECT_DIR}}/${{FO

@@ -26,7 +26,7 @@ static fmi2Integer      simulation_ticks    = 0;
 
 // define model size
 #define NUMBER_OF_REALS                  {numReal}
-#define NUMBER_OF_INTEGERS               {numIntP}
+#define NUMBER_OF_INTEGERS               {numInt}
 #define NUMBER_OF_BOOLEANS               {numBoolean}
 #define NUMBER_OF_STRINGS                0
 #define NUMBER_OF_REALS_IN_MODEL         {numReal}
