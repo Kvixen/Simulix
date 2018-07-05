@@ -52,9 +52,18 @@ target_link_libraries(
 set_target_properties(${{CMAKE_PROJECT_NAME}} PROPERTIES PREFIX "")
 find_file(
 		ZIP_PROG_PATH 
+		NAMES "7za.exe" 
+		HINTS ENV PATH
+)
+
+if(NOT ZIP_PROG_PATH)
+find_file(
+		ZIP_PROG_PATH 
 		NAMES "7z.exe" 
 		HINTS ENV PATH
 )
+endif()
+
 set(FMU_OUT_DIR ${{PROJECT_BINARY_DIR}}/fmu)
 add_custom_command(
     TARGET ${{CMAKE_PROJECT_NAME}}
