@@ -283,15 +283,16 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     real_T bias  = 0.0;
     unsigned short modParamFlag = 0; 
 
-    /* Assert the parameter index is less than total number of parameters */
-    assert(signalIdx < rtwCAPI_GetNumModelParameters(capiMap));
-
     switch(signalTypeFlag)
     {
         case ROOT_INPUT_FLAG:
+        /* Assert the signal index is less than total number of signals */
+            assert(signalIdx < rtwCAPI_GetNumRootInputs(capiMap));
             signals = rtwCAPI_GetRootInputs(capiMap);
             break;
         case ROOT_OUTPUT_FLAG:
+        /* Assert the signal index is less than total number of signals */
+            assert(signalIdx < rtwCAPI_GetNumRootOutputs(capiMap));
             signals = rtwCAPI_GetRootOutputs(capiMap);
             break;
     }
