@@ -46,7 +46,7 @@ def _gen_capi_utils(src, dst):
             capiFile.write(capiTemplate.read())
 
 def _gen_main(src, dst):
-    with open(path.join(dst, 'main.c'),'w') as mainFile:
+    with open(path.join(dst, 'exemain.c'),'w') as mainFile:
         with open(path.join(src,'LicenseTemplate'),'r') as licenseFile:
             mainFile.write(licenseFile.read())
         with open(path.join(src,'mainIncludes'),'r') as mainIncludes:
@@ -55,7 +55,6 @@ def _gen_main(src, dst):
             mainFile.write(mainTemplate.read())
 
 def _copy_files(src, dst):
-
     for item in listdir(src):
         s = path.join(src, item)
         d = path.join(dst, item)
@@ -90,9 +89,9 @@ def _handle_zip(dst, zipPath):
                 templateReplace['modelNameS'] = templateReplace['modelName'][:28]
             else:
                 templateReplace['modelNameS'] = templateReplace['modelName']
+
+    
         
-
-
 
 
 def generate_files(src, dst, zipPath, zipName):
@@ -112,6 +111,7 @@ def generate_files(src, dst, zipPath, zipName):
         zipPath:
             Path to generated Zip.
     """
+    templateReplace['path'] = path.dirname(path.realpath(__file__)).replace('\\','/')
     if zipName.split('.')[-1] == "zip":
         zipPath = path.join(zipPath, zipName)
     else:
@@ -120,10 +120,15 @@ def generate_files(src, dst, zipPath, zipName):
     templatePath = path.join(src, 'templates')
     includeDst = path.join(dst, 'includes')
     includeSrc = path.join(src, 'includes')
+    libincludeDst = path.join(dst, 'libraryincludes')
+    libincludeSrc = path.join(src, 'libraryincludes')
     
     if not path.exists(includeDst):
         makedirs(includeDst)
+    if not path.exists(libincludeDst):
+        makedirs(libincludeDst)
     _copy_files(includeSrc, includeDst)
+    _copy_files(libincludeSrc, libincludeDst)
     _gen_capi_utils(templatePath, includeDst)
     _gen_main(templatePath, dst)
     _gen_cmakelists(templatePath, dst)

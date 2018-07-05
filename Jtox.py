@@ -57,16 +57,22 @@ def build_XML_tree(data):
 
     create_xml_subtree(root, "ModelStructure", data['ModelStructure'])
 
-    return root
+    return root, guid
 
 
 def main():
     data = read_json_file("ModelOutputs.json")
 
-    XML_tree = build_XML_tree(data)
+
+    XML_tree, guid = build_XML_tree(data)
 
     with open('modelDescription.xml', 'w') as output:
         output.write(prettify(XML_tree))
+
+    data["GUID"] = guid
+
+    with open('ModelOutputs.json', 'w') as jsonF:
+        json.dump(data, jsonF)
 
 def XML_attribute_orderer(XML):
     with open("newXML.xml", "w") as newXML:
