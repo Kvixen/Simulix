@@ -28,12 +28,14 @@ BUILD_ONLY = False
 def _build(compile_program,make_program,dst):
     command = "cmake -G {0} ..".format(compile_program)
     print("Executing {0}".format(command))
-    p = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    p = subprocess.Popen(command, stderr=subprocess.PIPE)
     errs = p.communicate()[1]
     if errs:
         print("Something went wrong with CMake. Error message = \n")
         print(errs)
         #handle_error(errs)
+    command = "{0}".format(make_program)
+    subprocess.Popen(command, stderr=subprocess.PIPE)
 
 def prepare_build_directory(dst, folderName):
     if not folderName:

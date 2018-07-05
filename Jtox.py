@@ -65,10 +65,10 @@ def main():
         output.write(prettify(XML_tree))
 
     data["GUID"] = guid
-    print(guid)
 
     with open('ModelOutputs.json', 'w') as jsonF:
         json.dump(data, jsonF)
 
 if __name__ == '__main__':
+
     main()
