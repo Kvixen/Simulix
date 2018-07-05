@@ -24,13 +24,11 @@ add_executable(main ${{SOURCE}} ${{SOURCES_NORMAL}} ${{SOURCES_MATLAB}} ${{SOURC
 
 add_custom_command(
     OUTPUT ${{PROJECT_DIR}}/dllmain.c
+    DEPENDS main
 	COMMAND echo "Executing main.exe"
 	COMMAND main.exe
-	#Sleep to make sure main.exe has generated json file
-	COMMAND ${{CMAKE_COMMAND}} -E sleep 1
 	COMMAND echo "JSON to XML with Python"
 	COMMAND python ${{PYTHON_SOURCE_DIR}}/jtox.py
-    COMMAND ${{CMAKE_COMMAND}} -E sleep 1
     COMMAND python ${{PYTHON_SOURCE_DIR}}/dllgen.py -o ${{PROJECT_DIR}}
 )
 
