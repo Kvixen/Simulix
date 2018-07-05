@@ -6,6 +6,7 @@ set(FOLDER_NAME {folderName})
 set(MODEL_FOLDER_NAME {modelName}_grt_rtw)
 
 cmake_minimum_required(VERSION 3.0)
+add_definitions(-DFMI_COSIMULATION)
 file(GLOB_RECURSE SOURCES_NORMAL ${{PROJECT_DIR}} "${{FOLDER_NAME}}/*.c")
 file(GLOB_RECURSE SOURCES_MATLAB ${{PROJECT_DIR}} "${{MATLAB_VERSION}}/*.c")
 file(GLOB_RECURSE SOURCES_INCLUDES ${{PROJECT_DIR}} "includes/*.c")
