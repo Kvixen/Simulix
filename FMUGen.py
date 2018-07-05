@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from cgen import generate_files
 from build import build
-from Jtox import main as jm
 import argparse
 import time
 from os import getcwd, path
@@ -37,13 +36,6 @@ def main():
         generate_files(args.TP, args.Path, args.ZP, args.ZN)
     print("Building")
     build(compprog, makeprog, args.Path)
-    print("Creating XML from ModelOutputs.json")
-    while(True):
-        if(path.isfile("ModelOutputs.json")):
-            break
-        else:
-            time.sleep(1)
-    jm()
     
 
 
