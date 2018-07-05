@@ -56,7 +56,7 @@ def main(dst, src):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate a C file for a FMU",prog="dllgen",usage="%(prog)s [options]")
     parser.add_argument('-o', help='Path to dllmain.c output', default=getcwd())
-    parser.add_argument('-t', help='Path to template file', default=path.join(path.dirname(path.realpath(__file__)), 'dllmain.c'))
+    parser.add_argument('-t', help='Path to template file', default=path.join(path.dirname(path.realpath(__file__)), 'templates/dllmain.c'))
     args = parser.parse_args()
     main(args.o, args.t)
 
