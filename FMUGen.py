@@ -33,6 +33,7 @@ makeprog = '"mingw32-make"'
 def main():
     if not args.ONLY_BUILD:
         print("Generating files")
+        print(args.Path, args.ZN)
         generate_files(args.TP, args.Path, args.ZP, args.ZN)
     print("Building")
     build(compprog, makeprog, args.Path)
@@ -44,10 +45,10 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generating and building step 1",prog="FMUGen",usage="%(prog)s [options]")
-    parser.add_argument('Path', nargs='?', default=getcwd(), help='Path for generated C file')
+    parser.add_argument('--Path', default=getcwd(), help='Path for generated C file')
     parser.add_argument('--TP', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
-    parser.add_argument('--ZN', help='Name of zipfile generated from matlab', default='default.zip')
-    parser.add_argument('--ZP', help='Path to zipfile, if not executing folder', default=getcwd())
+    parser.add_argument('ZN', help='Name of zipfile generated from matlab', default='default.zip')
+    parser.add_argument('--ZP', nargs='?', help='Path to zipfile, if not executing folder', default=getcwd())
     parser.add_argument('--ONLY_BUILD', help='Only build, dont make build directory', action='store_true')
     args = parser.parse_args()
     main()

@@ -73,7 +73,7 @@ def handle_error(err):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="cgen",usage="%(prog)s [options]")
-    parser.add_argument('Path', nargs='?', default=getcwd(), help='Path for generated C file')
+    parser.add_argument('--Path', default=getcwd(), help='Path for generated C file')
     parser.add_argument('--G', help='Cmake supported makefile generator (Ex. MinGW Makefiles)', default="MinGW Makefiles")
     parser.add_argument('--M', help='Make program that supports generated makefile', default="mingw32-make")
     parser.add_argument('--FN', help='Build folder name', default='build')
