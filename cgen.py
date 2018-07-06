@@ -135,7 +135,6 @@ def generate_files(src, dst, zipPath, zipName):
 
 
 def main():
-    print(args.Path, args.ZN)
     generate_files(args.TP, args.Path, args.ZP, args.ZN)
     
 
