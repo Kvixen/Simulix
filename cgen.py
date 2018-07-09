@@ -26,35 +26,25 @@ import zipfile
 from glob import glob
 import re
 
-templateReplace = {
+template_replace = {
 }
 
-
 pattern = re.compile(r"^(R20)\d\d[a-b]")
-#Includes for capi_utils.c. Only one line made it unnecessary for an entire file. If this gets appended, please make a template file for it instead
-CONST_CAPI_UTILS_INCLUDE = '#include "{modelName}.h"\n'
 
 
+def generate_template_file(src, dst, file_name, template_file_name):
+    with open(path.join(dst, file_name), 'w') as generated_file:
+        with open(path.join(src, template_file_name), 'r') as template_file:
+            generated_file.write(template_file.read().format(**template_replace))
 
+def generate_template_files(src, dst):
+    generate_template_file(src, dst, "includes/capi_utils.c","templates/capi_utils_template.c")
+    generate_template_file(src, dst, "exemain.c","templates/exemain_template.c")
+    generate_template_file(src, dst, "CMakeLists.txt", "templates/CMakeLists_template.txt")
 
-def _gen_capi_utils(src, dst):
-    with open(path.join(dst,"capi_utils.c"), 'w') as capiFile:
-        with open(path.join(src,'LicenseTemplate'),'r') as licenseFile:
-            capiFile.write(licenseFile.read())
-        capiFile.write(CONST_CAPI_UTILS_INCLUDE.format(**templateReplace))
-        with open(path.join(src,'capi_utils_template.c'), 'r') as capiTemplate:
-            capiFile.write(capiTemplate.read())
-
-def _gen_main(src, dst):
-    with open(path.join(dst, 'exemain.c'),'w') as mainFile:
-        with open(path.join(src,'LicenseTemplate'),'r') as licenseFile:
-            mainFile.write(licenseFile.read())
-        with open(path.join(src,'mainIncludes'),'r') as mainIncludes:
-            mainFile.write(mainIncludes.read().format(**templateReplace))
-        with open(path.join(src,'main_template.c'),'r') as mainTemplate:
-            mainFile.write(mainTemplate.read())
-
-def _copy_files(src, dst):
+def copy_directory(src, dst):
+    if not path.exists(dst):
+        makedirs(dst)
     for item in listdir(src):
         s = path.join(src, item)
         d = path.join(dst, item)
@@ -62,14 +52,13 @@ def _copy_files(src, dst):
             copytree(s, d, False, None)
         else:
             copy2(s,d)
-    
-def _gen_cmakelists(src, dst):
-    with open(path.join(dst, 'CMakeLists.txt'),'w') as CMakeFile:
-        with open(path.join(src,'CMakeListsTemplate.txt'),'r') as templateFile:
-            CMakeFile.write(templateFile.read().format(**templateReplace))
 
-def _handle_zip(dst, zipPath):
-    zip_ref = zipfile.ZipFile(zipPath, 'r')
+def copy_directories(src, dst):
+    copy_directory(path.join(src, 'includes'), path.join(dst, 'includes'))
+    copy_directory(path.join(src, 'libraryincludes'), path.join(dst, 'libraryincludes'))
+
+def handle_zip(dst, zip_path):
+    zip_ref = zipfile.ZipFile(zip_path, 'r')
     zip_ref.extractall(dst)
     root_dirs = []
     for f in zip_ref.namelist():
@@ -80,23 +69,30 @@ def _handle_zip(dst, zipPath):
     zip_ref.close()
     for line in root_dirs:
         if pattern.match(line):
-            templateReplace['matlabVersion'] = line
+            template_replace['matlabVersion'] = line
         elif line != "otherFiles":
-            templateReplace['folderName'] = line
-            tempList = listdir(path.join(dst, line))[0].split('_')
-            templateReplace['modelName'] = '_'.join(tempList[:-2])
-            if len(templateReplace['modelName']) > 28:
-                templateReplace['modelNameS'] = templateReplace['modelName'][:28]
+            template_replace['folderName'] = line
+            # The model name in a generated grt code is inside a folder called <model_name>_grt_rtw
+            # Inside this zip there's only 2-3 folders. One of them is neither matching the pattern regex nor called "otherFiles"
+            # This folder contains the mentioned folder above. When we find a directory following the rules above we do the following:
+            # Look for directories in the above mentioned folder:
+            # listdir(path.join(dst, line))[0]
+            # This will produce a list with only one element which we will access. 
+            # Next, we split it with '_' in order to get rid of _grt_rtw
+            # And we join together all elements except the last two so we support model names with underscores.
+            template_replace['modelName'] = '_'.join(listdir(path.join(dst, line))[0].split('_')[:-2])
+            if len(template_replace['modelName']) > 28:
+                template_replace['modelNameS'] = template_replace['modelName'][:28]
             else:
-                templateReplace['modelNameS'] = templateReplace['modelName']
+                template_replace['modelNameS'] = template_replace['modelName']
 
     
         
 
 
-def generate_files(src, dst, zipPath, zipName):
+def generate_files(src, dst, zip_path, zipName):
     """
-    Extracts content from zip in zipPath
+    Extracts content from zip in zip_path
     Generates and copies neccesary files
     
 
@@ -108,30 +104,19 @@ def generate_files(src, dst, zipPath, zipName):
         dst:
             Destination of generated file(s).
 
-        zipPath:
+        zip_path:
             Path to generated Zip.
     """
-    templateReplace['path'] = path.dirname(path.realpath(__file__)).replace('\\','/')
+    template_replace['path'] = path.dirname(path.realpath(__file__)).replace('\\','/')
+
     if zipName.split('.')[-1] == "zip":
-        zipPath = path.join(zipPath, zipName)
+        zip_path = path.join(zip_path, zipName)
     else:
-        zipPath = path.join(zipPath, zipName + ".zip")
-    _handle_zip(dst, zipPath)
-    templatePath = path.join(src, 'templates')
-    includeDst = path.join(dst, 'includes')
-    includeSrc = path.join(src, 'includes')
-    libincludeDst = path.join(dst, 'libraryincludes')
-    libincludeSrc = path.join(src, 'libraryincludes')
-    
-    if not path.exists(includeDst):
-        makedirs(includeDst)
-    if not path.exists(libincludeDst):
-        makedirs(libincludeDst)
-    _copy_files(includeSrc, includeDst)
-    _copy_files(libincludeSrc, libincludeDst)
-    _gen_capi_utils(templatePath, includeDst)
-    _gen_main(templatePath, dst)
-    _gen_cmakelists(templatePath, dst)
+        zip_path = path.join(zip_path, zipName + ".zip")
+    print("Handle zips!")
+    handle_zip(dst, zip_path)
+    copy_directories(src,dst)
+    generate_template_files(src, dst)
 
 
 def main():
@@ -140,10 +125,10 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="cgen",usage="%(prog)s [options]")
-    parser.add_argument('--Path', default=getcwd(), help='Path for generated C file')
-    parser.add_argument('--TP', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
+    parser.add_argument('--p', default=getcwd(), help='Path for generated C file')
+    parser.add_argument('--t', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
     parser.add_argument('ZN', nargs='?', help='Name of zipfile generated from matlab', default='default')
-    parser.add_argument('--ZP', help='Path to zipfile, if not executing folder', default=getcwd())
+    parser.add_argument('--zp', help='Path to zipfile, if not executing folder', default=getcwd())
     args = parser.parse_args()
     main()
 

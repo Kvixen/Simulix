@@ -1,3 +1,23 @@
+/*
+FGen generates an FMU from a simulink model source code.
+ 
+Copyright (C) 2018 Scania and FGen contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+#include "{modelName}.h"
 #include <stddef.h>
 #include <assert.h>
 #include "capi_utils.h"
@@ -6,29 +26,29 @@
 
 struct ScalarVariable sVariable;
 
-void GetName(char *name){
+void GetName(char *name){{
     const char s[2] = "/";
     char *token;
    
     token = strtok(name, s);
    
-   while( token != NULL ) {
+   while( token != NULL ) {{
       strcpy(name, token);
       token = strtok(NULL, s);
-   }
-}
+   }}
+}}
 
-void RemoveSpaces(char* source){
+void RemoveSpaces(char* source){{
     char* i = source;
     char* j = source;
     while(*j != 0)
-    {
+    {{
       *i = *j++;
       if(*i != ' ')
         i++;
-    }
+    }}
     *i = 0;
-}
+}}
 
 void GetValueFromAdress( char           *paramName,
                          void*          paramAddress,
@@ -37,7 +57,7 @@ void GetValueFromAdress( char           *paramName,
                          uint_T*        actualDims,
                          uint_T         numDims,
                          real_T         slope,
-                         real_T         bias) {
+                         real_T         bias) {{
     
     strcpy(sVariable.name, paramName);
     sVariable.DataID = slDataID;
@@ -62,82 +82,82 @@ void GetValueFromAdress( char           *paramName,
     bias           = %f\n", paramName, slDataID, isComplex ? "true" : "false" ,numRows,numCols, numPages, slope, bias);
     #endif
 
-    switch(slDataID) {
+    switch(slDataID) {{
         case SS_DOUBLE :
-        {
+        {{
             real_T* paramVal = (real_T *) paramAddress;
             sprintf(sVariable.value, "%f", paramVal[0]);
             break;
-        }
+        }}
         case SS_SINGLE :
-        {
+        {{
             real32_T* paramVal = (real32_T *) paramAddress;
             sprintf(sVariable.value, "%f", paramVal[0]);
             break;
-        }
+        }}
         case SS_INT8:
-        {
+        {{
             int8_T* paramVal = (int8_T *) paramAddress;
             int8_T intVal  = paramVal[0];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
-        }
+        }}
         case SS_UINT8:
-        {
+        {{
             uint8_T* paramVal = (uint8_T *) paramAddress;
             uint8_T intVal  = paramVal[0];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
-        }
+        }}
         case SS_INT16:
-        {
+        {{
             int16_T* paramVal = (int16_T *) paramAddress;
             int16_T intVal  = paramVal[0];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
-        }
+        }}
         case SS_UINT16:
-        {
+        {{
             uint16_T* paramVal = (uint16_T *) paramAddress;
             uint16_T intVal  = paramVal[0];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
-        }
+        }}
         case SS_INT32:
-        {
+        {{
             int32_T* paramVal = (int32_T *) paramAddress;
             int32_T intVal  = paramVal[0];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
-        }
+        }}
 
         case SS_UINT32:
-        {
+        {{
             uint32_T* paramVal = (uint32_T *) paramAddress;
             uint32_T intVal  = paramVal[0];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
-        }
+        }}
         case SS_BOOLEAN:
-        {
+        {{
             boolean_T* paramVal = (boolean_T *) paramAddress;
             sprintf(sVariable.value, "%s", paramVal[0] ? "True" : "False");
             break;
-        }
+        }}
         default:
             strcpy(sVariable.name, "Type not handled, CAPI_UTILS ERROR 2");
-    }
+    }}
     return;
-}
+}}
 
 void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
-                        uint_T                    paramIdx) {
+                        uint_T                    paramIdx) {{
     
     const rtwCAPI_ModelParameters* modelParams;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
@@ -146,7 +166,7 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     const uint_T*                  dimArray;
     void**                         dataAddrMap;
 
-    const char_T* paramName;
+    char_T* paramName;
     uint_T        addrIdx;
     uint16_T      dataTypeIdx;
     uint16_T      dimIndex;
@@ -209,13 +229,13 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
      *       o index into the dimArray (dimArrayIdx)                         *
      * 5) Using numDims and the dimArrayIdx, get the actual dimensions from  *
      *    the dimArray                                                       *
-     *       uint_T ActualDims[numDims] = {dimArray[dimArrayIdx],            *
+     *       uint_T ActualDims[numDims] = {{dimArray[dimArrayIdx],            *
      *                                     dimArray[dimArrayIdx+1],          *
      *				       ...                                   *
-     *				       dimArray[dimArrayIdx+(numDims-1)]}    *
+     *				       dimArray[dimArrayIdx+(numDims-1)]}}    *
      *    For e.g, scalar and 2-D parameters will have numDims = 2, So       *
-     *       uint_T ActualDims[2] = {dimArray[dimArrayIdx],                  *
-     *                               dimArray[dimArrayIdx +1]}               */
+     *       uint_T ActualDims[2] = {{dimArray[dimArrayIdx],                  *
+     *                               dimArray[dimArrayIdx +1]}}               */
     
     dimMap   = rtwCAPI_GetDimensionMap(capiMap);
     dimArray = rtwCAPI_GetDimensionArray(capiMap);
@@ -228,16 +248,16 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     orientation = rtwCAPI_GetOrientation(dimMap, dimIndex);
 
     actualDimensions = (uint_T *) malloc(numDims*sizeof(uint_T));
-    for(idx=0; idx < numDims; idx++) {
+    for(idx=0; idx < numDims; idx++) {{
         actualDimensions[idx] = dimArray[dimArrayIdx + idx];
-    }
+    }}
     
     /* Get fixed-point information of the parameter */
     fxpMap = rtwCAPI_GetFixPtMap(capiMap);
     if (fxpMap == NULL) return;
     
     fxpMapIdx = rtwCAPI_GetModelParameterFixPtIdx(modelParams, paramIdx);
-    if(fxpMapIdx > 0) {
+    if(fxpMapIdx > 0) {{
         /* Only Fixed-point parameters have fxpMapIdx > 0 */
         real_T fracslope = rtwCAPI_GetFxpFracSlope(fxpMap,fxpMapIdx);
         int8_T expt      = rtwCAPI_GetFxpExponent(fxpMap,fxpMapIdx);
@@ -250,7 +270,7 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
         
         slope = fracslope*pow(2.0,expt);
         bias  = rtwCAPI_GetFxpBias(fxpMap,fxpMapIdx);
-    }
+    }}
 
     /* Get the address to this parameter                                     */
     dataAddrMap = rtwCAPI_GetDataAddressMap(capiMap);
@@ -269,17 +289,17 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     /* Disabled until further notice.
     if(modParamFlag &&
        capi_ModifyParameter(paramAddress, paramAddress, orientation,
-                            actualDimensions, numDims, slDataID, isComplex)) {
+                            actualDimensions, numDims, slDataID, isComplex)) {{
                                 printf("Parameter modified with itself\n");
-                            }
+                            }}
     */
     free(actualDimensions);
     return;
-}
+}}
 
 void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
                 uint_T                    signalIdx,
-                uint_T                    signalTypeFlag) {
+                uint_T                    signalTypeFlag) {{
     
     const rtwCAPI_Signals*         signals;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
@@ -309,7 +329,7 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     unsigned short modParamFlag = 0; 
 
     switch(signalTypeFlag)
-    {
+    {{
         case ROOT_INPUT_FLAG:
         /* Assert the signal index is less than total number of signals */
             assert(signalIdx < rtwCAPI_GetNumRootInputs(capiMap));
@@ -320,7 +340,7 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
             assert(signalIdx < rtwCAPI_GetNumRootOutputs(capiMap));
             signals = rtwCAPI_GetRootOutputs(capiMap);
             break;
-    }
+    }}
 
     if(signals == NULL) return;
     
@@ -363,13 +383,13 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
      *       o index into the dimArray (dimArrayIdx)                         *
      * 5) Using numDims and the dimArrayIdx, get the actual dimensions from  *
      *    the dimArray                                                       *
-     *       uint_T ActualDims[numDims] = {dimArray[dimArrayIdx],            *
+     *       uint_T ActualDims[numDims] = {{dimArray[dimArrayIdx],            *
      *                                     dimArray[dimArrayIdx+1],          *
      *				       ...                                   *
-     *				       dimArray[dimArrayIdx+(numDims-1)]}    *
+     *				       dimArray[dimArrayIdx+(numDims-1)]}}    *
      *    For e.g, scalar and 2-D parameters will have numDims = 2, So       *
-     *       uint_T ActualDims[2] = {dimArray[dimArrayIdx],                  *
-     *                               dimArray[dimArrayIdx +1]}               */
+     *       uint_T ActualDims[2] = {{dimArray[dimArrayIdx],                  *
+     *                               dimArray[dimArrayIdx +1]}}               */
     
     dimMap   = rtwCAPI_GetDimensionMap(capiMap);
     dimArray = rtwCAPI_GetDimensionArray(capiMap);
@@ -382,16 +402,16 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     orientation = rtwCAPI_GetOrientation(dimMap, dimIndex);
 
     actualDimensions = (uint_T *) malloc(numDims*sizeof(uint_T));
-    for(idx=0; idx < numDims; idx++) {
+    for(idx=0; idx < numDims; idx++) {{
         actualDimensions[idx] = dimArray[dimArrayIdx + idx];
-    }
+    }}
     
     /* Get fixed-point information of the parameter */
     fxpMap = rtwCAPI_GetFixPtMap(capiMap);
     if (fxpMap == NULL) return;
     
     fxpMapIdx = rtwCAPI_GetSignalFixPtIdx(signals, signalIdx);
-    if(fxpMapIdx > 0) {
+    if(fxpMapIdx > 0) {{
         /* Only Fixed-point parameters have fxpMapIdx > 0 */
         real_T fracslope = rtwCAPI_GetFxpFracSlope(fxpMap,fxpMapIdx);
         int8_T expt      = rtwCAPI_GetFxpExponent(fxpMap,fxpMapIdx);
@@ -404,7 +424,7 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
         
         slope = fracslope*pow(2.0,expt);
         bias  = rtwCAPI_GetFxpBias(fxpMap,fxpMapIdx);
-    }
+    }}
 
     /* Get the address to this parameter                                     */
     dataAddrMap = rtwCAPI_GetDataAddressMap(capiMap);
@@ -423,22 +443,22 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     /* Disabled until further notice.
     if(modParamFlag &&
        capi_ModifyParameter(paramAddress, paramAddress, orientation,
-                            actualDimensions, numDims, slDataID, isComplex)) {
+                            actualDimensions, numDims, slDataID, isComplex)) {{
                                 printf("Parameter modified with itself\n");
-                            }
+                            }}
     */
     free(actualDimensions);
     return;
-}
+}}
 
 
 
 struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
                                    uint_T                    index,
-                                   uint_T                    flag) {
+                                   uint_T                    flag) {{
     sVariable = EmptyStruct; 
                  
-    switch(flag){
+    switch(flag){{
         case MODEL_PARAMETER_FLAG:
             GetModelParameter(capiMap, index);
             break;
@@ -448,11 +468,11 @@ struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
             break;
         default:
             printf("Flag passed to GetVariable() was %i, not handled.", flag);
-    }
+    }}
 
     return sVariable;
 
-}
+}}
 
 
 

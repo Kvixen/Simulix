@@ -1,3 +1,29 @@
+/*
+FGen generates an FMU from a simulink model source code.
+ 
+Copyright (C) 2018 Scania and FGen contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+#include "{modelName}.h"
+#include "{modelName}_capi.h"
+#define MODEL_NAME "{modelName}"
+#define REAL_TIME_MODEL {modelNameS}_M
+#define INIT_MODEL {modelName}_initialize()
+#define STEP_MODEL {modelName}_step()
+#define TERMINATE_MODEL {modelName}_terminate()
 #include <stdlib.h>
 #include <stdio.h>
 #include "capi_utils.h"
@@ -17,8 +43,8 @@ int numBoolean = 0;
 #define GetNumOutputs(mmi)           rtwCAPI_GetNumRootOutputs(mmi)
 #define GetOutputs(mmi)              rtwCAPI_GetRootOutputs(mmi)
 
-char *_getDataType(uint8_T index){
-    switch(index){
+char *_getDataType(uint8_T index){{
+    switch(index){{
         case 0:
         case 1:
             return "Real";
@@ -31,12 +57,12 @@ char *_getDataType(uint8_T index){
             return "Integer";
         case 8:
             return "Boolean";
-    }
-}
+    }}
+}}
 
 #define GetDataType(num)              _getDataType(num)
 
-void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* capiMap) {
+void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* capiMap) {{
 
     int number, i;
     struct ScalarVariable sVariable;
@@ -55,7 +81,7 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
     char initial[10];
     char causality[15];
 
-    switch(FLAG) {
+    switch(FLAG) {{
         case ROOT_INPUT_FLAG:
             number = GetNumInputs(capiMap);
             strcpy(variability, "discrete");
@@ -78,13 +104,13 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             UnknownChildObject = cJSON_CreateObject();
             Unknown = cJSON_AddArrayToObject(UnknownChildObject, "Unknown");
             break;		
-    }
+    }}
 
     #ifdef FDEBUG
     printf("Debug in MAIN.c, function objectCreator:\n\
     Number of %s    = %i,\n", FLAG == ROOT_INPUT_FLAG ? "inputs" : FLAG == ROOT_OUTPUT_FLAG ? "outputs" : "parameters", number);
     #endif
-    for (i=0; i < number; i++) {
+    for (i=0; i < number; i++) {{
         sVariable = GetVariable(capiMap, i, FLAG);
         jsonSV = cJSON_CreateObject();
         cJSON_AddStringToObject(jsonSV, "name", sVariable.name);
@@ -92,46 +118,46 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
         cJSON_AddStringToObject(jsonSV, "description", sVariable.name);
         cJSON_AddStringToObject(jsonSV, "variability", variability);
 
-        if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){
+        if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){{
             sprintf(valueReference, "%i", numReal++);
-        } else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {
+        }} else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {{
             sprintf(valueReference, "%i", numInt++);
-        } else {
+        }} else {{
             sprintf(valueReference, "%i", numBoolean++);
-        }
+        }}
         cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
         
         startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
 
-        if(FLAG != ROOT_OUTPUT_FLAG){
+        if(FLAG != ROOT_OUTPUT_FLAG){{
             cJSON_AddStringToObject(jsonSV, "initial", initial);
             startObject = cJSON_CreateObject();
             cJSON_AddStringToObject(startObject, "start", sVariable.value);
             cJSON_AddItemToArray(startArray, startObject);
-        } else {
-            if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){
+        }} else {{
+            if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){{
                 sprintf(outputIndex, "%i", numReal);
-            } else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {
+            }} else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {{
                 sprintf(outputIndex, "%i", numInt);
-            } else {
+            }} else {{
                 sprintf(outputIndex, "%i", numBoolean);
-            }
+            }}
             outputObject = cJSON_CreateObject();
             cJSON_AddStringToObject(outputObject, "index", outputIndex);
             cJSON_AddItemToArray(Unknown, outputObject);
-        }
+        }}
         cJSON_AddItemToArray(ScalarVariables, jsonSV); 
-    }
-    if(FLAG == ROOT_OUTPUT_FLAG){
+    }}
+    if(FLAG == ROOT_OUTPUT_FLAG){{
         cJSON_AddItemToArray(Outputs, UnknownChildObject);
         cJSON_AddArrayToObject(outputChildObject, "Derivatives");
         cJSON_AddArrayToObject(outputChildObject, "InitialUnknowns");
         cJSON_AddItemToArray(ModelStructure, outputChildObject);
-    }
-}
+    }}
+}}
 
 
-int main(int argc, const char *argv[]) {
+int main(int argc, const char *argv[]) {{
 
     INIT_MODEL;
     STEP_MODEL;
@@ -166,17 +192,17 @@ int main(int argc, const char *argv[]) {
 
 
     string = cJSON_Print(root);
-    if (string == NULL) {
+    if (string == NULL) {{
         fprintf(stderr, "Failed to print cJSON.\n");
         exit(12);
-    }
+    }}
     cJSON_Delete(root);
 
     FILE *f = fopen("ModelOutputs.json", "w");
-    if(!f){
+    if(!f){{
         printf("Error opening file");
         exit(13);
-    }
+    }}
     fprintf(f, "%s",string);
     fclose(f);
     
@@ -184,4 +210,4 @@ int main(int argc, const char *argv[]) {
     TERMINATE_MODEL;
 
     return 0;
-}
+}}
