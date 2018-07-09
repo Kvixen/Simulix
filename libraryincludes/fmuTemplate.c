@@ -238,7 +238,9 @@ fmi2Status fmi2EnterInitializationMode(fmi2Component c) {
     if (invalidState(comp, "fmi2EnterInitializationMode", MASK_fmi2EnterInitializationMode))
         return fmi2Error;
     FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2EnterInitializationMode")
-
+    #ifdef FMUHASENTERINITIALIZATIONMODE
+        enterInitializationMode(comp);  //implemented by the includer of this file
+    #endif
     comp->state = modelInitializationMode;
     return fmi2OK;
 }
@@ -266,7 +268,7 @@ fmi2Status fmi2Terminate(fmi2Component c) {
     if (invalidState(comp, "fmi2Terminate", MASK_fmi2Terminate))
         return fmi2Error;
     FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2Terminate")
-
+    Terminated();
     comp->state = modelTerminated;
     return fmi2OK;
 }
@@ -383,7 +385,6 @@ fmi2Status fmi2GetReal (fmi2Component c, const fmi2ValueReference vr[], size_t n
         if (vrOutOfRange(comp, "fmi2GetReal", vr[i], NUMBER_OF_REALS))
             return fmi2Error;
         value[i] = getReal(comp, vr[i]); // to be implemented by the includer of this file
-
         FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetReal: #r%u# = %.16g", vr[i], value[i])
     }
 #endif
@@ -406,7 +407,7 @@ fmi2Status fmi2GetInteger(fmi2Component c, const fmi2ValueReference vr[], size_t
     for (i = 0; i < nvr; i++) {
         if (vrOutOfRange(comp, "fmi2GetInteger", vr[i], NUMBER_OF_INTEGERS))
             return fmi2Error;
-        value[i] = comp->i[vr[i]];
+        value[i] = getInteger(comp, vr[i]);
         FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetInteger: #i%u# = %d", vr[i], value[i])
     }
     return fmi2OK;
@@ -428,7 +429,7 @@ fmi2Status fmi2GetBoolean(fmi2Component c, const fmi2ValueReference vr[], size_t
     for (i = 0; i < nvr; i++) {
         if (vrOutOfRange(comp, "fmi2GetBoolean", vr[i], NUMBER_OF_BOOLEANS))
             return fmi2Error;
-        value[i] = comp->b[vr[i]];
+        value[i] = getBoolean(comp, vr[i]);
         FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetBoolean: #b%u# = %s", vr[i], value[i]? "true" : "false")
     }
     return fmi2OK;
@@ -471,7 +472,7 @@ fmi2Status fmi2SetReal (fmi2Component c, const fmi2ValueReference vr[], size_t n
         if (vrOutOfRange(comp, "fmi2SetReal", vr[i], NUMBER_OF_REALS))
             return fmi2Error;
         FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2SetReal: #r%d# = %.16g", vr[i], value[i])
-        comp->r[vr[i]] = value[i];
+        setReal(comp, vr[i],value[i]);
     }
     if (nvr > 0) comp->isDirtyValues = 1;
     return fmi2OK;
@@ -492,7 +493,7 @@ fmi2Status fmi2SetInteger(fmi2Component c, const fmi2ValueReference vr[], size_t
         if (vrOutOfRange(comp, "fmi2SetInteger", vr[i], NUMBER_OF_INTEGERS))
             return fmi2Error;
         FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2SetInteger: #i%d# = %d", vr[i], value[i])
-        comp->i[vr[i]] = value[i];
+        setInteger(comp, vr[i], value[i]);
     }
     if (nvr > 0) comp->isDirtyValues = 1;
     return fmi2OK;
@@ -513,7 +514,7 @@ fmi2Status fmi2SetBoolean(fmi2Component c, const fmi2ValueReference vr[], size_t
         if (vrOutOfRange(comp, "fmi2SetBoolean", vr[i], NUMBER_OF_BOOLEANS))
             return fmi2Error;
         FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2SetBoolean: #b%d# = %s", vr[i], value[i] ? "true" : "false")
-        comp->b[vr[i]] = value[i];
+        setBoolean(comp, vr[i], value[i]);
     }
     if (nvr > 0) comp->isDirtyValues = 1;
     return fmi2OK;

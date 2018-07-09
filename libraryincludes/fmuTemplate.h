@@ -3,10 +3,13 @@
  * Definitions by the includer of this file
  * Copyright QTronic GmbH. All rights reserved.
  * ---------------------------------------------------------------------------*/
+#ifndef _FMUTEMPLATE_H
+#define _FMUTEMPLATE_H
 
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include "fmi2Functions.h"
 
 #ifdef FMUHASRESOURCES
 # ifdef WIN32
@@ -14,7 +17,12 @@
 # endif
 #endif
 
-#include "fmi2Functions.h"
+#ifdef FMUHASCANEXTENSIONS
+typedef fmi2Status (*fmi2_extensions_can_frame_fp)(fmi2String channel, fmi2Integer identifier, fmi2Byte data[], fmi2Integer length);
+FMI2_Export fmi2Status fmi2ExtCanSend(fmi2String channel, fmi2Integer identifier, fmi2Byte data[], fmi2Integer length);
+FMI2_Export fmi2Status fmi2ExtCanSetReceivedCallback(fmi2_extensions_can_frame_fp callback);
+FMI2_Export fmi2Status fmi2ExtCanGetAvailableChannels(fmi2String *channels[], fmi2Integer *length);
+#endif
 
 // macros used to define variables
 #define  r(vr) comp->r[vr]
@@ -161,3 +169,5 @@ typedef struct {
     fmi2EventInfo eventInfo;
     int isDirtyValues; // !0 is true
 } ModelInstance;
+
+#endif
