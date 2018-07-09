@@ -39,8 +39,11 @@ struct ScalarVariable{
 };
 static const struct ScalarVariable EmptyStruct;
 
+extern void GetName(char* name);
 
-extern void GetValueFromAdress(const char_T*  paramName,
+extern void RemoveSpaces(char* source);
+
+extern void GetValueFromAdress( char           *paramName,
                                 void*          paramAddress,
                                 uint8_T        slDataId,
                                 unsigned short isComplex,

@@ -168,6 +168,7 @@ int main(int argc, const char *argv[]) {
     string = cJSON_Print(root);
     if (string == NULL) {
         fprintf(stderr, "Failed to print cJSON.\n");
+        exit(12);
     }
     cJSON_Delete(root);
 

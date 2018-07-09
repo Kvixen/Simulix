@@ -6,6 +6,30 @@
 
 struct ScalarVariable sVariable;
 
+void GetName(char *name){
+    const char s[2] = "/";
+    char *token;
+   
+    token = strtok(name, s);
+   
+   while( token != NULL ) {
+      strcpy(name, token);
+      token = strtok(NULL, s);
+   }
+}
+
+void RemoveSpaces(char* source){
+    char* i = source;
+    char* j = source;
+    while(*j != 0)
+    {
+      *i = *j++;
+      if(*i != ' ')
+        i++;
+    }
+    *i = 0;
+}
+
 void GetValueFromAdress(const char_T*  paramName,
                          void*          paramAddress,
                          uint8_T        slDataID,
@@ -14,6 +38,7 @@ void GetValueFromAdress(const char_T*  paramName,
                          uint_T         numDims,
                          real_T         slope,
                          real_T         bias) {
+    
     strcpy(sVariable.name, paramName);
     sVariable.DataID = slDataID;
 
@@ -263,7 +288,7 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     const uint_T*                  dimArray;
     void**                         dataAddrMap;
 
-    const char_T* signalName;
+    char *signalName = malloc(256);
     uint_T        addrIdx;
     uint16_T      dataTypeIdx;
     uint16_T      dimIndex;
@@ -300,7 +325,10 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     if(signals == NULL) return;
     
     /* Get Parameter Name */
-    signalName   = rtwCAPI_GetSignalName(signals, signalIdx); 
+    strcpy(signalName, rtwCAPI_GetSignalBlockPath(signals, signalIdx));
+    GetName(signalName);
+    RemoveSpaces(signalName);
+
 
     /* Get Data Type attributes of the Model Parameter                       */
     /* Accessing the data type information from capiMap is a 3 step process  *
