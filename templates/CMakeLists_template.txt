@@ -28,8 +28,7 @@ add_custom_command(
 	COMMAND echo "Executing main.exe"
 	COMMAND main.exe
 	COMMAND echo "JSON to XML with Python"
-	COMMAND python ${{PYTHON_SOURCE_DIR}}/jtox.py
-    COMMAND python ${{PYTHON_SOURCE_DIR}}/dllgen.py -o ${{PROJECT_DIR}}
+	COMMAND python ${{PYTHON_SOURCE_DIR}}/combo.py -o ${{PROJECT_DIR}}
 )
 
 add_library(
