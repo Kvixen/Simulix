@@ -85,12 +85,12 @@ def dllgen(dst, src, data):
 
     for item in data['ModelVariables'][0]['ScalarVariable']:
         if 'Real' in item.keys():
-            realString+= "{{F64, (void *)&{0}_{1}.{2}}},\n".format(modelName, causalityDict[item['causality']], item['name'])
+            realString+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(modelName, causalityDict[item['causality']], item['name'])
         
         elif 'Integer' in item.keys():
-            intString+= "{{S32, (void *)&{0}_{1}.{2}}},\n".format(modelName, causalityDict[item['causality']], item['name'])
+            intString+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(modelName, causalityDict[item['causality']], item['name'])
         else:
-            booleanString+= "{{B, (void *)&{0}_{1}.{2}}},\n".format(modelName, causalityDict[item['causality']], item['name'])
+            booleanString+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(modelName, causalityDict[item['causality']], item['name'])
             
         
     templateReplace['realString'] = realString
@@ -111,6 +111,6 @@ def main(dst, src):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate a C file for a FMU",prog="dllgen",usage="%(prog)s [options]")
     parser.add_argument('-o', help='Path to dllmain.c output', default=getcwd())
-    parser.add_argument('-t', help='Path to template file', default=path.join(path.dirname(path.realpath(__file__)), 'templates/dllmain.c'))
+    parser.add_argument('-t', help='Path to template file', default=path.join(path.dirname(path.realpath(__file__)), 'templates/dllmain_template.c'))
     args = parser.parse_args()
     main(args.o, args.t)

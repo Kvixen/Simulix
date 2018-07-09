@@ -1,7 +1,0 @@
-#include "{modelName}.h"
-#include "{modelName}_capi.h"
-#define MODEL_NAME "{modelName}"
-#define REAL_TIME_MODEL {modelNameS}_M
-#define INIT_MODEL {modelName}_initialize()
-#define STEP_MODEL {modelName}_step()
-#define TERMINATE_MODEL {modelName}_terminate()
