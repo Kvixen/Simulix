@@ -30,7 +30,7 @@ void RemoveSpaces(char* source){
     *i = 0;
 }
 
-void GetValueFromAdress(const char_T*  paramName,
+void GetValueFromAdress( char           *paramName,
                          void*          paramAddress,
                          uint8_T        slDataID,
                          unsigned short isComplex,
