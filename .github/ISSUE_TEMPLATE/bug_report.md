@@ -20,7 +20,7 @@ A clear and concise description of what happened. (Including error message, logs
 If applicable, add screenshots to help explain your problem.
 
 **Software (please complete the following information):**
- - FGen version [e.g v1.0.0 (Can be found by running FGen with flag -v]
+ - Simulix version [e.g v1.0.0 (Can be found by running Simulix with flag -v]
  - Matlab version [e.g R2017b (Can be found by running command -v in matlab]
 
 **Additional context**

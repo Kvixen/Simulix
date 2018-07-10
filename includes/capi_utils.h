@@ -1,5 +1,7 @@
 /*
-Copyright (C) 2018 Scania
+Simulix generates an FMU from a simulink model source code.
+
+Copyright (C) 2018 Scania and Simulix contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -1,7 +1,7 @@
 """
-FGen generates an FMU from a simulink model source code.
+Simulix generates an FMU from a simulink model source code.
  
-Copyright (C) 2018 Scania and FGen contributors
+Copyright (C) 2018 Scania and Simulix contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ def main():
         sys.exit("Path specified doesn't exist")
     if not args.ONLY_BUILD:
         print("Generating files")
-        generate_files(args.t, args.p, args.ZP, args.ZN)
+        generate_files(args.t, args.p, args.zp, args.ZN)
     print("Building")
     build(compprog, makeprog, args.p)
     
@@ -47,11 +47,13 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generating and building step 1",prog="FMUGen",usage="%(prog)s [options]")
+    parser = argparse.ArgumentParser(description="Generates an FMU from a Simulink model",prog="Simulix",usage="%(prog)s [options]")
     parser.add_argument('-p', default=getcwd(), help='Path for generated C file')
     parser.add_argument('-t', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
     parser.add_argument('ZN', nargs='?', help='Name of zipfile generated from matlab', default='default.zip')
-    parser.add_argument('--ZP', help='Path to zipfile, if not executing folder', default=getcwd())
+    parser.add_argument('-zp', help='Path to zipfile', default=getcwd())
+    parser.add_argument('-g', help='Makefile generator', default="MinGW Makefiles")
+    parser.add_argument('-m', help='Makefile program', default="mingw32-make")
     parser.add_argument('--ONLY_BUILD', help='Only build, dont make build directory', action='store_true')
     args = parser.parse_args()
     main()
