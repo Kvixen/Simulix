@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from os import mkdir, path, getcwd, chdir, system
 import argparse
 import subprocess
-from sys import exit
 
 
 BUILD_ONLY = False

@@ -152,4 +152,3 @@ if __name__ == "__main__":
     parser.add_argument('--zp', help='Path to zipfile, if not executing folder', default=getcwd())
     args = parser.parse_args()
     main()
-

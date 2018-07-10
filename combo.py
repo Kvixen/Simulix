@@ -1,3 +1,22 @@
+"""
+FGen generates an FMU from a simulink model source code.
+ 
+Copyright (C) 2018 Scania and FGen contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""
 import xml.etree.cElementTree as ET
 import json
 import uuid
@@ -17,20 +36,21 @@ def prettify(elem):
 	return reparsed.toprettyxml(indent="".join([' '] * 4))
 
 def create_xml_subtree(root, name, dict_tree):
-    if type(dict_tree) == list and not dict_tree:
-        k1_ele = ET.SubElement(root, name)
-    elif type(dict_tree) == list:
+    if isinstance(dict_tree, list): #type(dict_tree) == list:
+        if not dict_tree:
+            k1_ele = ET.SubElement(root, name)
+            return root
         for i in dict_tree:
             k1_ele = ET.SubElement(root, name)
             for k2, v2 in i.items():
-                if type(v2) == list:
+                if isinstance(v2, list): #type(v2) == list:
                     create_xml_subtree(k1_ele, k2, v2)
                 else:
                     if k2 == 'start':
                         try:
                             v2 = str(float(v2))
-                        except:
-                            break
+                        except ValueError:
+                            continue
                     k1_ele.set(k2, v2)
     return root
 
@@ -48,7 +68,7 @@ def xmlgen(data):
     ET.SubElement(root,"CoSimulation",CoSimulation_dict)
     
     LogCategories = ET.SubElement(root,"LogCategories")
-    for i in range(len(category_dictlist)):
+    for i in enumerate(category_dictlist):
         ET.SubElement(LogCategories,"Category",category_dictlist[i])
 
     ET.SubElement(root, "DefaultExperiment", step_size_dict)
