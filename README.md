@@ -4,6 +4,10 @@
 
 ## Content
 * [License](#license)
+* [Usage](#usage)
+  * [Download and Installation](#download-and-installation)
+  * [Running Simulix](#running-simulix)
+* [Currently Work In Progress](#currently-work-in-progress)
 
 ## License
 
