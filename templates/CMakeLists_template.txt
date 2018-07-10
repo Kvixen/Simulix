@@ -12,6 +12,7 @@ file(GLOB_RECURSE SOURCES_MATLAB ${{PROJECT_DIR}} "${{MATLAB_VERSION}}/*.c")
 file(GLOB_RECURSE SOURCES_INCLUDES ${{PROJECT_DIR}} "includes/*.c")
 file(GLOB_RECURSE SOURCES_LIBRARY ${{PROJECT_DIR}} "libraryincludes/*.c")
 list(REMOVE_ITEM SOURCES_MATLAB ${{PROJECT_DIR}}/${{MATLAB_VERSION}}/rtw/c/src/common/rt_main.c)
+list(REMOVE_ITEM SOURCES_MATLAB ${{PROJECT_DIR}}/${{MATLAB_VERSION}}/rtw/c/grt/classic_main.c)
 set(SOURCE exemain.c)
 
 include_directories(${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}})
