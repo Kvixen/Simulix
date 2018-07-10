@@ -145,7 +145,7 @@ def main():
     
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="cgen",usage="%(prog)s [options]")
+    parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="unpack",usage="%(prog)s [options]")
     parser.add_argument('--p', default=getcwd(), help='Path for generated C file')
     parser.add_argument('--t', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
     parser.add_argument('ZN', nargs='?', help='Name of zipfile generated from matlab', default='default')

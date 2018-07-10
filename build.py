@@ -29,10 +29,6 @@ def _build(compile_program,make_program,dst):
     print("Executing {0}".format(command))
     cmake_p = subprocess.Popen(command, stderr=subprocess.PIPE)
     cmake_errs = cmake_p.communicate()[1]
-    if cmake_errs:
-        print("Something went wrong with CMake. Error message = \n")
-        print(cmake_errs)
-        #handle_error(cmake_errs)
     command = "{0}".format(make_program)
     make_p = subprocess.Popen(command, stderr=subprocess.PIPE)
     make_errs = make_p.communicate()[1]
@@ -53,34 +49,14 @@ def build(compprog, makeprog, dst, folder_name=None):
     prepare_build_directory(dst, folder_name)
     _build(compprog, makeprog, dst)
 
-def handle_error(err):
-    err_msg = str(err).split(r'\n')
-    if "CMake Error:" in err_msg[0]:
-        print("CMake crashed with the following error:")
-        err_msg_s = err_msg[0].split(':')[1][1:]
-        if "generator" in err_msg_s:
-            print(err_msg_s)
-            print("Please use one of CMakes supported generators below: ")
-            for i in range(3, len(err_msg)-1):
-                print(err_msg[i])
-            exit("Specified CMake generator was not found")
-        elif "source directory" in err_msg_s:
-            print(err)
-            exit("The source directory {0} doesn't contain CMakeLists.txt".format(path.join(getcwd(),"..")))
-    else:
-        print("HANDLE ERROR NOT KNOWIGNG WHAT ERROR")
-        print(err)
-        exit("Unknown error, please post issue to Github")
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="cgen",usage="%(prog)s [options]")
-    parser.add_argument('--Path', default=getcwd(), help='Path for generated C file')
-    parser.add_argument('--G', help='Cmake supported makefile generator (Ex. MinGW Makefiles)', default="MinGW Makefiles")
-    parser.add_argument('--M', help='Make program that supports generated makefile', default="mingw32-make")
-    parser.add_argument('--FN', help='Build folder name', default='build')
+    parser = argparse.ArgumentParser(description="Executes CMake with Makefile generator",prog="build",usage="%(prog)s [options]")
+    parser.add_argument('p', nargs='?', help='Path to files for building', default=getcwd())
+    parser.add_argument('-g', help='Makefile generator', default="MinGW Makefiles")
+    parser.add_argument('-m', help='Makefile program', default="mingw32-make")
+    parser.add_argument('-f', help='Build folder name', default='build')
     args = parser.parse_args()
-    BUILD_ONLY = args.ONLY_BUILD
-    #build(args.G, args.M, args.FN)
+    build(args.g, args.m, args.p, args.f)
 
 
 

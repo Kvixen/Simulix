@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from cgen import generate_files
+from unpack import generate_files
 from build import build
 import argparse
 import time
