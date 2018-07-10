@@ -67,14 +67,15 @@ Simulix comes with certain flags
 
 Here are some examples of executing Simulix
 
-    The model zip file is called *example.zip* and exists in the current directory
-    `Simulix.py example`
+The model zip file is called *example.zip* and exists in the current directory
 
-    The model zip file exists in a subfolder called *zip* and I want to build in a subfolder called *generated*
-    `
+    Simulix.py example
+
+The model zip file exists in a subfolder called *zip* and I want to build in a subfolder called *generated*
+    
     mkdir generated
     Simulix.py example -p generated -zp zip
-    `
+    
 
 # Currently Work In Progress
 
