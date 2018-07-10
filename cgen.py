@@ -21,7 +21,7 @@ from pathlib import Path
 from os import listdir, getcwd, path, chdir, makedirs, walk
 import sys
 import argparse
-from shutil import copy2, copytree
+from shutil import copy2, copytree, which
 import zipfile
 from glob import glob
 import re
@@ -36,6 +36,26 @@ def generate_template_file(src, dst, file_name, template_file_name):
     with open(path.join(dst, file_name), 'w') as generated_file:
         with open(path.join(src, template_file_name), 'r') as template_file:
             generated_file.write(template_file.read().format(**template_replace))
+
+def find_definitions(dst):
+    for root, dirs, files in walk(dst):
+        if "defines.txt" in files:
+            return path.join(root, "defines.txt")
+    return None
+
+def add_definitions(dst):
+    path_to_define = find_definitions(dst)
+    if path_to_define:
+        with open(path.join(dst, "CMakeLists.txt"), 'r+') as cmake_file:
+            content = cmake_file.read()
+            cmake_file.seek(0,0)
+            cmake_file.write('add_definitions(')
+            with open(path_to_define, 'r') as defines_file:
+                for line in defines_file:
+                    cmake_file.write("-D{0} ".format(line.rstrip('\r\n')))
+            cmake_file.write(')\n' + content)
+    
+
 
 def generate_template_files(src, dst):
     generate_template_file(src, dst, "includes/capi_utils.c","templates/capi_utils_template.c")
@@ -62,8 +82,7 @@ def handle_zip(dst, zip_path):
     zip_ref.extractall(dst)
     root_dirs = []
     for f in zip_ref.namelist():
-        r_dir = f.split('/')
-        r_dir = r_dir[0]
+        r_dir = f.split('/')[0]
         if r_dir not in root_dirs:
             root_dirs.append(r_dir)
     zip_ref.close()
@@ -80,6 +99,7 @@ def handle_zip(dst, zip_path):
             # This will produce a list with only one element which we will access. 
             # Next, we split it with '_' in order to get rid of _grt_rtw
             # And we join together all elements except the last two so we support model names with underscores.
+            # '_'.join(<code-in-here>.split('_')[:-2])
             template_replace['modelName'] = '_'.join(listdir(path.join(dst, line))[0].split('_')[:-2])
             if len(template_replace['modelName']) > 28:
                 template_replace['modelNameS'] = template_replace['modelName'][:28]
@@ -117,6 +137,7 @@ def generate_files(src, dst, zip_path, zipName):
     handle_zip(dst, zip_path)
     copy_directories(src,dst)
     generate_template_files(src, dst)
+    add_definitions(dst)
 
 
 def main():

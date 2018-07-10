@@ -39,19 +39,19 @@ def _build(compile_program,make_program,dst):
     make_errs = make_p.communicate()[1]
     return
 
-def prepare_build_directory(dst, folderName):
-    if not folderName:
-        folderName = "build"
-    if not path.isdir(path.join(dst, folderName)) and dst.split('/')[-1:] != folderName:
-        mkdir(path.join(dst, folderName))
-        chdir(path.join(dst, folderName))
-    elif dst.split('/')[-1:] != folderName:
-        chdir(path.join(dst, folderName))
+def prepare_build_directory(dst, folder_name):
+    if not folder_name:
+        folder_name = "build"
+    if not path.isdir(path.join(dst, folder_name)) and dst.split('/')[-1:] != folder_name:
+        mkdir(path.join(dst, folder_name))
+        chdir(path.join(dst, folder_name))
+    elif dst.split('/')[-1:] != folder_name:
+        chdir(path.join(dst, folder_name))
 
     
 
-def build(compprog, makeprog, dst, folderName=None):  
-    prepare_build_directory(dst, folderName)
+def build(compprog, makeprog, dst, folder_name=None):  
+    prepare_build_directory(dst, folder_name)
     _build(compprog, makeprog, dst)
 
 def handle_error(err):

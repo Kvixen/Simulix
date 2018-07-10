@@ -279,20 +279,9 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
 
     if (paramAddress == NULL) return;
     
-    /* Print the parameter value */
     GetValueFromAdress(paramName, paramAddress, slDataID, isComplex,
                         actualDimensions, numDims, slope, bias);
 
-    /* Modify parameter with itself */
-    /* modParamflag is used as a flag to indicate whether you want to modify
-     * the parameter after you print the value. Set flag to 1 to modify    */
-    /* Disabled until further notice.
-    if(modParamFlag &&
-       capi_ModifyParameter(paramAddress, paramAddress, orientation,
-                            actualDimensions, numDims, slDataID, isComplex)) {{
-                                printf("Parameter modified with itself\n");
-                            }}
-    */
     free(actualDimensions);
     return;
 }}
@@ -344,7 +333,7 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
 
     if(signals == NULL) return;
     
-    /* Get Parameter Name */
+    /* Get Signal Name. This has to be done via the SignalBlockPath */
     strcpy(signalName, rtwCAPI_GetSignalBlockPath(signals, signalIdx));
     GetName(signalName);
     RemoveSpaces(signalName);
