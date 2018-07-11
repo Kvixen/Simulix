@@ -2,28 +2,5 @@ For easier TODO file handling, download Todo+ for vscode
 
 TODO:
     Things not yet existing, but should or need to be implemented.
-    ☐ Add and support PATH argument for build so user can build outside source directory @low 
-    ☐ JSON to XML
-    ☐ Extend the switch-case to other Simulink DataIds
+    ☐ Handle errors from CMake and Make program
 
-FIXME:
-    Optimization.
-    ☐ Fix handle_error in build.py. Currently, not optimal solution. @low 
-
-GOALS:
-    Milestones for our project. When there's nothing else to do, aim to implement support for these bulletpoints.
-    ☐ Handle Scanias Simulink_lib models @low 
-    ✔ Handle all different variable types matlab generates @high @started(18-07-05 12:18) @done(18-07-05 12:18) @lasted(17s)
-
-Archive:
-    FIXME:
-        ✔ Make variables arrays instead of same object key (ModelOutput.json) @low @started(18-06-28 10:17) @done(18-06-28 14:12) @lasted(3h55m36s) @project(FIXME)
-    BUG:
-        ✔ Fix the program @critical @done(18-06-28 12:22)
-        ✔ Floats not handled correctly when written inside CAPI_Utils.c `Github issue #2` @critical @today @started(18-06-28 07:39) @project(BUG) @done(18-06-28 11:40) @lasted(4h1m29s)
-    TODO:
-       ✔ Add standalone option to build.py @started(18-06-28 08:16) @done(18-06-28 10:43) @lasted(2h27m51s) @project(TODO)
-           ✔ Generate cmake list of generators if user input is not supported @done(18-06-28 10:18) @project(TODO)
-               ✔ Make supported generators not cause errors @bug @started(18-06-28 10:34) @done(18-06-28 10:39) @lasted(5m49s) @project(TODO)
-           ✘ Security issues where user input feeds to call and Popen commands, could cause harm @critical @cancelled(18-06-28 10:43) @project(TODO)
-        
