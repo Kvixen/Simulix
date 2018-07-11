@@ -133,7 +133,8 @@ def generate_files(src, dst, zip_path, zipName):
         zip_path = path.join(zip_path, zipName)
     else:
         zip_path = path.join(zip_path, zipName + ".zip")
-    print("Handle zips!")
+    if not path.isfile(zip_path):
+        exit("Couldn't find ZIP file")
     handle_zip(dst, zip_path)
     copy_directories(src,dst)
     generate_template_files(src, dst)
