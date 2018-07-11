@@ -45,7 +45,7 @@ extern void GetName(char* name);
 
 extern void RemoveSpaces(char* source);
 
-extern void GetValueFromAdress( char           *paramName,
+extern void GetValueFromAdress( char*           paramName,
                                 void*          paramAddress,
                                 uint8_T        slDataId,
                                 unsigned short isComplex,

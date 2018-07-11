@@ -194,7 +194,7 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     if (modelParams == NULL) return;
     
     /* Get Parameter Name */
-    paramName   = rtwCAPI_GetModelParameterName(modelParams, paramIdx); 
+    paramName   = (char*)rtwCAPI_GetModelParameterName(modelParams, paramIdx); 
 
     /* Get Data Type attributes of the Model Parameter                       */
     /* Accessing the data type information from capiMap is a 3 step process  *
