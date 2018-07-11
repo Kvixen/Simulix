@@ -58,6 +58,7 @@ def main(make_prog):
         print("Generating files")
         generate_files(args.t, args.p, args.zp, args.ZN)
     print("Building")
+    print(make_prog)
     build(make_prog[0], make_prog[1], args.p)
     
 
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     if not args.m or not which(args.m):
         make_program = find_make_prog()
     elif which(args.m):
-        make_program = {find_generate_prog(args.m.lower()), args.m} 
+        make_program = (find_generate_prog(args.m.lower()), args.m) 
         
     if not make_program:
         exit("Couldn't find Make program")
