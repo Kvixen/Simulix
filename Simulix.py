@@ -30,23 +30,23 @@ import sys
 
 def find_generate_prog(x):
     return {
-        'mingw32-make' : "MinGW Makefiles",
-        'nmake'        : "NMake Makefiles",
-        'make'         : "Unix Makefiles",
-        'ninja'        : "Ninja"
+        'mingw32-make' : "\"MinGW Makefiles\"",
+        'nmake'        : "\"NMake Makefiles\"",
+        'make'         : "\"Unix Makefiles\"",
+        'ninja'        : "\"Ninja\""
     }[x]
 
 def find_make_prog():
     if("Windows" in system()):
         if(which("NMAKE")):
-            return {"NMake Makefiles", "NMAKE"}
+            return ("\"NMake Makefiles\"", "NMAKE")
         elif(which("mingw32-make")):
-            return {"MinGW Makefiles", "mingw32-make"}
+            return ("\"MinGW Makefiles\"", "mingw32-make")
     elif("Linux" in system()):
         if(which("make")):
-            return {"Unix Makefiles", "make"}
+            return ("\"Unix Makefiles\"", "make")
     elif(which("Ninja")):
-        return {"Ninja", "Ninja"}
+        return ("\"Ninja\"", "Ninja")
 
 
 def main(make_prog):
@@ -58,6 +58,8 @@ def main(make_prog):
         print("Generating files")
         generate_files(args.t, args.p, args.zp, args.ZN)
     print("Building")
+    print(make_prog)
+    print(make_prog[0])
     build(make_prog[0], make_prog[1], args.p)
     
 
