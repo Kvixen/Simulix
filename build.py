@@ -24,14 +24,14 @@ import subprocess
 
 BUILD_ONLY = False
 
-def _build(compile_program,make_program,dst):
+def execute_build_commands(compile_program,make_program,dst):
     command = "cmake -G {0} ..".format(compile_program)
     print("Executing {0}".format(command))
-    cmake_p = subprocess.Popen(command, stderr=subprocess.PIPE)
-    cmake_errs = cmake_p.communicate()[1]
+    cmake_p = subprocess.Popen(command, shell=True)
+    cmake_p.communicate()
     command = "{0}".format(make_program)
-    make_p = subprocess.Popen(command, stderr=subprocess.PIPE)
-    make_errs = make_p.communicate()[1]
+    make_p = subprocess.Popen(command, shell=True)
+    make_p.communicate() # Wait for program to finish
     return
 
 def prepare_build_directory(dst, folder_name):
@@ -47,7 +47,7 @@ def prepare_build_directory(dst, folder_name):
 
 def build(compprog, makeprog, dst, folder_name=None):  
     prepare_build_directory(dst, folder_name)
-    _build(compprog, makeprog, dst)
+    execute_build_commands(compprog, makeprog, dst)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Executes CMake with Makefile generator",prog="build",usage="%(prog)s [options]")
