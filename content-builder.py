@@ -68,7 +68,7 @@ def xmlgen(data):
     ET.SubElement(root,"CoSimulation",CoSimulation_dict)
     
     LogCategories = ET.SubElement(root,"LogCategories")
-    for i in enumerate(category_dictlist):
+    for i in range(len(category_dictlist)):
         ET.SubElement(LogCategories,"Category",category_dictlist[i])
 
     ET.SubElement(root, "DefaultExperiment", step_size_dict)
