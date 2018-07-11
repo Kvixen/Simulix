@@ -6,6 +6,7 @@
 * [License](#license)
 * [Usage](#usage)
   * [Download and Installation](#download-and-installation)
+  * [Exporting your model from Simulink](#exporting-your-model-from-simulink)
   * [Running Simulix](#running-simulix)
 * [Currently Work In Progress](#currently-work-in-progress)
 
@@ -58,6 +59,24 @@ To use Simulix, you will need the following
 
 Note that you have to add the installation directory to your PATH variable if you don't want to specify the installation path every time you want to run Simulix.
 
+### Exporting your model from Simulink
+
+In order for Simulix to function correctly, the correct code generation options need to be selected in Simulink.
+
+![Options](https://github.com/Kvixen/Simulix/blob/master/resources/Options.PNG)
+
+In Simulink, the code generation options are located under *Code, C/C++ Code, Code Generation Options*.
+
+![CodeG_list](https://github.com/Kvixen/Simulix/blob/master/resources/CodeG_list.PNG) ![CodeG](https://github.com/Kvixen/Simulix/blob/master/resources/CodeG.PNG)
+In *Code Generation*, under *Target selection*, make sure that *System target file* is set to *grt.tlc* and that *Language* is set to *C*.
+
+Under *Build process*, select *Package code and artifacts*. You can also fill in the name of the zip file that will be generated. If the field is left empty, the zip file will have the name of the Simulink model.
+
+![Interface_list](https://github.com/Kvixen/Simulix/blob/master/resources/Interface_list.PNG) ![Interface](https://github.com/Kvixen/Simulix/blob/master/resources/Interface.PNG)
+In the submenu *Interface* to *Code Generation*, make sure all boxes for C API generation are ticked.
+
+To build your model, simply press *Ctrl+B* on your keyboard.
+
 ### Running Simulix
 
 Simulix comes with certain flags
@@ -83,4 +102,4 @@ The model zip file exists in a subfolder called *zip* and I want to build in a s
 
 # Currently Work In Progress
 
-Almost everything in this project is currently work in progress, even the project name. Feel free to contribute all you want. 
+Almost everything in this project is currently work in progress, even the project name. Feel free to contribute all you want.

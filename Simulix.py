@@ -58,7 +58,6 @@ def main(make_prog):
         print("Generating files")
         generate_files(args.t, args.p, args.zp, args.ZN)
     print("Building")
-    print(make_prog)
     build(make_prog[0], make_prog[1], args.p)
     
 
