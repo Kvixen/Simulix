@@ -1,7 +1,7 @@
 """
 Simulix generates an FMU from a simulink model source code.
  
-Copyright (C) 2018 Scania and Simulix contributors
+Copyright (C) 2018 Scania CV AB and Simulix contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ def xmlgen(data):
 
 def dllgen(dst, src, data):
 
-    templateReplace = {
+    template_replace = {
 
     }
 
@@ -91,12 +91,12 @@ def dllgen(dst, src, data):
         'parameter':'P'
     }
 
-    templateReplace['numReal'] = int(data['numReal']) + 1 #Add one because we dont count the real current_time until now
-    templateReplace['numInt'] = int(data['numInt']) + 1
-    templateReplace['numBoolean'] = int(data['numBoolean'])
-    templateReplace['stepSize'] = data['StepSize']
-    templateReplace['modelName'] = data['Model']
-    templateReplace['GUID'] = data['GUID']
+    template_replace['numReal'] = int(data['numReal']) + 1 #Add one because we dont count the real current_time until now
+    template_replace['numInt'] = int(data['numInt']) + 1
+    template_replace['numBoolean'] = int(data['numBoolean'])
+    template_replace['stepSize'] = data['StepSize']
+    template_replace['modelName'] = data['Model']
+    template_replace['GUID'] = data['GUID']
     modelName = data['Model']
     
     realString = ""
@@ -113,12 +113,12 @@ def dllgen(dst, src, data):
             booleanString+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(modelName, causalityDict[item['causality']], item['name'])
             
         
-    templateReplace['realString'] = realString
-    templateReplace['intString'] = intString
-    templateReplace['booleanString'] = booleanString
+    template_replace['realString'] = realString
+    template_replace['intString'] = intString
+    template_replace['booleanString'] = booleanString
     with open(path.join(dst, 'dllmain.c'), 'w') as dllmain:
         with open(src, 'r') as dllmainTemplate:
-            dllmain.write(dllmainTemplate.read().format(**templateReplace))
+            dllmain.write(dllmainTemplate.read().format(**template_replace))
 
 
 def main(dst, src):
