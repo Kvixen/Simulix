@@ -9,6 +9,7 @@
   * [Exporting your model from Simulink](#exporting-your-model-from-simulink)
   * [Running Simulix](#running-simulix)
 * [Currently Work In Progress](#currently-work-in-progress)
+* [Support](#support)
 
 ## License
 
@@ -16,7 +17,7 @@ GNU GPL V.3
 
 >Simulix generates an FMU from a simulink model source code.
 > 
->Copyright (C) 2018 Scania and Simulix contributors
+>Copyright (C) 2018 Scania CV AB and Simulix contributors
 >
 >This program is free software: you can redistribute it and/or modify
 >it under the terms of the GNU General Public License as published by
@@ -103,3 +104,22 @@ The model zip file exists in a subfolder called *zip* and I want to build in a s
 # Currently Work In Progress
 
 Almost everything in this project is currently work in progress, even the project name. Feel free to contribute all you want.
+
+# Support
+
+While we are in Alpha, we will list what we are currently supporting.
+
+✓: We currently support this software/OS
+
+✕: We currently do not support this software/OS
+
+?: We are currently not able to test Simulix on this software and are unable to determine if we support it or not.
+
+
+* Windows
+  * 32-bit: ✕
+  * 64-bit: ✓
+* Linux: ?
+* macOS: ?
+
+
