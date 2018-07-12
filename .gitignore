@@ -27,6 +27,10 @@ Backup/
 Tests/
 Test/
 fmu/
+.vscode/
+
+# VSCode extenstion files
+TODO
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
