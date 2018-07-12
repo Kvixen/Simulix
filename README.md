@@ -84,7 +84,7 @@ Simulix comes with certain flags
 * `-p:            Path for building`
 * `-t:            Path to template files`
 * `-zp:           Path to zipfile`
-* `-g:            Makefile generator`
+* `-f:            Name of build folder`
 * `-m:            Makefile program`
 * `--ONLY_BUILD:  Not generate new files, only build existing`
 

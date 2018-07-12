@@ -97,8 +97,8 @@ add_custom_command(
     COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}/dist/sources
     COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}/dist/documentation
 
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/build/${{CMAKE_PROJECT_NAME}}.dll ${{FMU_OUT_DIR}}/dist/binaries/win64
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/build/modelDescription.xml ${{FMU_OUT_DIR}}/dist
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{CMAKE_BINARY_DIR}}/${{CMAKE_PROJECT_NAME}}.dll ${{FMU_OUT_DIR}}/dist/binaries/win64
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{CMAKE_BINARY_DIR}}/modelDescription.xml ${{FMU_OUT_DIR}}/dist
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/model.png ${{FMU_OUT_DIR}}/dist
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/fmusdk_license.txt ${{FMU_OUT_DIR}}/dist/documentation
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{HEADERS}} ${{FMU_OUT_DIR}}/dist/sources

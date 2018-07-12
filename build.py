@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from os import mkdir, path, getcwd, chdir, system
 import argparse
 import subprocess
+from shutil import which
+from platform import system
 
 
 BUILD_ONLY = False
@@ -35,8 +37,6 @@ def execute_build_commands(compile_program,make_program,dst):
     return
 
 def prepare_build_directory(dst, folder_name):
-    if not folder_name:
-        folder_name = "build"
     if not path.isdir(path.join(dst, folder_name)) and dst.split('/')[-1:] != folder_name:
         mkdir(path.join(dst, folder_name))
         chdir(path.join(dst, folder_name))
@@ -49,14 +49,49 @@ def build(compprog, makeprog, dst, folder_name=None):
     prepare_build_directory(dst, folder_name)
     execute_build_commands(compprog, makeprog, dst)
 
+def find_generate_prog(x):
+    return {
+        'mingw32-make' : "\"MinGW Makefiles\"",
+        'nmake'        : "\"NMake Makefiles\"",
+        'make'         : "\"Unix Makefiles\"",
+        'ninja'        : "\"Ninja\""
+    }[x]
+
+def find_make_prog():
+    if("Windows" in system()):
+        if(which("NMAKE")):
+            return ("\"NMake Makefiles\"", "NMAKE")
+        elif(which("mingw32-make")):
+            return ("\"MinGW Makefiles\"", "mingw32-make")
+    elif("Linux" in system()):
+        if(which("make")):
+            return ("\"Unix Makefiles\"", "make")
+    elif(which("Ninja")):
+        return ("\"Ninja\"", "Ninja")
+
+def main(dst, folder_name, make_prog):
+    if not path.isabs(dst):
+        dst = path.join(getcwd(), dst)
+    if not path.isdir(dst):
+        exit("Path specified doesn't exist")
+    if not make_prog or not which(make_prog):
+        make_program = find_make_prog()
+    elif which(make_prog):
+        make_program = (find_generate_prog(make_prog.lower()), make_prog)
+   
+    if not make_program:
+        exit("Couldn't find Make program")
+    print("Building")
+    build(make_program[0], make_program[1], dst, folder_name)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Executes CMake with Makefile generator",prog="build",usage="%(prog)s [options]")
     parser.add_argument('p', nargs='?', help='Path to files for building', default=getcwd())
-    parser.add_argument('-g', help='Makefile generator', default="MinGW Makefiles")
-    parser.add_argument('-m', help='Makefile program', default="mingw32-make")
+    parser.add_argument('-m', help='Makefile program')
     parser.add_argument('-f', help='Build folder name', default='build')
     args = parser.parse_args()
-    build(args.g, args.m, args.p, args.f)
+
+    main(args.p, args.f, args.m)
 
 
 
