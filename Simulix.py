@@ -20,17 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from unpack import generate_files
-from build import main as bm
+from build import main as build
 import argparse
 import time
-from os import getcwd, path, listdir
+from os import getcwd, path
 import sys
 
 def main(dst, make_prog, folder_name):
     if not args.ONLY_BUILD:
         print("Generating files")
         generate_files(args.t, args.p, args.zp, args.ZN)
-    bm(dst, folder_name, make_prog,)
+    build(dst, folder_name, make_prog,)
     
 
 
