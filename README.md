@@ -110,8 +110,11 @@ Almost everything in this project is currently work in progress, even the projec
 While we are in Alpha, we will list what we are currently supporting.
 
 ✓: We currently support this software/OS
+
 ✕: We currently do not support this software/OS
+
 ?: We are currently not able to test Simulix on this software and are unable to determine if we support it or not.
+
 
 * Windows
   * 32-bit: ✕
