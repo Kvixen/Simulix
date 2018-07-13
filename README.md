@@ -8,6 +8,7 @@
   * [Download and Installation](#download-and-installation)
   * [Exporting your model from Simulink](#exporting-your-model-from-simulink)
   * [Running Simulix](#running-simulix)
+  * [Extensions](#extensions)
 * [Currently Work In Progress](#currently-work-in-progress)
 * [Support](#support)
 
@@ -83,12 +84,13 @@ To build your model, simply press *Ctrl+B* on your keyboard.
 ### Running Simulix
 
 Simulix comes with certain flags
-* `z:             Positional argument for name of zipfile`
-* `-p:            Path for building`
-* `-t:            Path to template files`
+* ` z :           Positional argument for name of zipfile`
+* `-p :           Path for building`
+* `-t :           Path to template files`
 * `-zp:           Path to zipfile`
-* `-f:            Name of build folder`
-* `-m:            Makefile program`
+* `-f :           Name of build folder`
+* `-m :           Makefile program`
+* `-e :           Path to extension`
 * `--ONLY_BUILD:  Not generate new files, only build existing`
 
 Here are some examples of executing Simulix
@@ -102,6 +104,53 @@ The model zip file exists in a subfolder called *zip* and I want to build in a s
     mkdir generated
     Simulix.py example -p generated -zp zip
     
+
+### Extensions
+
+With Simulink, there's a lot of toolboxes. Instead of waiting around for support of a special toolbox you can temporary do your own.
+
+With out program, you can supply a path to your extension with the model when building. This extension can provide additional information and replace our template files.
+
+In order to use it, make a new folder containing a extension.py file. This is the only required step. If this file exists, even if it's empty, the extension will be recognized.
+
+With an extension, you can use certain functions inside extension.py that will be called.
+
+    get_template_info(replace_dict):
+        return replace_dict
+
+    If this function exist, the dict Simulix uses to generate template files will be passed so you either can log the variables, change them or remove them.
+    In order for this to take effect, you have to return the replace_dict after your changes.
+
+With an extension, you can also modify Simulix template files. If a template file is found inside the extension in a templates folder, Simulix will default to that template file. An example of an extension can look something like this
+
+
+`extension.py`
+
+    get_template_info(replace_dict):
+        replace_dict['TEXT_STRING'] = "Hello World"
+        return replace_dict
+
+`templates/CMakeLists_template.txt`
+
+    message(STATUS {TEXT_STRING})
+
+
+Because we are using pythons [format](https://docs.python.org/3.4/library/string.html#string.Formatter.format) function on the entire file, to use brackets without replacing anything and without raising a KeyError error, use double brackets. An example can look like this
+
+`templates/CMakeLists_template.txt`
+
+    set(TEXT_STRING {TEXT_STRING})
+    message(STATUS ${{TEXT_STRING}})
+
+This will produce the CMakeLists file like so
+
+`ModelDir/CMakeLists.txt`
+
+    set(TEXT_STRING "Hello World")
+    message(STATUS ${TEXT_STRING})
+
+
+
 
 # Currently Work In Progress
 

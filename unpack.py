@@ -68,25 +68,33 @@ def handle_extension(extension_path, src, dst):
     if path.isfile(path.join(extension_path, "extension.py")):
         sys.path.append(extension_path)
         import extension
-        template_replace.update(extension.get_template_info(template_replace))
-    else:
-        return -1
-    if path.isdir(path.join(extension_path, "templates")):
-        if path.isfile(path.join(extension_path, "templates/exemain_template.c")):
-            generate_template_file(extension_path, dst, "exemain.c", "templates/exemain_template.c")
-        else:
-            generate_template_file(src, dst, "exemain.c","templates/exemain_template.c")
+        try:
+            template_replace.update(extension.get_template_info(template_replace))
+        except AttributeError:
+            pass
+        if path.isdir(path.join(extension_path, "templates")):
+            if path.isfile(path.join(extension_path, "templates/exemain_template.c")):
+                generate_template_file(extension_path, dst, "exemain.c", "templates/exemain_template.c")
+            else:
+                generate_template_file(src, dst, "exemain.c","templates/exemain_template.c")
 
-        if path.isfile(path.join(extension_path, "templates/CMakeLists_template.txt")):
-            generate_template_file(extension_path, dst, "CMakeLists.txt", "templates/CMakeLists_template.txt")
-        else:
-            generate_template_file(src, dst, "CMakeLists.txt", "templates/CMakeLists_template.txt")
+            if path.isfile(path.join(extension_path, "templates/CMakeLists_template.txt")):
+                generate_template_file(extension_path, dst, "CMakeLists.txt", "templates/CMakeLists_template.txt")
+            else:
+                generate_template_file(src, dst, "CMakeLists.txt", "templates/CMakeLists_template.txt")
 
-        generate_template_file(src, dst, "includes/capi_utils.c","templates/capi_utils_template.c")
+            if path.isfile(path.join(extension_path, "templates/capi_utils_template.c")):
+                generate_template_file(extension_path, dst, "includes/capi_utils.c", "templates/capi_utils_template.c")
+            else:
+                generate_template_file(src, dst, "includes/capi_utils.c", "templates/capi_utils_template.c")
+        else:
+            generate_template_files(src, dst)
+        
+        return True
     else:
-        generate_template_files(src, dst)
+        return False
     
-    return 0
+    return False
 
 
 def copy_directory(src, dst):
@@ -167,11 +175,11 @@ def generate_files(src, dst, zip_path, zipName, extension_path):
     copy_directories(src,dst)
     # Extensions will overwrite whatever handle_zip has put in the template_replace
     # This can be useful and harmful so use extensions carefully
-    result = -1
+    extension = False
     if extension_path:
-        result = handle_extension(extension_path, src, dst)
+        extension = handle_extension(extension_path, src, dst)
         
-    if (result == -1) or not extension_path:
+    if not extension or not extension_path:
         generate_template_files(src, dst)
     add_definitions(dst)
 

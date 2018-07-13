@@ -7,7 +7,8 @@ set(MODEL_FOLDER_NAME {modelName}_grt_rtw)
 
 cmake_minimum_required(VERSION 3.0)
 add_definitions(-DFMI_COSIMULATION)
-set(	LIBRARY_SOURCES
+
+set(    SHARED_SOURCES
 	    "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}.c"
 		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_capi.c"
 		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_data.c"
@@ -15,17 +16,16 @@ set(	LIBRARY_SOURCES
 		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rtGetNaN.c"
 		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rtGetInf.c"
 		"${{PROJECT_DIR}}/${{MATLAB_VERSION}}/rtw/c/src/rt_logging.c")
+)
+
+set(	LIBRARY_SOURCES
+
+)
 		
 set(	EXECUTABLE_SOURCES
-		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}.c"
 		"${{PROJECT_DIR}}/includes/cJSON.c"
 		"${{PROJECT_DIR}}/includes/capi_utils.c"
-		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_capi.c"
-		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_data.c"
-		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rt_nonfinite.c"
-		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rtGetNaN.c"
-		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rtGetInf.c"
-		"${{PROJECT_DIR}}/${{MATLAB_VERSION}}/rtw/c/src/rt_logging.c")
+)
 
 file(GLOB_RECURSE HEADERS ${{PROJECT_DIR}} "*.h")
 
@@ -41,6 +41,7 @@ add_executable(
     main 
     exemain.c 
     ${{EXECUTABLE_SOURCES}}
+    ${{SHARED_SOURCES}}
 )
 
 add_custom_command(
@@ -56,13 +57,8 @@ add_library(
     ${{CMAKE_PROJECT_NAME}}
     SHARED
     ${{PROJECT_DIR}}/dllmain.c
-    "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}.c"
-    "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_data.c"
-    "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_capi.c"
-    "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rt_nonfinite.c"
-    "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rtGetNaN.c"
-    "${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/rtGetInf.c"
-    "${{PROJECT_DIR}}/${{MATLAB_VERSION}}/rtw/c/src/rt_logging.c"
+    $${{LIBRARY_SOURCES}}
+    $${{SHARED_SOURCES}}
 )
 
 target_link_libraries(
@@ -71,6 +67,7 @@ target_link_libraries(
 )
 
 set_target_properties(${{CMAKE_PROJECT_NAME}} PROPERTIES PREFIX "")
+
 find_file(
 		ZIP_PROG_PATH 
 		NAMES "7za.exe" 
