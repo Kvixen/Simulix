@@ -29,7 +29,7 @@ import sys
 def main(dst, make_prog, folder_name):
     if not args.ONLY_BUILD:
         print("Generating files")
-        generate_files(args.t, args.p, args.zp, args.ZN)
+        generate_files(args.t, args.p, args.zp, args.ZN, args.e)
     bm(dst, folder_name, make_prog,)
     
 
@@ -45,6 +45,7 @@ if __name__ == "__main__":
     parser.add_argument('-zp', help='Path to zipfile', default=getcwd())
     parser.add_argument('-m', help='Makefile program')
     parser.add_argument('-f', help='Build folder name', default='build')
+    parser.add_argument('-e', help='Path to extension')
     parser.add_argument('--ONLY_BUILD', help='Only build, do not generate files', action='store_true')
     args = parser.parse_args()
     main(args.p, args.m, args.f)

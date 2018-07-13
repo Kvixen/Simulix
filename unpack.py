@@ -25,6 +25,7 @@ from shutil import copy2, copytree, which
 import zipfile
 from glob import glob
 import re
+import importlib.util
 
 template_replace = {
 }
@@ -61,6 +62,32 @@ def generate_template_files(src, dst):
     generate_template_file(src, dst, "includes/capi_utils.c","templates/capi_utils_template.c")
     generate_template_file(src, dst, "exemain.c","templates/exemain_template.c")
     generate_template_file(src, dst, "CMakeLists.txt", "templates/CMakeLists_template.txt")
+
+
+def handle_extension(extension_path, src, dst):
+    if path.isfile(path.join(extension_path, "extension.py")):
+        sys.path.append(extension_path)
+        import extension
+        template_replace.update(extension.get_template_info(template_replace))
+    else:
+        return -1
+    if path.isdir(path.join(extension_path, "templates")):
+        if path.isfile(path.join(extension_path, "templates/exemain_template.c")):
+            generate_template_file(extension_path, dst, "exemain.c", "templates/exemain_template.c")
+        else:
+            generate_template_file(src, dst, "exemain.c","templates/exemain_template.c")
+
+        if path.isfile(path.join(extension_path, "templates/CMakeLists_template.txt")):
+            generate_template_file(extension_path, dst, "CMakeLists.txt", "templates/CMakeLists_template.txt")
+        else:
+            generate_template_file(src, dst, "CMakeLists.txt", "templates/CMakeLists_template.txt")
+
+        generate_template_file(src, dst, "includes/capi_utils.c","templates/capi_utils_template.c")
+    else:
+        generate_template_files(src, dst)
+    
+    return 0
+
 
 def copy_directory(src, dst):
     if not path.exists(dst):
@@ -110,7 +137,7 @@ def handle_zip(dst, zip_path):
         
 
 
-def generate_files(src, dst, zip_path, zipName):
+def generate_files(src, dst, zip_path, zipName, extension_path):
     """
     Extracts content from zip in zip_path
     Generates and copies neccesary files
@@ -127,6 +154,7 @@ def generate_files(src, dst, zip_path, zipName):
         zip_path:
             Path to generated Zip.
     """
+
     template_replace['path'] = path.dirname(path.realpath(__file__)).replace('\\','/')
 
     if zipName.split('.')[-1] == "zip":
@@ -137,12 +165,19 @@ def generate_files(src, dst, zip_path, zipName):
         exit("Couldn't find ZIP file")
     handle_zip(dst, zip_path)
     copy_directories(src,dst)
-    generate_template_files(src, dst)
+    # Extensions will overwrite whatever handle_zip has put in the template_replace
+    # This can be useful and harmful so use extensions carefully
+    result = -1
+    if extension_path:
+        result = handle_extension(extension_path, src, dst)
+        
+    if (result == -1) or not extension_path:
+        generate_template_files(src, dst)
     add_definitions(dst)
 
 
 def main():
-    generate_files(args.TP, args.Path, args.ZP, args.ZN)
+    generate_files(args.t, args.p, args.zp, args.ZN, args.e)
     
 
 if __name__ == "__main__":
@@ -151,5 +186,6 @@ if __name__ == "__main__":
     parser.add_argument('-t', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
     parser.add_argument('ZN', nargs='?', help='Name of zipfile generated from matlab', default='default')
     parser.add_argument('-zp', help='Path to zipfile, if not executing folder', default=getcwd())
+    parser.add_argument('-e', help='Path to extension')
     args = parser.parse_args()
     main()

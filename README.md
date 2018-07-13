@@ -69,11 +69,13 @@ In order for Simulix to function correctly, the correct code generation options 
 In Simulink, the code generation options are located under *Code, C/C++ Code, Code Generation Options*.
 
 ![CodeG_list](https://github.com/Kvixen/Simulix/blob/master/resources/CodeG_list.PNG) ![CodeG](https://github.com/Kvixen/Simulix/blob/master/resources/CodeG.PNG)
+
 In *Code Generation*, under *Target selection*, make sure that *System target file* is set to *grt.tlc* and that *Language* is set to *C*.
 
 Under *Build process*, select *Package code and artifacts*. You can also fill in the name of the zip file that will be generated. If the field is left empty, the zip file will have the name of the Simulink model.
 
 ![Interface_list](https://github.com/Kvixen/Simulix/blob/master/resources/Interface_list.PNG) ![Interface](https://github.com/Kvixen/Simulix/blob/master/resources/Interface.PNG)
+
 In the submenu *Interface* to *Code Generation*, make sure all boxes for C API generation are ticked.
 
 To build your model, simply press *Ctrl+B* on your keyboard.
