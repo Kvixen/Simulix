@@ -109,7 +109,7 @@ The model zip file exists in a subfolder called *zip* and I want to build in a s
 
 With Simulink, there's a lot of toolboxes. Instead of waiting around for support of a special toolbox you can temporary do your own.
 
-With out program, you can supply a path to your extension with the model when building. This extension can provide additional information and replace our template files.
+With our program, you can supply a path to your extension with the model when building. This extension can provide additional information and replace our template files.
 
 In order to use it, make a new folder containing a extension.py file. This is the only required step. If this file exists, even if it's empty, the extension will be recognized.
 
@@ -139,15 +139,15 @@ Because we are using pythons [format](https://docs.python.org/3.4/library/string
 
 `templates/CMakeLists_template.txt`
 
-    set(TEXT_STRING {TEXT_STRING})
-    message(STATUS ${{TEXT_STRING}})
+    set(STRING_VARIABLE {TEXT_STRING})
+    message(STATUS ${{STRING_VARIABLE}})
 
 This will produce the CMakeLists file like so
 
 `ModelDir/CMakeLists.txt`
 
-    set(TEXT_STRING "Hello World")
-    message(STATUS ${TEXT_STRING})
+    set(STRING_VARIABLE "Hello World")
+    message(STATUS ${STRING_VARIABLE})
 
 
 
