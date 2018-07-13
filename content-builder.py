@@ -85,7 +85,7 @@ def dllgen(dst, src, data):
 
     }
 
-    causalityDict = {
+    causality_dict = {
         'input':'U',
         'output':'Y',
         'parameter':'P'
@@ -97,25 +97,25 @@ def dllgen(dst, src, data):
     template_replace['stepSize'] = data['StepSize']
     template_replace['modelName'] = data['Model']
     template_replace['GUID'] = data['GUID']
-    modelName = data['Model']
+    model_name = data['Model']
     
-    realString = ""
-    intString = ""
-    booleanString = ""
+    real_string = ""
+    int_string = ""
+    boolean_string = ""
 
     for item in data['ModelVariables'][0]['ScalarVariable']:
         if 'Real' in item.keys():
-            realString+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(modelName, causalityDict[item['causality']], item['name'])
+            real_string+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
         
         elif 'Integer' in item.keys():
-            intString+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(modelName, causalityDict[item['causality']], item['name'])
+            int_string+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
         else:
-            booleanString+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(modelName, causalityDict[item['causality']], item['name'])
+            boolean_string+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
             
         
-    template_replace['realString'] = realString
-    template_replace['intString'] = intString
-    template_replace['booleanString'] = booleanString
+    template_replace['realString'] = real_string
+    template_replace['intString'] = int_string
+    template_replace['booleanString'] = boolean_string
     with open(path.join(dst, 'dllmain.c'), 'w') as dllmain:
         with open(src, 'r') as dllmainTemplate:
             dllmain.write(dllmainTemplate.read().format(**template_replace))
