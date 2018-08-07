@@ -145,7 +145,7 @@ def handle_zip(dst, zip_path):
         
 
 
-def generate_files(src, dst, zip_path, zipName, extension_path):
+def generate_files(src, dst, zip_path, zip_name, extension_path):
     """
     Extracts content from zip in zip_path
     Generates and copies neccesary files
@@ -165,10 +165,10 @@ def generate_files(src, dst, zip_path, zipName, extension_path):
 
     template_replace['path'] = path.dirname(path.realpath(__file__)).replace('\\','/')
 
-    if zipName.split('.')[-1] == "zip":
-        zip_path = path.join(zip_path, zipName)
+    if zip_name.split('.')[-1] == "zip":
+        zip_path = path.join(zip_path, zip_name)
     else:
-        zip_path = path.join(zip_path, zipName + ".zip")
+        zip_path = path.join(zip_path, zip_name + ".zip")
     if not path.isfile(zip_path):
         exit("Couldn't find ZIP file")
     handle_zip(dst, zip_path)
@@ -189,8 +189,8 @@ def main():
     
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generating a C file from a template",prog="unpack",usage="%(prog)s [options]")
-    parser.add_argument('-p', default=getcwd(), help='Path for generated C file')
+    parser = argparse.ArgumentParser(description="Generating necessary files for an FMU",prog="unpack",usage="%(prog)s [options]")
+    parser.add_argument('-p', default=getcwd(), help='Path for generated files')
     parser.add_argument('-t', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
     parser.add_argument('ZN', nargs='?', help='Name of zipfile generated from matlab', default='default')
     parser.add_argument('-zp', help='Path to zipfile, if not executing folder', default=getcwd())

@@ -23,15 +23,18 @@ from unpack import generate_files
 from build import main as build
 import argparse
 import time
-from os import getcwd, path
+from os import getcwd, path, system
 import sys
 
 def main():
     if not args.ONLY_BUILD:
         print("Generating files")
         generate_files(args.t, args.p, args.zp, args.ZN, args.e)
-    build(args.p, args.f, args.m)
-    
+    if not args.CC:
+        build(args.p, args.f, args.m)
+    elif("Linux" in system()):
+        # How do we start calling the compile-tools? New script?
+        pass
 
 
 
@@ -46,6 +49,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', help='Makefile program')
     parser.add_argument('-f', help='Build folder name', default='build')
     parser.add_argument('-e', help='Path to extension')
+    parser.add_argument('--CC', help='Crosscompile (ALPHA! LINUX ONLY!)', action='store_true')
     parser.add_argument('--ONLY_BUILD', help='Only build, do not generate files', action='store_true')
     args = parser.parse_args()
     main()

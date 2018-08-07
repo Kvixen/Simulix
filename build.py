@@ -37,9 +37,11 @@ def execute_build_commands(compile_program,make_program,dst):
     return
 
 def prepare_build_directory(dst, folder_name):
+    #If theres no build folder or we're currently in the build folder
     if not path.isdir(path.join(dst, folder_name)) and dst.split('/')[-1:] != folder_name:
         mkdir(path.join(dst, folder_name))
         chdir(path.join(dst, folder_name))
+    #If theres a build folder but we're currently not in it
     elif dst.split('/')[-1:] != folder_name:
         chdir(path.join(dst, folder_name))
 
@@ -82,7 +84,7 @@ def main(dst, folder_name, make_prog):
     if not make_program:
         exit("Couldn't find Make program")
     print("Building")
-    build(make_program[0], make_program[1], dst, folder_name)
+    build(make_program[0], make_program[1], dst, folder_name) 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Executes CMake with Makefile generator",prog="build",usage="%(prog)s [options]")
@@ -92,7 +94,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.p, args.f, args.m)
-
-
-
-    

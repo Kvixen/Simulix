@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.0)
 set(PYTHON_SOURCE_DIR {path})
 project({modelName})
 set(PROJECT_DIR ${{{modelName}_SOURCE_DIR}})
@@ -5,7 +6,6 @@ set(MATLAB_VERSION {matlabVersion})
 set(FOLDER_NAME {folderName})
 set(MODEL_FOLDER_NAME {modelName}_grt_rtw)
 
-cmake_minimum_required(VERSION 3.0)
 add_definitions(-DFMI_COSIMULATION)
 
 set(    SHARED_SOURCES

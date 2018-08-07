@@ -48,7 +48,7 @@ In order to use Simulix you can either
 
 2. **Download the GitHub repository zip**:
 
-    ```sh
+    ```
     Click the green 'Clone or Download' button on the repo
     Click 'Download ZIP'
     ```
