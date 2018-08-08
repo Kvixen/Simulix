@@ -44,9 +44,9 @@ GNU GPL V.3
 
 ## Usage
 
-### Download and Installation
+## Download and Installation
 
-### Windows
+## Windows
 
 <div id='w-dependencies'/>
 
@@ -78,7 +78,7 @@ In order to use Simulix you can either
 
 <div id='linux'/>
 
-### Linux (Ubuntu)
+## Linux (Ubuntu)
 
 <div id='l-dependencies'/>
 
@@ -115,7 +115,7 @@ Optional for cross compiling to Windows
     cd Simulix
     ```
 
-### Exporting your model from Simulink
+## Exporting your model from Simulink
 
 In order for Simulix to function correctly, the correct code generation options need to be selected in Simulink.
 
@@ -135,7 +135,7 @@ In the submenu *Interface* to *Code Generation*, make sure all boxes for C API g
 
 To build your model, simply press *Ctrl+B* on your keyboard.
 
-### Running Simulix
+## Running Simulix
 
 Simulix comes with certain flags
 * ` z :           Positional argument for name of zipfile`
@@ -159,7 +159,7 @@ The model zip file exists in a subfolder called *zip* and I want to build in a s
     Simulix.py example -p generated -zp zip
     
 
-### Extensions
+## Extensions
 
 With Simulink, there's a lot of toolboxes. Instead of waiting around for support of a special toolbox you can temporary do your own.
 
