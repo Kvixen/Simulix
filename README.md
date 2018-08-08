@@ -46,11 +46,11 @@ GNU GPL V.3
 
 ### Download and Installation
 
-#### Windows
+### Windows
 
 <div id='w-dependencies'/>
 
-##### Dependencies
+### Dependencies
 
 To use Simulix, you will need the following
 * [Python 3](https://www.python.org/).
@@ -59,7 +59,7 @@ To use Simulix, you will need the following
 
 <div id='w-installation'/>
 
-##### Windows Installation
+### Windows Installation
 In order to use Simulix you can either
 
 1. **Clone the GitHub repository via git**:
@@ -78,11 +78,11 @@ In order to use Simulix you can either
 
 <div id='linux'/>
 
-#### Linux (Ubuntu)
+### Linux (Ubuntu)
 
 <div id='l-dependencies'/>
 
-##### Linux Dependencies
+### Linux Dependencies
 
 To use Simulix, you need the following
 * Python 3
@@ -93,7 +93,7 @@ Optional for cross compiling to Windows
 
 <div id='l-installation'/>
 
-##### Linux Installation
+### Linux Installation
 
 1. **Install the dependencies**:
 
