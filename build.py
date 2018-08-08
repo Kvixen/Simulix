@@ -51,6 +51,9 @@ def build(compprog, makeprog, dst, folder_name=None):
     prepare_build_directory(dst, folder_name)
     execute_build_commands(compprog, makeprog, dst)
 
+def cross_compile(dst, folder_name=None):
+    pass
+
 def find_generate_prog(x):
     return {
         'mingw32-make' : "\"MinGW Makefiles\"",

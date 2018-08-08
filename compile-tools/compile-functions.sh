@@ -108,7 +108,7 @@ function handle_packages () {
         if [ $? -eq 1 ]; then
             select_menu "You're missing package $i. It's required to crosscompile to certain systems. Would you like to install it?"
             if [ $? -eq 1 ]; then
-                if [ "$i" = "cmake" ] || [ "$i" = "python" ]; then
+                if [ "$i" = "cmake" ] || [ "$i" = "python3" ]; then
                     echo "Program can not run without $i. Make sure to install it before using Simulix"
                     exit 1
                 else
@@ -122,8 +122,13 @@ function handle_packages () {
                 sudo apt-get --assume-yes install "$i" >&-
                 error_code=$?
                 if [ $error_code -ne 0 ]; then
-                    echo "Failed to install $i with error code $error_code. The program will continue without compiling using this package."
-                    packages=( "${packages[@]/$i}" )
+                    echo "Failed to install $i with error code $error_code."
+                    if [ "$i" = "cmake" ] || [ "$i" = "python3" ]; then
+                        echo "The program can't continue without this package. Install it outside Simulix and re-run it"
+                    else
+                        echo "The program will continue without compiling using this package."
+                        packages=( "${packages[@]/$i}" )
+                    fi
                 else
                     echo "$i sucessfully installed!"
                 fi

@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from unpack import generate_files
-from build import main as build
+from build import main as build, cross_compile
 import argparse
 import time
 from os import getcwd, path, system
@@ -33,9 +33,12 @@ def main():
     if not args.CC:
         build(args.p, args.f, args.m)
     elif("Linux" in system()):
-        # How do we start calling the compile-tools? New script?
-        pass
-
+        # We need to somehow tell the program that if we're going to cross-compile we need to use a different CMakeLists
+        # Or rewrite the one we currently have so we supply it with a default toolchain or no toolchain but it still works for all cases
+        
+        cross_compile(args.p, args.f)
+    else:
+        exit("Cross compiling is not supported in other systems than Linux based ones.")
 
 
 
