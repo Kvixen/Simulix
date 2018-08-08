@@ -251,6 +251,8 @@ static void Terminated()
     {modelName}_terminate();
 }}
 
+#if defined(_WIN32) || defined(WIN32)
+
 #ifndef _WIN64
 //! Get the Dll image size in bytes
 static size_t GetDllImageSize(void);
@@ -318,6 +320,8 @@ BOOL WINAPI DllMain( HMODULE hModule,
 #endif
     return TRUE;
 }}
+
+#endif
 
 // include code that implements the FMI based on the above definitions
 #include "fmuTemplate.c"

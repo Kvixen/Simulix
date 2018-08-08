@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-from os import mkdir, path, getcwd, chdir, system
+from os import mkdir, path, getcwd, chdir
 import argparse
 import subprocess
 from shutil import which
@@ -32,6 +32,7 @@ def execute_build_commands(compile_program,make_program,dst):
     cmake_p = subprocess.Popen(command, shell=True)
     cmake_p.communicate()
     command = "{0}".format(make_program)
+    print("Executing {0}".format(command))
     make_p = subprocess.Popen(command, shell=True)
     make_p.communicate() # Wait for program to finish
     return

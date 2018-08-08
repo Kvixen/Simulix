@@ -19,26 +19,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from unpack import generate_files
+from unpack import generate_files, generate_files_fmu
 from build import main as build, cross_compile
 import argparse
 import time
-from os import getcwd, path, system
+from os import getcwd, path
 import sys
+from platform import system
 
 def main():
+    if args.ONLY_BUILD and args.NO_BUILD:
+        exit("Can't supply both --ONLY_BUILD and --NO_BUILD")
+
     if not args.ONLY_BUILD:
-        print("Generating files")
-        generate_files(args.t, args.p, args.zp, args.ZN, args.e)
-    if not args.CC:
-        build(args.p, args.f, args.m)
-    elif("Linux" in system()):
-        # We need to somehow tell the program that if we're going to cross-compile we need to use a different CMakeLists
-        # Or rewrite the one we currently have so we supply it with a default toolchain or no toolchain but it still works for all cases
-        
-        cross_compile(args.p, args.f)
-    else:
-        exit("Cross compiling is not supported in other systems than Linux based ones.")
+        if not args.FMU:
+            print("Generating files")
+            generate_files(args.t, args.p, args.zp, args.ZN, args.e)
+        else:
+            generate_files_fmu(args.t, args.p, args.zp, args.ZN)
+
+    if not args.NO_BUILD:
+        if not args.CC:
+            build(args.p, args.f, args.m)
+        elif args.CC and "Linux" in system():
+            # We need to somehow tell the program that if we're going to cross-compile we need to use a different CMakeLists
+            # Or rewrite the one we currently have so we supply it with a default toolchain or no toolchain but it still works for all cases
+
+            cross_compile(args.p, args.f)
+        else:
+            exit("Cross compiling is not supported in other systems than Linux based ones.")
 
 
 
@@ -53,6 +62,8 @@ if __name__ == "__main__":
     parser.add_argument('-f', help='Build folder name', default='build')
     parser.add_argument('-e', help='Path to extension')
     parser.add_argument('--CC', help='Crosscompile (ALPHA! LINUX ONLY!)', action='store_true')
+    parser.add_argument('--FMU', help='Use existing FMU instead of ZIP (All arguments are still supported)', action='store_true')
     parser.add_argument('--ONLY_BUILD', help='Only build, do not generate files', action='store_true')
+    parser.add_argument('--NO_BUILD', help='Don\' build, only generate files.', action='store_true')
     args = parser.parse_args()
     main()

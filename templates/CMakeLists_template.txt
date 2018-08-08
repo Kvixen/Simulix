@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.3) # 3.3 is the first version with IN_LIST
 set(PYTHON_SOURCE_DIR {path})
-project({modelName})
+project({modelName} C CXX)
 set(PROJECT_DIR ${{{modelName}_SOURCE_DIR}})
 set(MATLAB_VERSION {matlabVersion})
 set(FOLDER_NAME {folderName})
@@ -27,8 +27,10 @@ set(	EXECUTABLE_SOURCES
 		"${{PROJECT_DIR}}/includes/capi_utils.c"
 )
 
-file(GLOB_RECURSE HEADERS ${{PROJECT_DIR}} "*.h")
-
+# Skips CAPI_UTILS and cJSON headers
+file(GLOB_RECURSE MATLAB_HEADERS ${{PROJECT_DIR}}/${{MATLAB_VERSION}}/*.h)
+file(GLOB_RECURSE MODEL_HEADERS ${{PROJECT_DIR}}/${{FOLDER_NAME}}/*.h)
+file(GLOB_RECURSE LIBRARY_HEADERS ${{PROJECT_DIR}}/libraryincludes/*.h)
 
 include_directories(${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}})
 include_directories(${{PROJECT_DIR}}/${{MATLAB_VERSION}}/extern/include)
@@ -47,8 +49,8 @@ add_executable(
 add_custom_command(
     OUTPUT ${{PROJECT_DIR}}/dllmain.c
     DEPENDS main
-	COMMAND echo "Executing main.exe"
-	COMMAND main.exe
+	COMMAND echo "Executing main executable"
+	COMMAND ./main
 	COMMAND echo "JSON to XML with Python"
 	COMMAND python ${{PYTHON_SOURCE_DIR}}/content-builder.py -o ${{PROJECT_DIR}}
 )
@@ -98,11 +100,15 @@ add_custom_command(
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{CMAKE_BINARY_DIR}}/modelDescription.xml ${{FMU_OUT_DIR}}/dist	
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/model.png ${{FMU_OUT_DIR}}/dist	
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/fmusdk_license.txt ${{FMU_OUT_DIR}}/dist/documentation
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{MATLAB_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{MODEL_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{LIBRARY_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{LIBRARY_SOURCES}} ${{FMU_OUT_DIR}}/dist/sources
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{SHARED_SOURCES}} ${{FMU_OUT_DIR}}/dist/sources
     COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/dllmain.c ${{FMU_OUT_DIR}}/dist/sources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/CMakeLists.txt ${{FMU_OUT_DIR}}/dist/sources	
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/defines.txt ${{FMU_OUT_DIR}}/dist/sources
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/fmuTemplate.c ${{FMU_OUT_DIR}}/dist/sources 
+    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/CMakeLists.txt ${{FMU_OUT_DIR}}/dist/documentation	
     COMMAND ${{CMAKE_COMMAND}} -E remove ${{FMU_OUT_DIR}}/dist/documentation/model.png
     COMMAND ${{ZIP_PROG_PATH}} a -tzip ${{FMU_OUT_DIR}}/${{CMAKE_PROJECT_NAME}}.fmu ${{FMU_OUT_DIR}}/dist/*
 )
