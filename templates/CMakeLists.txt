@@ -1,12 +1,30 @@
 cmake_minimum_required(VERSION 3.3) # 3.3 is the first version with IN_LIST
+project({modelName} C CXX)
+add_definitions(-DFMI_COSIMULATION)
+
 set(MODEL_NAME {modelName})
 set(PYTHON_PATH {path})
-project({modelName} C CXX)
 set(PROJECT_DIR ${{{modelName}_SOURCE_DIR}})
-add_definitions(-DFMI_COSIMULATION)
-get_directory_property(PC_DEFINITIONS COMPILE_DEFINITIONS)
+set(PYTHON_COMMAND python)
+set(BINARY_PREFIX $ENV{{BINARY_PREFIX}})
 
-set(BUILD_PATH CACHE STRING "Path to build")
+if (NOT ${{BINARY_PREFIX}})
+    if(UNIX)
+        if(APPLE)
+            # Support for APPLE? (DARWIN)
+            # set(BINARY_PREFIX "darwin")
+        else()
+            set(BINARY_PREFIX "linux")
+        endif()
+    elseif(WIN32)
+        set(BINARY_PREFIX "win")
+    endif()
+endif()
+
+
+if (UNIX)
+    set(PYTHON_COMMAND python3)
+endif(UNIX)
 
 # FindMatlab has a hardcoded list of all Matlab versions
 # Because of older installs om CMake (i.e 3.3)
@@ -27,6 +45,49 @@ include(FindMatlab)
 file(GLOB C_SOURCE_FILES ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/*.c)
 file(GLOB CPP_SOURCE_FILES  ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/*.cpp)
 
+get_directory_property(PC_DEFINITIONS COMPILE_DEFINITIONS)
+if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
+
+    if (WIN32)
+
+        target_link_libraries(
+            ${{CMAKE_PROJECT_NAME}}
+            Shlwapi.lib
+        )
+
+    endif()
+
+
+
+    if($ENV{{SIMX_EXE}})
+
+        add_executable(
+            main 
+            ${{PROJECT_DIR}}/exemain.c
+            ${{PROJECT_DIR}}/includes/cJSON.c
+            ${{PROJECT_DIR}}/includes/capi_utils.c
+            ${{C_SOURCE_FILES}}
+            ${{CPP_SOURCE_FILES}}
+        )
+        
+        target_include_directories(
+            main
+            ${{PROJECT_DIR}}/includes
+        )
+    
+        add_custom_command(
+            OUTPUT ${{PROJECT_DIR}}/dllmain.c
+            DEPENDS main
+            COMMAND echo "Executing main executable"
+            COMMAND ./main
+            COMMAND echo "JSON to XML with Python"
+            COMMAND ${{PYTHON_COMMAND}} ${{PYTHON_SOURCE_DIR}}/content-builder.py -o ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/
+        )
+
+        list(APPEND C_SOURCE_FILES "${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/dllmain.c")
+    endif()
+endif()
+
 add_library(
     ${{CMAKE_PROJECT_NAME}}
     SHARED
@@ -41,43 +102,11 @@ set_target_properties(
     PREFIX ""    
 )
 
-# SIMULIX things
-if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
-
-    message(STATUS "HELLO WORLD OF SIMULIX")
-
-    if ("${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/fmuTemplate.c" IN_LIST C_SOURCE_FILES)
-        set(EXIST_FMU_TEMPLATE TRUE)
-    else()
-        set(EXIST_FMU_TEMPLATE FALSE)
-    endif()
-
-    if (WIN32)
-
-        target_link_libraries(
-            ${{CMAKE_PROJECT_NAME}}
-            Shlwapi.lib
-        )
-
-    endif()
-
-    if(NOT ${{EXIST_FMU_TEMPLATE}})
-        # This shouldn't happen unless someone deleted the fmuTemplate and fmi2<name> files after running Simulix.
-        # As we have changed fmuTemplate.c to match our main.c file we need to supply our file or it wont work.
-        # It's a very unnecessary procedure because, as mentioned above, it wont happen if the user knows what they are doing
-        list(APPEND C_SOURCE_FILES ${{PYTHON_PATH}}/libraryincludes/fmuTemplate.c)
-        file(GLOB FMUSDK_HEADERS ${{PYTHON_PATH}}/libraryincludes/*.h)
-        add_custom_command(
-            TARGET ${{CMAKE_PROJECT_NAME}}
-            POST_BUILD
-            COMMAND ${{CMAKE_COMMAND}} -E copy ${{PYTHON_PATH}}/libraryincludes/fmuTemplate.c ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/
-            COMMAND ${{CMAKE_COMMAND}} -E copy ${{FMUSDK_HEADERS}} ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/
-        )
-
-        set(EXIST_FMU_TEMPLATE TRUE)
-    endif()
+if(CMAKE_C_FLAGS MATCHES "^-m32" OR CMAKE_C_FLAGS MATCHES " -m32")
+    set(BINARY_PREFIX "${{BINARY_PREFIX}}32")
+else()
+    set(BINARY_PREFIX "${{BINARY_PREFIX}}64")
 endif()
-
 
 
 

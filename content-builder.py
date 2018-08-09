@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Simulix generates an FMU from a simulink model source code.
  
@@ -21,9 +22,12 @@ import xml.etree.cElementTree as ET
 import json
 import uuid
 import argparse
-from os import getcwd, path
+from os import getcwd, path, environ
 from pprint import pprint
 from xml.dom import minidom
+import re
+
+SOURCE_REXEG = re.compile(r"^.+\\(\w+.c)$")
 
 def read_json_file(src):
 	with open((src),'r') as json_file:
@@ -60,12 +64,21 @@ def xmlgen(data):
     name = data["Model"]
 
     fmiMD = {"fmiVersion":"2.0", "modelName":name, "guid":data["GUID"], "numberOfEventIndicators":"0"}
-    CoSimulation_dict = {"providesDirectionalDerivative":"false", "modelIdentifier":name, "canHandleVariableCommunicationStepSize":"true"}
+    co_simulation_dict = {"providesDirectionalDerivative":"false", "modelIdentifier":name, "canHandleVariableCommunicationStepSize":"true"}
     category_dictlist = [{"name":"logAll", "description":"-"}, {"name":"logError", "description":"-"}, {"name":"logFmiCall", "description":"-"}, {"name":"logEvent", "description":"-"}]
     step_size_dict = {"stepSize":step_size}
 
     root = ET.Element("fmiModelDescription", fmiMD)
-    ET.SubElement(root,"CoSimulation",CoSimulation_dict)
+
+
+    source_files_subelement = ET.SubElement(ET.SubElement(root,"CoSimulation",co_simulation_dict), "SourceFiles")
+    # $ENV{SIMX_SOURCE_LIST} is set in unpack.py
+    source_list = environ['SIMX_SOURCES_LIST'].split(';')
+    for source in source_list:
+        match = SOURCE_REXEG.match(source)
+        if match:
+            ET.SubElement(source_files_subelement, "File").set("name", match.group(1))
+
     
     LogCategories = ET.SubElement(root,"LogCategories")
     for i in range(len(category_dictlist)):

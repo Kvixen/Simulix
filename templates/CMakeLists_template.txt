@@ -1,12 +1,38 @@
 cmake_minimum_required(VERSION 3.3) # 3.3 is the first version with IN_LIST
 set(PYTHON_SOURCE_DIR {path})
 project({modelName} C CXX)
+set(MODEL_NAME {modelName})
 set(PROJECT_DIR ${{{modelName}_SOURCE_DIR}})
 set(MATLAB_VERSION {matlabVersion})
 set(FOLDER_NAME {folderName})
 set(MODEL_FOLDER_NAME {modelName}_grt_rtw)
 
 add_definitions(-DFMI_COSIMULATION)
+
+message(STATUS "UNIX: ${{UNIX}}")
+message(STATUS "CYGWIN: ${{CYGWIN}}")
+message(STATUS "CMAKE_HOST_APPLE: ${{CMAKE_HOST_APPLE}}")
+message(STATUS "CMAKE_HOST_SYSTEM_NAME: ${{CMAKE_HOST_SYSTEM_NAME}}")
+
+set(PYTHON_COMMAND python)
+
+if (UNIX)
+    set(PYTHON_COMMAND python3)
+endif(UNIX)
+
+message(STATUS "ENV SIMX_SOURCES_LIST: $ENV{{SIMX_SOURCES_LIST}}")
+
+set(SCRS "")
+
+
+
+FOREACH(FILE_PATH $ENV{{SIMX_SOURCES_LIST}})
+    STRING(REGEX REPLACE "^(.*\\\\)" "" FILE_NAME ${{FILE_PATH}})
+    list(APPEND FILE_NAME)
+    configure_file(../${{FILE_PATH}} ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources COPYONLY)
+ENDFOREACH()
+
+
 
 set(    SHARED_SOURCES
 		"${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/${{CMAKE_PROJECT_NAME}}_capi.c"
@@ -52,7 +78,7 @@ add_custom_command(
 	COMMAND echo "Executing main executable"
 	COMMAND ./main
 	COMMAND echo "JSON to XML with Python"
-	COMMAND python ${{PYTHON_SOURCE_DIR}}/content-builder.py -o ${{PROJECT_DIR}}
+	COMMAND ${{PYTHON_COMMAND}} ${{PYTHON_SOURCE_DIR}}/content-builder.py -o ${{PROJECT_DIR}}
 )
 
 add_library(
@@ -63,10 +89,17 @@ add_library(
     ${{SHARED_SOURCES}}
 )
 
-target_link_libraries(
-    ${{CMAKE_PROJECT_NAME}}
-    Shlwapi.lib
-)
+if (UNIX)
+    target_link_libraries(main m)
+    target_link_libraries(${{CMAKE_PROJECT_NAME}} m)
+endif(UNIX)
+
+if (WIN32)
+    target_link_libraries(
+        ${{CMAKE_PROJECT_NAME}}
+        Shlwapi.lib
+    )
+endif(WIN32)
 
 set_target_properties(${{CMAKE_PROJECT_NAME}} PROPERTIES PREFIX "")
 
@@ -85,31 +118,31 @@ find_file(
 endif()
 
 set(FMU_OUT_DIR ${{PROJECT_BINARY_DIR}}/fmu)
-add_custom_command(
-    TARGET ${{CMAKE_PROJECT_NAME}}
-    POST_BUILD
-    # Building FMU  
-	COMMAND echo "Building FMU"	
-    COMMAND ${{CMAKE_COMMAND}} -E remove_directory ${{FMU_OUT_DIR}}
-    COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}
-    COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}/dist/binaries/win64
-    COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}/dist/sources	
-    COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}/dist/documentation
-
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{CMAKE_BINARY_DIR}}/${{CMAKE_PROJECT_NAME}}.dll ${{FMU_OUT_DIR}}/dist/binaries/win64
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{CMAKE_BINARY_DIR}}/modelDescription.xml ${{FMU_OUT_DIR}}/dist	
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/model.png ${{FMU_OUT_DIR}}/dist	
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/fmusdk_license.txt ${{FMU_OUT_DIR}}/dist/documentation
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{MATLAB_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{MODEL_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{LIBRARY_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{LIBRARY_SOURCES}} ${{FMU_OUT_DIR}}/dist/sources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{SHARED_SOURCES}} ${{FMU_OUT_DIR}}/dist/sources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/dllmain.c ${{FMU_OUT_DIR}}/dist/sources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/defines.txt ${{FMU_OUT_DIR}}/dist/sources
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/fmuTemplate.c ${{FMU_OUT_DIR}}/dist/sources 
-    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/CMakeLists.txt ${{FMU_OUT_DIR}}/dist/documentation	
-    COMMAND ${{CMAKE_COMMAND}} -E remove ${{FMU_OUT_DIR}}/dist/documentation/model.png
-    COMMAND ${{ZIP_PROG_PATH}} a -tzip ${{FMU_OUT_DIR}}/${{CMAKE_PROJECT_NAME}}.fmu ${{FMU_OUT_DIR}}/dist/*
-)
+#add_custom_command(
+#    TARGET ${{CMAKE_PROJECT_NAME}}
+#    POST_BUILD
+#    # Building FMU  
+#	COMMAND echo "Building FMU"	
+#    COMMAND ${{CMAKE_COMMAND}} -E remove_directory ${{FMU_OUT_DIR}}
+#    COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}
+#    COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}/dist/binaries/win64
+#    COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}/dist/sources	
+#    COMMAND ${{CMAKE_COMMAND}} -E make_directory ${{FMU_OUT_DIR}}/dist/documentation
+#
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{CMAKE_BINARY_DIR}}/${{CMAKE_PROJECT_NAME}}.dll ${{FMU_OUT_DIR}}/dist/binaries/win64
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{CMAKE_BINARY_DIR}}/modelDescription.xml ${{FMU_OUT_DIR}}/dist	
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/model.png ${{FMU_OUT_DIR}}/dist	
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/fmusdk_license.txt ${{FMU_OUT_DIR}}/dist/documentation
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{MATLAB_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{MODEL_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{LIBRARY_HEADERS}} ${{FMU_OUT_DIR}}/dist/sources
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{LIBRARY_SOURCES}} ${{FMU_OUT_DIR}}/dist/sources
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{SHARED_SOURCES}} ${{FMU_OUT_DIR}}/dist/sources
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/dllmain.c ${{FMU_OUT_DIR}}/dist/sources
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/${{FOLDER_NAME}}/${{MODEL_FOLDER_NAME}}/defines.txt ${{FMU_OUT_DIR}}/dist/sources
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/libraryincludes/fmuTemplate.c ${{FMU_OUT_DIR}}/dist/sources 
+#    COMMAND ${{CMAKE_COMMAND}} -E copy ${{PROJECT_DIR}}/CMakeLists.txt ${{FMU_OUT_DIR}}/dist/documentation	
+#    COMMAND ${{CMAKE_COMMAND}} -E remove ${{FMU_OUT_DIR}}/dist/documentation/model.png
+#    COMMAND ${{ZIP_PROG_PATH}} a -tzip ${{FMU_OUT_DIR}}/${{CMAKE_PROJECT_NAME}}.fmu ${{FMU_OUT_DIR}}/dist/*
+#)
 

@@ -1,6 +1,7 @@
 /*
-Simulix generates an FMU from a simulink model source code.
 
+Simulix generates an FMU from a simulink model source code.
+ 
 Copyright (C) 2018 Scania CV AB and Simulix contributors
 
 This program is free software: you can redistribute it and/or modify
@@ -15,6 +16,19 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+/*
+As a special exception, you may create a larger work that contains
+some or all of the template files included in Simulix and distribute
+that work under terms of your choice, so long as that work isn't itself 
+a FMU compiler using the template files.
+
+This exception was added in version 1.0 of Simulix.
+
+This special exception applies to files containing this special exception text.
+The terms of the exception exists inside the text.
 
 */
 #ifndef _CAPI_UTILS_H_

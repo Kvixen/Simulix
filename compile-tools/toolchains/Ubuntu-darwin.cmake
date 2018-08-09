@@ -5,7 +5,6 @@ set(CMAKE_SYSTEM_NAME Darwin)
 set(PREFIX x86_64-apple-darwin15)
 set(CMAKE_C_COMPILER ${PREFIX}-gcc)
 set(CMAKE_CXX_COMPILER ${PREFIX}-g++)
-set(CMAKE_FIND_ROOT_PATH /usr/${PREFIX})
 
 set(DISABLE_WARNINGS 1)
 

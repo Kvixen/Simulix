@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Simulix generates an FMU from a simulink model source code.
  
