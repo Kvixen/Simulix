@@ -159,6 +159,7 @@ def generate_files_fmu(src, dst, fmu_path, fmu_name):
         exit("Couldn't find the specified FMU file")
     handle_fmu(dst, fmu_path)
     generate_template_file(src, dst, 'templates/CMakeLists.txt', 'CMakeLists.txt')
+    add_definitions(dst)
 
 def generate_files(src, dst, zip_path, zip_name, extension_path):
     """

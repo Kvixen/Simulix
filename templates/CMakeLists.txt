@@ -6,9 +6,11 @@ set(PROJECT_DIR ${{{modelName}_SOURCE_DIR}})
 add_definitions(-DFMI_COSIMULATION)
 get_directory_property(PC_DEFINITIONS COMPILE_DEFINITIONS)
 
-# Get the latest install as FindMatlab module fails to do this
-# This is because of older CMake installs
+set(BUILD_PATH CACHE STRING "Path to build")
+
 # FindMatlab has a hardcoded list of all Matlab versions
+# Because of older installs om CMake (i.e 3.3)
+# Some Matlab versions might not exist
 # Here we register extra versions to cover all bases
 set(MATLAB_ADDITIONAL_VERSIONS
     "R2017b=9.3"
@@ -18,11 +20,9 @@ set(MATLAB_ADDITIONAL_VERSIONS
     "R2015b=8.6"
     "R2015a=8.5"
     "R2014b=8.4"
-    )
+)
 
 include(FindMatlab)
-
-
 
 file(GLOB C_SOURCE_FILES ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/*.c)
 file(GLOB CPP_SOURCE_FILES  ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/*.cpp)
@@ -34,16 +34,24 @@ add_library(
     ${{CPP_SOURCE_FILES}}
 )
 
-message(STATUS "List C_SOURCE_FILES: ${{C_SOURCE_FILES}}")
+set_target_properties(
+    ${{CMAKE_PROJECT_NAME}}
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${{BUILD_PATH}}"
+    PREFIX ""    
+)
 
-if ("fmuTemplate.c" IN_LIST C_SOURCE_FILES)
-    set(EXIST_FMU_TEMPLATE TRUE)
-else()
-    set(EXIST_FMU_TEMPLATE FALSE)
-endif()
-
-# These are special Simulix includes and other things.
+# SIMULIX things
 if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
+
+    message(STATUS "HELLO WORLD OF SIMULIX")
+
+    if ("${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/fmuTemplate.c" IN_LIST C_SOURCE_FILES)
+        set(EXIST_FMU_TEMPLATE TRUE)
+    else()
+        set(EXIST_FMU_TEMPLATE FALSE)
+    endif()
+
     if (WIN32)
 
         target_link_libraries(
@@ -60,6 +68,8 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
         list(APPEND C_SOURCE_FILES ${{PYTHON_PATH}}/libraryincludes/fmuTemplate.c)
         file(GLOB FMUSDK_HEADERS ${{PYTHON_PATH}}/libraryincludes/*.h)
         add_custom_command(
+            TARGET ${{CMAKE_PROJECT_NAME}}
+            POST_BUILD
             COMMAND ${{CMAKE_COMMAND}} -E copy ${{PYTHON_PATH}}/libraryincludes/fmuTemplate.c ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/
             COMMAND ${{CMAKE_COMMAND}} -E copy ${{FMUSDK_HEADERS}} ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/
         )
@@ -71,7 +81,5 @@ endif()
 
 
 
-include_directories(${{PROJECT_DIR}}/${{MODEL_NAME}}/sources/*.c)
-
-set_target_properties(${{CMAKE_PROJECT_NAME}} PROPERTIES PREFIX "")
+include_directories(${{PROJECT_DIR}}/${{MODEL_NAME}}/sources)
 

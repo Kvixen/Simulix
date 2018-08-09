@@ -26,15 +26,17 @@ from platform import system
 
 BUILD_ONLY = False
 
-def execute_build_commands(compile_program,make_program,dst):
-    command = "cmake -G {0} ..".format(compile_program)
-    print("Executing {0}".format(command))
-    cmake_p = subprocess.Popen(command, shell=True)
-    cmake_p.communicate()
-    command = "{0}".format(make_program)
-    print("Executing {0}".format(command))
-    make_p = subprocess.Popen(command, shell=True)
-    make_p.communicate() # Wait for program to finish
+def execute_build_commands(compile_program,make_program,dst, exe_cmake, exe_make):
+    if exe_cmake:
+        command = "cmake -G {0} ..".format(compile_program)
+        print("Executing {0}".format(command))
+        cmake_p = subprocess.Popen(command, shell=True)
+        cmake_p.communicate() # Wait for program to finish
+    if exe_make:
+        command = "{0}".format(make_program)
+        print("Executing {0}".format(command))
+        make_p = subprocess.Popen(command, shell=True)
+        make_p.communicate() # Wait for program to finish
     return
 
 def prepare_build_directory(dst, folder_name):
@@ -45,12 +47,6 @@ def prepare_build_directory(dst, folder_name):
     #If theres a build folder but we're currently not in it
     elif dst.split('/')[-1:] != folder_name:
         chdir(path.join(dst, folder_name))
-
-    
-
-def build(compprog, makeprog, dst, folder_name=None):  
-    prepare_build_directory(dst, folder_name)
-    execute_build_commands(compprog, makeprog, dst)
 
 def cross_compile(dst, folder_name=None):
     pass
@@ -75,7 +71,7 @@ def find_make_prog():
     elif(which("Ninja")):
         return ("\"Ninja\"", "Ninja")
 
-def main(dst, folder_name, make_prog):
+def main(dst, folder_name, make_prog, exe_cmake, exe_make):
     if not path.isabs(dst):
         dst = path.join(getcwd(), dst)
     if not path.isdir(dst):
@@ -88,7 +84,9 @@ def main(dst, folder_name, make_prog):
     if not make_program:
         exit("Couldn't find Make program")
     print("Building")
-    build(make_program[0], make_program[1], dst, folder_name) 
+
+    prepare_build_directory(dst, folder_name)
+    execute_build_commands(make_program[0], make_program[1], dst, exe_cmake, exe_make)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Executes CMake with Makefile generator",prog="build",usage="%(prog)s [options]")
@@ -97,4 +95,4 @@ if __name__ == "__main__":
     parser.add_argument('-f', help='Build folder name', default='build')
     args = parser.parse_args()
 
-    main(args.p, args.f, args.m)
+    main(args.p, args.f, args.m, True, True)
