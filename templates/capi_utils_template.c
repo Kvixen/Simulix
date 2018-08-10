@@ -62,7 +62,9 @@ void GetValueFromAdress( char           *paramName,
     slope          = %f,\n\
     bias           = %f\n", paramName, slDataID, isComplex ? "true" : "false" ,numRows,numCols, numPages, slope, bias);
     #endif
-
+    if(numRows > 1 || numCols > 1){{
+        goto CAPI_UTILS_GET_VALUE_FROM_ADRESS_DEFAULT;
+    }}
     switch(slDataID) {{
         case SS_DOUBLE :
         {{
@@ -132,8 +134,12 @@ void GetValueFromAdress( char           *paramName,
             break;
         }}
         default:
-            strcpy(sVariable.name, "Type not handled, CAPI_UTILS ERROR 2");
+CAPI_UTILS_GET_VALUE_FROM_ADRESS_DEFAULT:
+            sVariable.success = 0;
+            strcpy(sVariable.value, "0");
+            return;
     }}
+    sVariable.success = 1;
     return;
 }}
 

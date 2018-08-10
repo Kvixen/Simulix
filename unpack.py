@@ -24,6 +24,7 @@ import argparse
 from shutil import copy2, copytree, copyfile
 import zipfile
 import re
+import tempfile
 
 TEMPLATE_REPLACE = {
 }
@@ -32,7 +33,9 @@ BAD_SOURCES = {
     "rt_main.c",
     "exemain.c",
     "cJSON.c",
-    "capi_utils.c"
+    "capi_utils.c",
+    "cJSON.h",
+    "capi_utils.h"
 }
 
 LIST_OF_SOURCES = []
@@ -60,13 +63,13 @@ def find_file(dst, file_name):
             return path.join(root, file_name)
     return None
 
-def add_definitions(dst):
-    path_to_define = find_file(dst, "defines.txt")
+def add_definitions(defines_path, cmakelist_path):
+    path_to_define = find_file(defines_path, "defines.txt")
     if path_to_define:
-        with open(path.join(dst, "CMakeLists.txt"), 'r+') as cmake_file:
+        with open(path.join(cmakelist_path, "CMakeLists.txt"), 'r+') as cmake_file:
             content = cmake_file.read()
             cmake_file.seek(0,0)
-            cmake_file.write('add_definitions(-DSIMULIX ')
+            cmake_file.write('add_definitions(-DSIMULIX -DFDEBUG ')
             with open(path_to_define, 'r+') as defines_file:
                 defines_file.write("SIMULIX")
                 for line in defines_file:
@@ -114,22 +117,20 @@ def handle_zip(dst, zip_path):
             # Next, we split it with '_' in order to get rid of _grt_rtw
             # And we join together all elements except the last two so we support model names with underscores.
             # '_'.join(<code-in-here>.split('_')[:-2])
-            #environ['SIMX_MODEL_NAME'] = '_'.join(listdir(path.join(dst, line))[0].split('_')[:-2])
-            TEMPLATE_REPLACE['modelName'] = '_'.join(listdir(path.join(dst, line))[0].split('_')[:-2])
+            environ['SIMX_MODEL_NAME'] = '_'.join(listdir(path.join(dst, line))[0].split('_')[:-2])
+            for folder_path in listdir(path.join(dst, line)):
+                if path.isdir(path.join(dst, line + "/" + folder_path)):
+                    TEMPLATE_REPLACE['modelName'] = '_'.join(listdir(path.join(dst, line))[0].split('_')[:-2])
+                    break
             if TEMPLATE_REPLACE['folderName'] == TEMPLATE_REPLACE['modelName']:
                 rename(path.join(dst, TEMPLATE_REPLACE['folderName']), path.join(dst, "old_" + TEMPLATE_REPLACE['folderName']))
                 TEMPLATE_REPLACE['folderName'] = "old_" + TEMPLATE_REPLACE['folderName']
-            if len(TEMPLATE_REPLACE['modelName']) > 28:
-                #environ['SIMX_MODEL_NAME_SHORT'] = environ['SIMX_MODEL_NAME'][:28]
-                TEMPLATE_REPLACE['modelNameS'] = TEMPLATE_REPLACE['modelName'][:28]
-            else:
-                #environ['SIMX_MODEL_NAME_SHORT'] = environ['SIMX_MODEL_NAME']
-                TEMPLATE_REPLACE['modelNameS'] = TEMPLATE_REPLACE['modelName']
+            TEMPLATE_REPLACE['modelNameS'] = TEMPLATE_REPLACE['modelName'][:28]
 
 def generate_template_files(src, dst):
     generate_template_file(src, dst, "templates/capi_utils_template.c", "includes/capi_utils.c", license=True)
     generate_template_file(src, dst, "templates/exemain_template.c", "exemain.c", license=True)
-    generate_template_file(src, dst, "templates/CMakeLists_template.txt", "CMakeLists.txt")
+    generate_template_file(src, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
 
 def handle_extension(extension_path, src, dst):
     if path.isfile(path.join(extension_path, "extension.py")):
@@ -145,10 +146,10 @@ def handle_extension(extension_path, src, dst):
             else:
                 generate_template_file(src, dst,"templates/exemain_template.c", "exemain.c")
 
-            if path.isfile(path.join(extension_path, "templates/CMakeLists_template.txt")):
-                generate_template_file(extension_path, dst, "templates/CMakeLists_template.txt", "CMakeLists.txt")
+            if path.isfile(path.join(extension_path, "templates/CMakeLists.txt")):
+                generate_template_file(extension_path, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
             else:
-                generate_template_file(src, dst, "templates/CMakeLists_template.txt", "CMakeLists.txt")
+                generate_template_file(src, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
 
             if path.isfile(path.join(extension_path, "templates/capi_utils_template.c")):
                 generate_template_file(extension_path, dst, "templates/capi_utils_template.c", "includes/capi_utils.c")
@@ -165,7 +166,7 @@ def copy_directories(src, dst):
     copy_directory(path.join(src, 'includes'), path.join(dst, 'includes'))
     copy_directory(path.join(src, 'libraryincludes'), path.join(dst, 'libraryincludes'))
 
-def generate_files(src, dst, zip_path, zip_name, extension_path):
+def generate_files(src, dst, zip_path, zip_name, extension_path, temp_path):
     """
     Extracts content from zip in zip_path
     Generates and copies neccesary files
@@ -182,6 +183,7 @@ def generate_files(src, dst, zip_path, zip_name, extension_path):
         zip_path:
             Path to generated Zip.
     """
+    environ['SIMX_TEMP_DIR'] = temp_path
     environ['SIMX_EXE'] = "1"
     TEMPLATE_REPLACE['path'] = path.dirname(path.realpath(__file__)).replace('\\', '/')
 
@@ -191,7 +193,7 @@ def generate_files(src, dst, zip_path, zip_name, extension_path):
         zip_path = path.join(zip_path, zip_name + ".zip")
     if not path.isfile(zip_path):
         exit("Couldn't find the specified ZIP file")
-    handle_zip(dst, zip_path)
+    handle_zip(temp_path, zip_path)
     copy_directories(src, dst)
     # Extensions will overwrite whatever handle_zip has put in the TEMPLATE_REPLACE
     # This can be useful and harmful so use extensions carefully
@@ -200,11 +202,10 @@ def generate_files(src, dst, zip_path, zip_name, extension_path):
         extension = handle_extension(extension_path, src, dst) 
     if not extension or not extension_path:
         generate_template_files(src, dst)
-    add_definitions(dst)
-    extract_file_names(dst)
+    add_definitions(temp_path, dst)
+    extract_file_names(temp_path)
     # This is used by content-builder to add a list of sources to modelDescription.xml
     environ['SIMX_SOURCES_LIST'] = ";".join(LIST_OF_SOURCES)
-    make_directory(dst, path.join(TEMPLATE_REPLACE['modelName'], "sources"))
 
 def extract_file_names(dst):
     for root, dirs, files in walk(dst):
@@ -231,7 +232,8 @@ def get_modeldescription_sources(dst):
     for atype in xml_root.findall('SourceFiles'):
         print(atype.get('File'))
     
-def generate_files_fmu(src, dst, fmu_path, fmu_name):
+def generate_files_fmu(src, dst, fmu_path, fmu_name, temp_path):
+    environ['SIMX_TEMP_DIR'] = temp_path
     TEMPLATE_REPLACE['path'] = path.dirname(path.realpath(__file__)).replace('\\', '/')
     if fmu_name.split('.')[-1] == "fmu":
         fmu_path = path.join(fmu_path, fmu_name)
@@ -241,12 +243,12 @@ def generate_files_fmu(src, dst, fmu_path, fmu_name):
         exit("Couldn't find the specified FMU file")
     handle_fmu(dst, fmu_path)
     generate_template_file(src, dst, 'templates/CMakeLists.txt', 'CMakeLists.txt')
-    add_definitions(dst)
 
 # Main
 
 def main():
-    generate_files(args.t, args.p, args.zp, args.ZN, args.e)  
+    with tempfile.TemporaryDirectory() as dirpath:
+        generate_files(args.t, args.p, args.zp, args.ZN, args.e, dirpath)  
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generating necessary files for an FMU",prog="unpack",usage="%(prog)s [options]")

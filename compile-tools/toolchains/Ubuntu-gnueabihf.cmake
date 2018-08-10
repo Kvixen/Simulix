@@ -1,11 +1,12 @@
-# Toolchain file for building ???
-include(include(CMakeForceCompiler))
-set(CMAKE_SYSTEM_NAME Darwin)
+set(CMAKE_SYSTEM_NAME Linux)
+set(TOOLCHAIN_PREFIX arm-linux-gnueabihf)
+set(BINARY_PREFIX "linux")
 
-set(PREFIX x86_64-apple-darwin15)
 set(CMAKE_C_COMPILER ${PREFIX}-gcc)
 set(CMAKE_CXX_COMPILER ${PREFIX}-g++)
-
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+	
 set(DISABLE_WARNINGS 1)
 
 # CMake makes multiple calls to the Toolchain file
@@ -23,6 +24,10 @@ if("${DISABLE_WARNINGS}" AND "${CMAKE_TOOLCHAIN_FILE}")
     # message(STATUS Warning messages disabled in ${TOOLCHAIN_PREFIX} toolchain file)
     
 endif()
+
+# target environment on the build host system
+#   set 1st to dir with the cross compiler's C/C++ headers/libs
+set(CMAKE_FIND_ROOT_PATH /usr/${PREFIX})
 
 
 # adjust the default behaviour of the FIND_XXX() commands:

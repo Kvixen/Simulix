@@ -6,13 +6,11 @@ set(PROJECT_DIR ${{{modelName}_SOURCE_DIR}})
 set(MATLAB_VERSION {matlabVersion})
 set(FOLDER_NAME {folderName})
 set(MODEL_FOLDER_NAME {modelName}_grt_rtw)
+set(BAD_SIMX_SOURCES
+    "fmuTemplate.c"
+)
 
 add_definitions(-DFMI_COSIMULATION)
-
-message(STATUS "UNIX: ${{UNIX}}")
-message(STATUS "CYGWIN: ${{CYGWIN}}")
-message(STATUS "CMAKE_HOST_APPLE: ${{CMAKE_HOST_APPLE}}")
-message(STATUS "CMAKE_HOST_SYSTEM_NAME: ${{CMAKE_HOST_SYSTEM_NAME}}")
 
 set(PYTHON_COMMAND python)
 
@@ -20,17 +18,17 @@ if (UNIX)
     set(PYTHON_COMMAND python3)
 endif(UNIX)
 
-message(STATUS "ENV SIMX_SOURCES_LIST: $ENV{{SIMX_SOURCES_LIST}}")
-
 set(SCRS "")
 
-
-
 FOREACH(FILE_PATH $ENV{{SIMX_SOURCES_LIST}})
-    STRING(REGEX REPLACE "^(.*\\\\)" "" FILE_NAME ${{FILE_PATH}})
-    list(APPEND FILE_NAME)
     configure_file(../${{FILE_PATH}} ${{PROJECT_DIR}}/${{MODEL_NAME}}/sources COPYONLY)
+    STRING(REGEX REPLACE "^(.*\\\\)" "" FILE_NAME ${{FILE_PATH}})
+    if ("${{FILE_NAME}}" MATCHES ".*\.(c|cpp)$" AND NOT "${{FILE_NAME}}" IN_LIST BAD_SIMX_SOURCES)
+        list(APPEND SCRS ${{FILE_NAME}})
+    endif()
 ENDFOREACH()
+
+message(STATUS "SCRS: ${{SCRS}}")
 
 
 

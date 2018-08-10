@@ -21,49 +21,63 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from unpack import generate_files, generate_files_fmu
-from build import main as build, cross_compile
+from build import main as build
+from crosscompile import main as cross_compile
+from pack import main as pack_fmu
 import argparse
 import time
-from os import getcwd, path
+from os import getcwd, path, mkdir, environ
 import sys
 from platform import system
+from shutil import rmtree
+
 
 def main():
+    args.p = path.join(getcwd(), args.p)
+    temp_folder_path = path.join(args.p, args.ez)
+
+    if path.isdir(temp_folder_path):
+        rmtree(temp_folder_path)
+    mkdir(temp_folder_path)
+
     if args.ONLY_BUILD and args.NO_MAKE and args.NO_CMAKE:
         exit("Can't run without building and making")
-
     if not args.ONLY_BUILD:
+        print("Generating files")
         if not args.FMU:
-            print("Generating files")
-            generate_files(args.t, args.p, args.zp, args.ZN, args.e)
+            generate_files(args.t, args.p, args.zp, args.ZN, args.e, temp_folder_path)
         else:
-            generate_files_fmu(args.t, args.p, args.zp, args.ZN)
+            generate_files_fmu(args.t, args.p, args.zp, args.ZN, temp_folder_path)
+    # Cross compile is disabled until fixed
+    #if not args.CC:
+    build(args.p, args.f, args.m, args.NO_CMAKE, args.NO_MAKE)
 
-    if not args.CC:
-        build(args.p, args.f, args.m, args.NO_CMAKE, args.NO_MAKE)
-    elif args.CC and "Linux" in system():
+    pack_fmu(args.p, path.join(args.p, environ['SIMX_MODEL_NAME']), environ['SIMX_MODEL_NAME'])
+    rmtree(temp_folder_path)
+    #elif args.CC and "Linux" in system():
         # We need to somehow tell the program that if we're going to cross-compile we need to use a different CMakeLists
         # Or rewrite the one we currently have so we supply it with a default toolchain or no toolchain but it still works for all cases
-        cross_compile(args.p, args.f)
-    else:
-        exit("Cross compiling is not supported in other systems than Linux based ones.")
-
+    #    cross_compile(args.t, args.p, args.f)
+    #else:
+    #    exit("Cross compiling is not supported in other systems than Linux based ones.")
 
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generates an FMU from a Simulink model",prog="Simulix",usage="%(prog)s [options]")
     parser.add_argument('ZN', nargs='?', help='Name of zipfile generated from matlab', default='default.zip')
-    parser.add_argument('-p', default=getcwd(), help='Path for generated C file')
+    parser.add_argument('-p', default=getcwd(), help='Path for generated FMU file')
     parser.add_argument('-t', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
     parser.add_argument('-zp', help='Path to zipfile', default=getcwd())
     parser.add_argument('-m', help='Makefile program')
     parser.add_argument('-f', help='Build folder name', default='build')
     parser.add_argument('-e', help='Path to extension')
-    parser.add_argument('--CC', help='Crosscompile (ALPHA! LINUX ONLY!)', action='store_true')
+    parser.add_argument('-ez', help='Path where zip is extracted', default='temp_folder')
+    #parser.add_argument('--CC', help='Crosscompile (ALPHA! LINUX ONLY!)', action='store_true')
+    parser.add_argument('--NO-TEMP')
     parser.add_argument('--FMU', help='Use existing FMU instead of ZIP (All arguments are still supported)', action='store_true')
-    parser.add_argument('--ONLY_BUILD', help='Only build, do not generate files', action='store_true')
-    parser.add_argument('--NO_CMAKE', help='Don\'t execute CMAKE', action='store_false')
-    parser.add_argument('--NO_MAKE', help='Don\'t execute MAKE program.', action='store_false')
+    parser.add_argument('--ONLY-BUILD', help='Only build, do not generate files', action='store_true')
+    parser.add_argument('--NO-CMAKE', help='Don\'t execute CMAKE', action='store_false')
+    parser.add_argument('--NO-MAKE', help='Don\'t execute MAKE program.', action='store_false')
     args = parser.parse_args()
     main()

@@ -52,6 +52,7 @@ struct ScalarVariable{
     char name[63];
     char value[50];
     uint8_T DataID;
+    int* success;
 };
 static const struct ScalarVariable EmptyStruct;
 

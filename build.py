@@ -48,9 +48,6 @@ def prepare_build_directory(dst, folder_name):
     elif dst.split('/')[-1:] != folder_name:
         chdir(path.join(dst, folder_name))
 
-def cross_compile(dst, folder_name=None):
-    pass
-
 def find_generate_prog(x):
     return {
         'mingw32-make' : "\"MinGW Makefiles\"",
@@ -87,6 +84,7 @@ def main(dst, folder_name, make_prog, exe_cmake, exe_make):
 
     prepare_build_directory(dst, folder_name)
     execute_build_commands(make_program[0], make_program[1], dst, exe_cmake, exe_make)
+    chdir("..")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Executes CMake with Makefile generator",prog="build",usage="%(prog)s [options]")

@@ -29,6 +29,10 @@ import re
 
 SOURCE_REXEG = re.compile(r"^.+\\(\w+.c)$")
 
+BAD_DLL_SOURCES = [
+    "fmuTemplate.c"
+]
+
 def read_json_file(src):
 	with open((src),'r') as json_file:
 		data = json.load(json_file)
@@ -74,9 +78,10 @@ def xmlgen(data):
     source_files_subelement = ET.SubElement(ET.SubElement(root,"CoSimulation",co_simulation_dict), "SourceFiles")
     # $ENV{SIMX_SOURCE_LIST} is set in unpack.py
     source_list = environ['SIMX_SOURCES_LIST'].split(';')
+    source_list.append("dllmain.c")
     for source in source_list:
         match = SOURCE_REXEG.match(source)
-        if match:
+        if match and match.group(1) not in BAD_DLL_SOURCES:
             ET.SubElement(source_files_subelement, "File").set("name", match.group(1))
 
     
@@ -111,6 +116,7 @@ def dllgen(dst, src, data):
     template_replace['modelName'] = data['Model']
     template_replace['GUID'] = data['GUID']
     model_name = data['Model']
+    model_nameS = model_name[:29]
     
     real_string = ""
     int_string = ""
@@ -118,12 +124,12 @@ def dllgen(dst, src, data):
 
     for item in data['ModelVariables'][0]['ScalarVariable']:
         if 'Real' in item.keys():
-            real_string+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
+            real_string+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
         
         elif 'Integer' in item.keys():
-            int_string+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
+            int_string+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
         else:
-            boolean_string+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
+            boolean_string+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
             
         
     template_replace['realString'] = real_string
