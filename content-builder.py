@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Simulix generates an FMU from a simulink model source code.
  
@@ -21,9 +22,16 @@ import xml.etree.cElementTree as ET
 import json
 import uuid
 import argparse
-from os import getcwd, path
+from os import getcwd, path, environ
 from pprint import pprint
 from xml.dom import minidom
+import re
+
+SOURCE_REXEG = re.compile(r"^.+\\(\w+.c)$")
+
+BAD_DLL_SOURCES = [
+    "fmuTemplate.c"
+]
 
 def read_json_file(src):
 	with open((src),'r') as json_file:
@@ -60,12 +68,22 @@ def xmlgen(data):
     name = data["Model"]
 
     fmiMD = {"fmiVersion":"2.0", "modelName":name, "guid":data["GUID"], "numberOfEventIndicators":"0"}
-    CoSimulation_dict = {"providesDirectionalDerivative":"false", "modelIdentifier":name, "canHandleVariableCommunicationStepSize":"true"}
+    co_simulation_dict = {"providesDirectionalDerivative":"false", "modelIdentifier":name, "canHandleVariableCommunicationStepSize":"true"}
     category_dictlist = [{"name":"logAll", "description":"-"}, {"name":"logError", "description":"-"}, {"name":"logFmiCall", "description":"-"}, {"name":"logEvent", "description":"-"}]
     step_size_dict = {"stepSize":step_size}
 
     root = ET.Element("fmiModelDescription", fmiMD)
-    ET.SubElement(root,"CoSimulation",CoSimulation_dict)
+
+
+    source_files_subelement = ET.SubElement(ET.SubElement(root,"CoSimulation",co_simulation_dict), "SourceFiles")
+    # $ENV{SIMX_SOURCE_LIST} is set in unpack.py
+    source_list = environ['SIMX_SOURCES_LIST'].split(';')
+    source_list.append("dllmain.c")
+    for source in source_list:
+        match = SOURCE_REXEG.match(source)
+        if match and match.group(1) not in BAD_DLL_SOURCES:
+            ET.SubElement(source_files_subelement, "File").set("name", match.group(1))
+
     
     LogCategories = ET.SubElement(root,"LogCategories")
     for i in range(len(category_dictlist)):
@@ -98,6 +116,7 @@ def dllgen(dst, src, data):
     template_replace['modelName'] = data['Model']
     template_replace['GUID'] = data['GUID']
     model_name = data['Model']
+    model_nameS = model_name[:29]
     
     real_string = ""
     int_string = ""
@@ -105,12 +124,12 @@ def dllgen(dst, src, data):
 
     for item in data['ModelVariables'][0]['ScalarVariable']:
         if 'Real' in item.keys():
-            real_string+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
+            real_string+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
         
         elif 'Integer' in item.keys():
-            int_string+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
+            int_string+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
         else:
-            boolean_string+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(model_name, causality_dict[item['causality']], item['name'])
+            boolean_string+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
             
         
     template_replace['realString'] = real_string

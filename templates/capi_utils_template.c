@@ -1,22 +1,3 @@
-/*
-Simulix generates an FMU from a simulink model source code.
- 
-Copyright (C) 2018 Scania CV AB and Simulix contributors
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
 #include "{modelName}.h"
 #include <stddef.h>
 #include <assert.h>
@@ -81,7 +62,9 @@ void GetValueFromAdress( char           *paramName,
     slope          = %f,\n\
     bias           = %f\n", paramName, slDataID, isComplex ? "true" : "false" ,numRows,numCols, numPages, slope, bias);
     #endif
-
+    if(numRows > 1 || numCols > 1){{
+        goto CAPI_UTILS_GET_VALUE_FROM_ADRESS_DEFAULT;
+    }}
     switch(slDataID) {{
         case SS_DOUBLE :
         {{
@@ -151,8 +134,12 @@ void GetValueFromAdress( char           *paramName,
             break;
         }}
         default:
-            strcpy(sVariable.name, "Type not handled, CAPI_UTILS ERROR 2");
+CAPI_UTILS_GET_VALUE_FROM_ADRESS_DEFAULT:
+            sVariable.success = 0;
+            strcpy(sVariable.value, "0");
+            return;
     }}
+    sVariable.success = 1;
     return;
 }}
 

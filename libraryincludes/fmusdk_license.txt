@@ -1,7 +1,7 @@
 
 FMU SDK license 
 
-Copyright © 2008-2014, QTronic GmbH. All rights reserved.
+Copyright Â© 2008-2018, QTronic GmbH. All rights reserved.
 The FmuSdk is licensed by the copyright holder under the BSD License
 (http://www.opensource.org/licenses/bsd-license.html):
 Redistribution and use in source and binary forms, with or without

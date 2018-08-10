@@ -1,23 +1,7 @@
-/* 
-Simulix generates an FMU from a simulink model source code.
- 
-Copyright (C) 2018 Scania CV AB and Simulix contributors
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-*/
 // Enables support to read resources folder in the FMU
-#define FMUHASRESOURCES
+#ifdef WIN32
+# define FMUHASRESOURCES
+#endif
 #define FMUHASENTERINITIALIZATIONMODE
 
 #include "{modelName}.h"
@@ -251,6 +235,8 @@ static void Terminated()
     {modelName}_terminate();
 }}
 
+#if defined(_WIN32) || defined(WIN32)
+
 #ifndef _WIN64
 //! Get the Dll image size in bytes
 static size_t GetDllImageSize(void);
@@ -318,6 +304,8 @@ BOOL WINAPI DllMain( HMODULE hModule,
 #endif
     return TRUE;
 }}
+
+#endif
 
 // include code that implements the FMI based on the above definitions
 #include "fmuTemplate.c"
