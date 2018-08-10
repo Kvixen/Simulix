@@ -40,10 +40,7 @@ endif()
 
 set(SRCS "")
 
-message(STATUS "$ENV{{SIMX_SOURCES_LIST}}")
-
 foreach(FILE_PATH $ENV{{SIMX_SOURCES_LIST}})
-    message(STATUS "FILE_PATH: ${{FILE_PATH}}")
     configure_file(${{FILE_PATH}} ${{FMU_PATH}}/sources COPYONLY)
     string(REGEX REPLACE ".+[\\/]" "" FILE_NAME ${{FILE_PATH}})
     if ("${{FILE_NAME}}" MATCHES ".*\.(c|cpp)$" AND NOT "${{FILE_NAME}}" IN_LIST BAD_SIMX_SOURCES)
