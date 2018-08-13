@@ -35,12 +35,15 @@ from shutil import rmtree
 def main():
     args.p = path.join(getcwd(), args.p)
     temp_folder_path = path.join(args.p, args.ez)
+    # CMake outputs syntax er
+    temp_folder_path = temp_folder_path.replace('\\', '/')
+    environ['SIMX_TEMP_DIR'] = temp_folder_path
 
     if path.isdir(temp_folder_path):
         rmtree(temp_folder_path)
     mkdir(temp_folder_path)
 
-    if args.ONLY_BUILD and args.NO_MAKE and args.NO_CMAKE:
+    if args.ONLY_BUILD and not args.NO_MAKE and not args.NO_CMAKE:
         exit("Can't run without building and making")
     if not args.ONLY_BUILD:
         print("Generating files")
@@ -48,18 +51,11 @@ def main():
             generate_files(args.t, args.p, args.zp, args.ZN, args.e, temp_folder_path)
         else:
             generate_files_fmu(args.t, args.p, args.zp, args.ZN, temp_folder_path)
-    # Cross compile is disabled until fixed
-    #if not args.CC:
     build(args.p, args.f, args.m, args.NO_CMAKE, args.NO_MAKE)
 
     pack_fmu(args.p, path.join(args.p, environ['SIMX_MODEL_NAME']), environ['SIMX_MODEL_NAME'])
-    rmtree(temp_folder_path)
-    #elif args.CC and "Linux" in system():
-        # We need to somehow tell the program that if we're going to cross-compile we need to use a different CMakeLists
-        # Or rewrite the one we currently have so we supply it with a default toolchain or no toolchain but it still works for all cases
-    #    cross_compile(args.t, args.p, args.f)
-    #else:
-    #    exit("Cross compiling is not supported in other systems than Linux based ones.")
+    if not args.NO_TEMP:
+        rmtree(temp_folder_path)
 
 
 
@@ -72,12 +68,12 @@ if __name__ == "__main__":
     parser.add_argument('-m', help='Makefile program')
     parser.add_argument('-f', help='Build folder name', default='build')
     parser.add_argument('-e', help='Path to extension')
-    parser.add_argument('-ez', help='Path where zip is extracted', default='temp_folder')
+    parser.add_argument('-tf', help='Name of temp folder', default='temp_folder')
     #parser.add_argument('--CC', help='Crosscompile (ALPHA! LINUX ONLY!)', action='store_true')
-    parser.add_argument('--NO-TEMP')
-    parser.add_argument('--FMU', help='Use existing FMU instead of ZIP (All arguments are still supported)', action='store_true')
-    parser.add_argument('--ONLY-BUILD', help='Only build, do not generate files', action='store_true')
-    parser.add_argument('--NO-CMAKE', help='Don\'t execute CMAKE', action='store_false')
-    parser.add_argument('--NO-MAKE', help='Don\'t execute MAKE program.', action='store_false')
+    parser.add_argument('--NO-TEMP', help='Doesn\'t delete the temp folder', action='store_true')
+    #parser.add_argument('--FMU', help='Use existing FMU instead of ZIP (All arguments are still supported)', action='store_true')
+    parser.add_argument('--ONLY-BUILD', help='Only build, doesn\'t generate files', action='store_true')
+    parser.add_argument('--NO-CMAKE', help='Doesn\'t execute CMAKE', action='store_false')
+    parser.add_argument('--NO-MAKE', help='Doesn\'t execute MAKE program.', action='store_false')
     args = parser.parse_args()
     main()

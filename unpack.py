@@ -127,9 +127,11 @@ def handle_zip(dst, zip_path):
                 TEMPLATE_REPLACE['folderName'] = "old_" + TEMPLATE_REPLACE['folderName']
             TEMPLATE_REPLACE['modelNameS'] = TEMPLATE_REPLACE['modelName'][:28]
 
-def generate_template_files(src, dst):
-    generate_template_file(src, dst, "templates/capi_utils_template.c", "includes/capi_utils.c", license=True)
-    generate_template_file(src, dst, "templates/exemain_template.c", "exemain.c", license=True)
+def generate_template_files(src, dst, temp_dst=None):
+    if not temp_dst:
+        temp_dst = dst
+    generate_template_file(src, temp_dst, "templates/capi_utils_template.c", "includes/capi_utils.c", license=True)
+    generate_template_file(src, temp_dst, "templates/exemain_template.c", "exemain.c", license=True)
     generate_template_file(src, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
 
 def handle_extension(extension_path, src, dst):
@@ -183,7 +185,6 @@ def generate_files(src, dst, zip_path, zip_name, extension_path, temp_path):
         zip_path:
             Path to generated Zip.
     """
-    environ['SIMX_TEMP_DIR'] = temp_path
     environ['SIMX_EXE'] = "1"
     TEMPLATE_REPLACE['path'] = path.dirname(path.realpath(__file__)).replace('\\', '/')
 
@@ -194,14 +195,14 @@ def generate_files(src, dst, zip_path, zip_name, extension_path, temp_path):
     if not path.isfile(zip_path):
         exit("Couldn't find the specified ZIP file")
     handle_zip(temp_path, zip_path)
-    copy_directories(src, dst)
+    copy_directories(src, temp_path)
     # Extensions will overwrite whatever handle_zip has put in the TEMPLATE_REPLACE
     # This can be useful and harmful so use extensions carefully
     extension = False
     if extension_path:
         extension = handle_extension(extension_path, src, dst) 
     if not extension or not extension_path:
-        generate_template_files(src, dst)
+        generate_template_files(src, dst, temp_path)
     add_definitions(temp_path, dst)
     extract_file_names(temp_path)
     # This is used by content-builder to add a list of sources to modelDescription.xml
@@ -233,7 +234,6 @@ def get_modeldescription_sources(dst):
         print(atype.get('File'))
     
 def generate_files_fmu(src, dst, fmu_path, fmu_name, temp_path):
-    environ['SIMX_TEMP_DIR'] = temp_path
     TEMPLATE_REPLACE['path'] = path.dirname(path.realpath(__file__)).replace('\\', '/')
     if fmu_name.split('.')[-1] == "fmu":
         fmu_path = path.join(fmu_path, fmu_name)

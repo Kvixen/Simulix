@@ -138,14 +138,22 @@ To build your model, simply press *Ctrl+B* on your keyboard.
 ## Running Simulix
 
 Simulix comes with certain flags
-* ` z :           Positional argument for name of zipfile`
-* `-p :           Path for building`
-* `-t :           Path to template files`
+
+*Requires Arguments:*
+* ` ZN:           Positional argument for name of zipfile`
+* `-p :           Path for generating files and build folder`
+* `-t :           Path to templates and includes folders (if not Simulix installation folder)`
 * `-zp:           Path to zipfile`
-* `-f :           Name of build folder`
 * `-m :           Makefile program`
+* `-f :           Build folder name`
 * `-e :           Path to extension`
+* `-tf:           Name of temp folder`
+
+*Just specify flag, not arguments:*
 * `--ONLY_BUILD:  Not generate new files, only build existing`
+* `--NO-TEMP   :  Doesn't delete the temp folder`
+* `--NO-CMAKE  :  Doesn't execute CMAKE`
+* `--NO-MAKE   :  Doesn't execute MAKE program`
 
 Here are some examples of executing Simulix
 

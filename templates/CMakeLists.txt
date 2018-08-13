@@ -15,6 +15,7 @@ set(MODEL_NAME {modelName})
 set(PYTHON_PATH {path})
 set(PROJECT_DIR ${{{modelName}_SOURCE_DIR}})
 set(FMU_PATH "${{PROJECT_DIR}}/${{MODEL_NAME}}")
+set(GENERATED_FILES_PATH "$ENV{{SIMX_TEMP_DIR}}")
 set(BAD_SIMX_SOURCES
     "fmuTemplate.c"
 )
@@ -58,9 +59,9 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
 
         # These sources are generated or copied by Simulix, needed to build the executable
         set(EXECUTABLE_SOURCES
-            "${{PROJECT_DIR}}/exemain.c"
-		    "${{PROJECT_DIR}}/includes/cJSON.c"
-		    "${{PROJECT_DIR}}/includes/capi_utils.c"
+            "${{GENERATED_FILES_PATH}}/exemain.c"
+		    "${{GENERATED_FILES_PATH}}/includes/cJSON.c"
+		    "${{GENERATED_FILES_PATH}}/includes/capi_utils.c"
         )
 
         set(PYTHON_COMMAND python)
@@ -77,7 +78,7 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
         target_include_directories(
             main
             PUBLIC
-            "${{PROJECT_DIR}}/includes"
+            "${{GENERATED_FILES_PATH}}/includes"
         )
     
         add_custom_command(
@@ -89,6 +90,7 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
             COMMAND ${{PYTHON_COMMAND}} ${{PYTHON_PATH}}/content-builder.py -o ${{FMU_PATH}}/sources
             COMMAND ${{CMAKE_COMMAND}} -E copy ${{CMAKE_BINARY_DIR}}/modelDescription.xml ${{FMU_PATH}}
         )
+
         set(LIBRARY_SOURCES
             "fmi2Functions.h"
             "fmi2FunctionTypes.h"
@@ -96,11 +98,12 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
             "fmuTemplate.c"
             "fmuTemplate.h"
         )
-        foreach(FILE_PATH ${{LIBRARY_SOURCES}})
-            configure_file("${{PROJECT_DIR}}/libraryincludes/${{FILE_PATH}}" "${{FMU_PATH}}/sources" COPYONLY)
+        message(STATUS "GENERATED_FILES_PATH: ${{GENERATED_FILES_PATH}}")
+        foreach(FILE_NAME ${{LIBRARY_SOURCES}})
+            configure_file("${{GENERATED_FILES_PATH}}/libraryincludes/${{FILE_NAME}}" "${{FMU_PATH}}/sources" COPYONLY)
         endforeach()
-        configure_file("${{PROJECT_DIR}}/libraryincludes/model.png" "${{FMU_PATH}}/documentation")
-        configure_file("${{PROJECT_DIR}}/libraryincludes/fmusdk_license.txt" "${{FMU_PATH}}/documentation")
+        configure_file("${{GENERATED_FILES_PATH}}/libraryincludes/model.png" "${{FMU_PATH}}/documentation")
+        configure_file("${{GENERATED_FILES_PATH}}/libraryincludes/fmusdk_license.txt" "${{FMU_PATH}}/documentation")
 
         if(UNIX)
             target_link_libraries(
