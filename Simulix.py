@@ -34,7 +34,7 @@ from shutil import rmtree
 
 def main():
     args.p = path.join(getcwd(), args.p)
-    temp_folder_path = path.join(args.p, args.ez)
+    temp_folder_path = path.join(args.p, args.tf)
     # CMake outputs syntax er
     temp_folder_path = temp_folder_path.replace('\\', '/')
     environ['SIMX_TEMP_DIR'] = temp_folder_path
@@ -47,10 +47,10 @@ def main():
         exit("Can't run without building and making")
     if not args.ONLY_BUILD:
         print("Generating files")
-        if not args.FMU:
-            generate_files(args.t, args.p, args.zp, args.ZN, args.e, temp_folder_path)
-        else:
-            generate_files_fmu(args.t, args.p, args.zp, args.ZN, temp_folder_path)
+        #if not args.FMU:
+        generate_files(args.t, args.p, args.zp, args.ZN, args.e, temp_folder_path)
+        #else:
+            #generate_files_fmu(args.t, args.p, args.zp, args.ZN, temp_folder_path)
     build(args.p, args.f, args.m, args.NO_CMAKE, args.NO_MAKE)
 
     pack_fmu(args.p, path.join(args.p, environ['SIMX_MODEL_NAME']), environ['SIMX_MODEL_NAME'])
