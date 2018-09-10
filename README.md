@@ -54,6 +54,7 @@ GNU GPL V.3
 
 To use Simulix, you will need the following
 * [Python 3](https://www.python.org/).
+  * [lxml - Python package](https://lxml.de/)
 * A [CMake](https://cmake.org/) installation, version 3 or above.
 * A C compiler compatible with CMake. We recommend [GCC](https://gcc.gnu.org/)
 
@@ -67,13 +68,7 @@ In order to use Simulix you can either
     ```sh
     git clone https://github.com/Kvixen/Simulix.git
     cd Simulix
-    ```
-
-2. **Download the GitHub repository zip**:
-
-    ```
-    Click the green 'Clone or Download' button on the repo
-    Click 'Download ZIP'
+    pip install -r requirements.txt
     ```
 
 <div id='linux'/>
@@ -86,6 +81,7 @@ In order to use Simulix you can either
 
 To use Simulix, you need the following
 * Python 3
+  * Lxml - Python package
 * CMake
 
 Optional for cross compiling to Windows
@@ -113,6 +109,7 @@ Optional for cross compiling to Windows
     ```sh
     git clone https://github.com/Kvixen/Simulix.git
     cd Simulix
+    python install -r requirements.txt
     ```
 
 ## Exporting your model from Simulink
