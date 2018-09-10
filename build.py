@@ -26,9 +26,9 @@ from platform import system
 
 BUILD_ONLY = False
 
-def execute_build_commands(compile_program,make_program,dst, exe_cmake, exe_make):
+def execute_build_commands(compile_program,make_program,dst, exe_cmake, exe_make, debug_build):
     if exe_cmake:
-        command = "cmake -G {0} ..".format(compile_program)
+        command = "cmake -G {0} -DCMAKE_BUILD_TYPE={1} ..".format(compile_program, "Release" if not debug_build else "Debug")
         print("Executing {0}".format(command))
         cmake_p = subprocess.Popen(command, shell=True)
         cmake_p.communicate() # Wait for program to finish
@@ -68,7 +68,7 @@ def find_make_prog():
     elif(which("Ninja")):
         return ("\"Ninja\"", "Ninja")
 
-def main(dst, folder_name, make_prog, exe_cmake, exe_make):
+def main(dst, folder_name, make_prog, exe_cmake, exe_make, debug_build):
     if not path.isabs(dst):
         dst = path.join(getcwd(), dst)
     if not path.isdir(dst):
@@ -83,14 +83,15 @@ def main(dst, folder_name, make_prog, exe_cmake, exe_make):
     print("Building")
 
     prepare_build_directory(dst, folder_name)
-    execute_build_commands(make_program[0], make_program[1], dst, exe_cmake, exe_make)
+    execute_build_commands(make_program[0], make_program[1], dst, exe_cmake, exe_make, debug_build)
     chdir("..")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Executes CMake with Makefile generator",prog="build",usage="%(prog)s [options]")
     parser.add_argument('p', nargs='?', help='Path to files for building', default=getcwd())
     parser.add_argument('-m', help='Makefile program')
+    parser.add_argument('--DEBUG-BUILD', help='Build as debug', action='store_true')
     parser.add_argument('-f', help='Build folder name', default='build')
     args = parser.parse_args()
 
-    main(args.p, args.f, args.m, True, True)
+    main(args.p, args.f, args.m, True, True, args.debug_build)
