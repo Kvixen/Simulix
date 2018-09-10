@@ -55,8 +55,8 @@ GNU GPL V.3
 To use Simulix, you will need the following
 * [Python 3](https://www.python.org/).
   * [lxml - Python package](https://lxml.de/)
-* A [CMake](https://cmake.org/) installation, version 3 or above.
-* A C compiler compatible with CMake. We recommend [GCC](https://gcc.gnu.org/)
+* A [CMake](https://cmake.org/) installation, version 3.3 or above.
+* A C compiler compatible with CMake. We recommend [GCC](https://gcc.gnu.org/), but also works with [Visual Studio](https://visualstudio.microsoft.com/vs/) 2010 or above.
 
 <div id='w-installation'/>
 
