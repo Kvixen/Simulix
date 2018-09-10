@@ -39,6 +39,7 @@ char *_getDataType(uint8_T index){{
         case 8:
             return "Boolean";
     }}
+    return "";
 }}
 
 #define GetDataType(num)              _getDataType(num)
@@ -84,7 +85,7 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             Outputs = cJSON_AddArrayToObject(outputChildObject, "Outputs");
             UnknownChildObject = cJSON_CreateObject();
             Unknown = cJSON_AddArrayToObject(UnknownChildObject, "Unknown");
-            break;		
+            break;
     }}
 
     #ifdef FDEBUG
@@ -108,7 +109,7 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             sprintf(valueReference, "%i", numBoolean++);
         }}
         cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
-        
+
         startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
 
         if(FLAG != ROOT_OUTPUT_FLAG){{
@@ -128,7 +129,7 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             cJSON_AddStringToObject(outputObject, "index", outputIndex);
             cJSON_AddItemToArray(Unknown, outputObject);
         }}
-        cJSON_AddItemToArray(ScalarVariables, jsonSV); 
+        cJSON_AddItemToArray(ScalarVariables, jsonSV);
     }}
     if(FLAG == ROOT_OUTPUT_FLAG){{
         cJSON_AddItemToArray(Outputs, UnknownChildObject);
@@ -143,51 +144,55 @@ int main(int argc, const char *argv[]) {{
 
     INIT_MODEL;
     STEP_MODEL;
-    rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo(REAL_TIME_MODEL).mmi);
-    
-    char name[NAME_LENGTH_MAX] = "";
-    int i;
-    char *string = NULL;
-    cJSON *ScalarVariables = NULL;
-    char stepSize[15];
 
-    cJSON *root = cJSON_CreateObject();
-    sprintf(stepSize, "%f", (double) REAL_TIME_MODEL->Timing.stepSize0);
+    {{
+        rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo(REAL_TIME_MODEL).mmi);
 
-    cJSON *ModelVariablesObject = cJSON_CreateObject();
-    ScalarVariables = cJSON_AddArrayToObject(ModelVariablesObject, "ScalarVariable");
+        char name[NAME_LENGTH_MAX] = "";
+        char *string = NULL;
+        cJSON *ScalarVariables = NULL;
+        char stepSize[15];
 
-    objectCreator(ROOT_INPUT_FLAG, root, ScalarVariables, capiMap);
-    objectCreator(MODEL_PARAMETER_FLAG, root, ScalarVariables, capiMap);
-    objectCreator(ROOT_OUTPUT_FLAG, root, ScalarVariables, capiMap);
-    cJSON *ModelVariables = cJSON_AddArrayToObject(root, "ModelVariables");
-    cJSON_AddItemToArray(ModelVariables, ModelVariablesObject);
+        cJSON *root = cJSON_CreateObject();
+        sprintf(stepSize, "%f", (double) REAL_TIME_MODEL->Timing.stepSize0);
 
+        {{
+            cJSON *ModelVariablesObject = cJSON_CreateObject();
+            ScalarVariables = cJSON_AddArrayToObject(ModelVariablesObject, "ScalarVariable");
 
-    //Information used in various python scripts
-    cJSON_AddStringToObject(root, "Model", MODEL_NAME);
-    cJSON_AddStringToObject(root, "StepSize", stepSize);
-    cJSON_AddNumberToObject(root, "numReal", numReal);
-    cJSON_AddNumberToObject(root, "numInt", numInt);
-    cJSON_AddNumberToObject(root, "numBoolean", numBoolean);
+            objectCreator(ROOT_INPUT_FLAG, root, ScalarVariables, capiMap);
+            objectCreator(MODEL_PARAMETER_FLAG, root, ScalarVariables, capiMap);
+            objectCreator(ROOT_OUTPUT_FLAG, root, ScalarVariables, capiMap);
+            {{
+                cJSON *ModelVariables = cJSON_AddArrayToObject(root, "ModelVariables");
+                cJSON_AddItemToArray(ModelVariables, ModelVariablesObject);
+            }}
+        }}
 
+        //Information used in various python scripts
+        cJSON_AddStringToObject(root, "Model", MODEL_NAME);
+        cJSON_AddStringToObject(root, "StepSize", stepSize);
+        cJSON_AddNumberToObject(root, "numReal", numReal);
+        cJSON_AddNumberToObject(root, "numInt", numInt);
+        cJSON_AddNumberToObject(root, "numBoolean", numBoolean);
 
+        string = cJSON_Print(root);
+        if (string == NULL) {{
+            fprintf(stderr, "Failed to print cJSON.\n");
+            exit(12);
+        }}
+        cJSON_Delete(root);
 
-    string = cJSON_Print(root);
-    if (string == NULL) {{
-        fprintf(stderr, "Failed to print cJSON.\n");
-        exit(12);
+        {{
+            FILE *f = fopen("ModelOutputs.json", "w");
+            if(!f){{
+                printf("Error opening file");
+                exit(13);
+            }}
+            fprintf(f, "%s",string);
+            fclose(f);
+        }}
     }}
-    cJSON_Delete(root);
-
-    FILE *f = fopen("ModelOutputs.json", "w");
-    if(!f){{
-        printf("Error opening file");
-        exit(13);
-    }}
-    fprintf(f, "%s",string);
-    fclose(f);
-    
 
     TERMINATE_MODEL;
 

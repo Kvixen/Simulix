@@ -13,9 +13,9 @@ void GetName(char *name){{
    
     token = strtok(name, s);
    
-   while( token != NULL ) {{
-      strcpy(name, token);
-      token = strtok(NULL, s);
+    while( token != NULL ) {{
+        strcpy(name, token);
+        token = strtok(NULL, s);
    }}
 }}
 
@@ -39,18 +39,15 @@ void GetValueFromAdress( char           *paramName,
                          uint_T         numDims,
                          real_T         slope,
                          real_T         bias) {{
-    
-    strcpy(sVariable.name, paramName);
-    sVariable.DataID = slDataID;
 
     uint_T numRows  = actualDims[0];
     uint_T numCols  = actualDims[1];
     uint_T numPages = 0;
-    int rowIdx;
-    int colIdx;
-    int pageIdx;
-    bool _set = false;
     if (numDims == 3) numPages = actualDims[2];
+
+    strcpy(sVariable.name, paramName);
+    sVariable.DataID = slDataID;
+
     #ifdef FDEBUG
     printf("Debug in CAPI_UTILS.c, function GetValueFromAdress:\n\
     Parameter Name = %s,\n\
