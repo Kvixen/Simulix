@@ -1,5 +1,5 @@
 // Enables support to read resources folder in the FMU
-#ifdef WIN32
+#if defined(_WIN32) || defined(WIN32)
 # define FMUHASRESOURCES
 #endif
 #define FMUHASENTERINITIALIZATIONMODE
@@ -7,7 +7,6 @@
 #include "{modelName}.h"
 #include "rtwtypes.h"
 #include <stdint.h>
-
 
 // include fmu header files, typedefs and macros
 #include "fmuTemplate.h"
@@ -18,7 +17,7 @@ size_t dllBaseAddress_U32 = 0;
 size_t dllImageSize_U32 = 0;
 
 static fmi2Real         current_time        = 0;
-static uint32_t         {modelName}_time = 0;
+static uint32_t         {modelName}_time    = 0;
 static const fmi2Real   step_size           = {stepSize};
 static fmi2Integer      simulation_ticks    = 0;
 
@@ -39,9 +38,9 @@ static fmi2Integer      simulation_ticks    = 0;
 #define NUMBER_OF_EVENT_INDICATORS       0
 #define STATES                           {{0}}
 
-
+enum type {{UNDEF, F32, F64, S32, S, B}};
 typedef struct {{
-    enum type {{F32 ,F64 , S32 , S , B}} dataType;
+    enum type dataType;
     union {{
         void          * xxx;
         float         * F32;
@@ -52,41 +51,36 @@ typedef struct {{
     }} ptr;
 }} ptr_elem;
 
-//data pointers for reals
-ptr_elem    dataReal[ NUMBER_OF_REALS_IN_MODEL + 1 ]       = {{
+// data pointers for reals
+ptr_elem dataReal[ NUMBER_OF_REALS_IN_MODEL + 1 ]       = {{
     {realString}
-    {{0, NULL}}
+    {{UNDEF, NULL}}
 }};
 
-//data pointers for integers
- 
-ptr_elem    dataInteger[ NUMBER_OF_INTEGERS_IN_MODEL + 1 ] = {{
+// data pointers for integers
+ptr_elem dataInteger[ NUMBER_OF_INTEGERS_IN_MODEL + 1 ] = {{
     {{S, (void *)&simulation_ticks}},
-	{intString}
-    {{0, NULL}}
+    {intString}
+    {{UNDEF, NULL}}
 }};
 
-//data pointers for booleans 
-ptr_elem    dataBoolean[ NUMBER_OF_BOOLEANS_IN_MODEL + 1] = {{
+// data pointers for booleans
+ptr_elem dataBoolean[ NUMBER_OF_BOOLEANS_IN_MODEL + 1 ] = {{
     {booleanString}
-    {{0, NULL}}
+    {{UNDEF, NULL}}
 }};
 
 // called by fmi2Instantiate
 // Set values for all variables that define a start value
 // Settings used unless changed by fmi2SetX before fmi2EnterInitializationMode
 static void setStartValues(ModelInstance *comp) {{
-    
    {modelName}_initialize();
-
-
 }}
 
 // called by fmi2EnterInitializationMode(), (which is called after fmi2Instantiate(), and after any initial fmi2SetX())
 void enterInitializationMode(ModelInstance *comp) {{
 
 }}
-
 
 // called by fmi2GetReal, fmi2GetInteger, fmi2GetBoolean, fmi2GetString, fmi2ExitInitialization
 // if setStartValues or environment set new values through fmi2SetXXX.
@@ -114,7 +108,7 @@ static fmi2Real getReal(ModelInstance *comp, fmi2ValueReference vr)
     else
     {{
         return comp->r[vr];
-    }}    
+    }}
 }}
 
 // called by fmi2SetReal
@@ -154,12 +148,12 @@ static fmi2Integer getInteger(ModelInstance *comp, fmi2ValueReference vr)
 }}
 
 // called by fmi2SetInteger
-static void setInteger(ModelInstance *comp, fmi2ValueReference vr , fmi2Integer value) 
+static void setInteger(ModelInstance *comp, fmi2ValueReference vr , fmi2Integer value)
 {{
     if(vr < NUMBER_OF_INTEGERS_IN_MODEL)
     {{
         if (dataReal[vr].dataType == S32) {{
-            *(dataInteger[vr].ptr.S32) = (int32_t)value; 
+            *(dataInteger[vr].ptr.S32) = (int32_t)value;
         }}
         else {{
             *(dataInteger[vr].ptr.S) = (int)value;
@@ -201,28 +195,29 @@ static void setBoolean(ModelInstance *comp, fmi2ValueReference vr , fmi2Boolean 
 static void eventUpdate(ModelInstance *comp, fmi2EventInfo *eventInfo, int isTimeEvent) {{
     static fmi2Boolean overrunFlag = fmi2False;
     fmi2Boolean error = fmi2False;
-    int i;
-    unsigned int log_address;
-    
+
     if (isTimeEvent) {{
         while (current_time < (comp->time - 0.1 * step_size) )
-        {{   
+        {{
             {modelName}_step();
             current_time        += step_size;
             {modelName}_time += 1;         // Only for Vision/Testlogger that cannot handle double-presicion floats
             simulation_ticks    += 1;
         }}
 
-        /* for (i = 0; i < number_of_log_variables; i++)
+        /*
         {{
-            double converted_value;
-            int last_value;
-            
-            log_address = variables_to_log[i].address + (unsigned int)dllBaseAddress_U32;
-        
-            last_value = (number_of_log_variables - 1 == i) ? 1 : 0;
-            ReadAndConvert(variables_to_log[i], log_address, &converted_value);
-            logInternalVariable((double)current_time, converted_value, last_value);
+            int i;
+            for (i = 0; i < number_of_log_variables; i++)
+            {{
+                double converted_value;
+                int last_value;
+                unsigned int log_address = variables_to_log[i].address + (unsigned int)dllBaseAddress_U32;
+
+                last_value = (number_of_log_variables - 1 == i) ? 1 : 0;
+                ReadAndConvert(variables_to_log[i], log_address, &converted_value);
+                logInternalVariable((double)current_time, converted_value, last_value);
+            }}
         }} */
         eventInfo->nextEventTimeDefined = fmi2True;
         eventInfo->nextEventTime        = step_size + comp->time;
@@ -281,10 +276,10 @@ static size_t GetDllImageSize(void)
  *  @returns TRUE on successful attach/detach
  ****************************************************************************/
 BOOL WINAPI DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved )
+                     DWORD ul_reason_for_call,
+                     LPVOID lpReserved )
 {{
-// The use of dllBaseAddress is only used for ccp/a2l and is not nesseccary when building 64bit fmu's
+// The use of dllBaseAddress is only used for ccp/a2l and is not necessary when building 64bit fmu's
 #ifndef _WIN64
     switch (ul_reason_for_call)
     {{

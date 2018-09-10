@@ -12,7 +12,7 @@
 #include "fmi2Functions.h"
 
 #ifdef FMUHASRESOURCES
-# ifdef WIN32
+# if defined(_WIN32) || defined(WIN32)
 #  include <shlwapi.h>
 # endif
 #endif
