@@ -60,27 +60,32 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
         # These sources are generated or copied by Simulix, needed to build the executable
         set(EXECUTABLE_SOURCES
             "${{GENERATED_FILES_PATH}}/exemain.c"
-		    "${{GENERATED_FILES_PATH}}/includes/cJSON.c"
-		    "${{GENERATED_FILES_PATH}}/includes/capi_utils.c"
+            "${{GENERATED_FILES_PATH}}/includes/cJSON.c"
+            "${{GENERATED_FILES_PATH}}/includes/capi_utils.c"
         )
 
-        set(PYTHON_COMMAND python)
-        if (UNIX)
-            set(PYTHON_COMMAND python3)
-        endif(UNIX)
+        find_package(PythonInterp 3 REQUIRED)
+        if (${{PYTHONINTERP_FOUND}})
+            set(PYTHON_COMMAND ${{PYTHON_EXECUTABLE}})
+        else()
+            set(PYTHON_COMMAND python)
+            if (UNIX)
+                set(PYTHON_COMMAND python3)
+            endif(UNIX)
+        endif()
 
         add_executable(
-            main 
+            main
             ${{EXECUTABLE_SOURCES}}
             ${{PRESRCS}}
         )
-        
+
         target_include_directories(
             main
             PUBLIC
             "${{GENERATED_FILES_PATH}}/includes"
         )
-    
+
         add_custom_command(
             OUTPUT ${{FMU_PATH}}/sources/dllmain.c
             DEPENDS main
@@ -127,14 +132,13 @@ if (WIN32)
         Shlwapi.lib
     )
 elseif(UNIX)
-
     target_link_libraries(
         ${{CMAKE_PROJECT_NAME}}
         m
     )
 endif()
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8) 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(BINARY_PREFIX "${{BINARY_PREFIX}}64")
 else()
     set(BINARY_PREFIX "${{BINARY_PREFIX}}32")
@@ -148,7 +152,7 @@ set_target_properties(
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${{LIBRARY_PATH}}"
     RUNTIME_OUTPUT_DIRECTORY "${{LIBRARY_PATH}}"
-    PREFIX ""    
+    PREFIX ""
 )
 
 
