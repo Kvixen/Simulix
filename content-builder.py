@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Simulix generates an FMU from a simulink model source code.
- 
+
 Copyright (C) 2018 Scania CV AB and Simulix contributors
 
 This program is free software: you can redistribute it and/or modify
@@ -18,13 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-import xml.etree.cElementTree as ET
+import lxml.etree as ET
 import json
 import uuid
 import argparse
 from os import getcwd, path, environ
-from pprint import pprint
-from xml.dom import minidom
+import collections
 import re
 
 SOURCE_REXEG = re.compile(r"^.+\\(\w+.c)$")
@@ -34,14 +33,9 @@ BAD_DLL_SOURCES = [
 ]
 
 def read_json_file(src):
-	with open((src),'r') as json_file:
-		data = json.load(json_file)
-	return data
-
-def prettify(elem):
-	rough_string = ET.tostring(elem, encoding='utf-8')
-	reparsed = minidom.parseString(rough_string)
-	return reparsed.toprettyxml(indent="".join([' '] * 4))
+    with open((src),'r') as json_file:
+        data = json.load(json_file, object_pairs_hook=collections.OrderedDict)
+    return data
 
 def create_xml_subtree(root, name, dict_tree):
     if isinstance(dict_tree, list): #type(dict_tree) == list:
@@ -74,7 +68,6 @@ def xmlgen(data):
 
     root = ET.Element("fmiModelDescription", fmiMD)
 
-
     source_files_subelement = ET.SubElement(ET.SubElement(root,"CoSimulation",co_simulation_dict), "SourceFiles")
     # $ENV{SIMX_SOURCE_LIST} is set in unpack.py
     source_list = environ['SIMX_SOURCES_LIST'].split(';')
@@ -84,7 +77,6 @@ def xmlgen(data):
         if match and match.group(1) not in BAD_DLL_SOURCES:
             ET.SubElement(source_files_subelement, "File").set("name", match.group(1))
 
-    
     LogCategories = ET.SubElement(root,"LogCategories")
     for i in range(len(category_dictlist)):
         ET.SubElement(LogCategories,"Category",category_dictlist[i])
@@ -93,9 +85,8 @@ def xmlgen(data):
     create_xml_subtree(root, "ModelVariables", data['ModelVariables'])
     create_xml_subtree(root, "ModelStructure", data['ModelStructure'])
 
-    with open(path.join('modelDescription.xml'), 'w') as output:
-        output.write(prettify(root))
-
+    ET.ElementTree(root).write(path.join('modelDescription.xml'),
+        encoding='utf-8', xml_declaration=True, method='xml', pretty_print=True)
 
 def dllgen(dst, src, data):
 
@@ -117,7 +108,7 @@ def dllgen(dst, src, data):
     template_replace['GUID'] = data['GUID']
     model_name = data['Model']
     model_nameS = model_name[:29]
-    
+
     real_string = ""
     int_string = ""
     boolean_string = ""
@@ -125,13 +116,12 @@ def dllgen(dst, src, data):
     for item in data['ModelVariables'][0]['ScalarVariable']:
         if 'Real' in item.keys():
             real_string+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
-        
+
         elif 'Integer' in item.keys():
             int_string+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
         else:
             boolean_string+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
-            
-        
+
     template_replace['realString'] = real_string
     template_replace['intString'] = int_string
     template_replace['booleanString'] = boolean_string
@@ -139,11 +129,10 @@ def dllgen(dst, src, data):
         with open(src, 'r') as dllmainTemplate:
             dllmain.write(dllmainTemplate.read().format(**template_replace))
 
-
 def main(dst, src):
     data = read_json_file("ModelOutputs.json")
     data["GUID"] = str(uuid.uuid4())
-    
+
     xmlgen(data)
     dllgen(dst, src, data)
 
