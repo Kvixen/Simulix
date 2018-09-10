@@ -30,7 +30,7 @@ from os import getcwd, path, mkdir, environ
 import sys
 from platform import system
 from shutil import rmtree
-
+ 
 
 def main():
     args.p = path.join(getcwd(), args.p)
@@ -51,7 +51,7 @@ def main():
         generate_files(args.t, args.p, args.zp, args.ZN, args.e, temp_folder_path)
         #else:
             #generate_files_fmu(args.t, args.p, args.zp, args.ZN, temp_folder_path)
-    build(args.p, args.f, args.m, args.NO_CMAKE, args.NO_MAKE)
+    build(args.p, args.f, args.m, args.NO_CMAKE, args.NO_MAKE, args.DEBUG_BUILD)
 
     pack_fmu(args.p, path.join(args.p, environ['SIMX_MODEL_NAME']), environ['SIMX_MODEL_NAME'])
     if not args.NO_TEMP:
@@ -71,6 +71,7 @@ if __name__ == "__main__":
     parser.add_argument('-tf', help='Name of temp folder', default='temp_folder')
     #parser.add_argument('--CC', help='Crosscompile (ALPHA! LINUX ONLY!)', action='store_true')
     parser.add_argument('--NO-TEMP', help='Doesn\'t delete the temp folder', action='store_true')
+    parser.add_argument('--DEBUG-BUILD', help='Build as debug', action='store_true')
     #parser.add_argument('--FMU', help='Use existing FMU instead of ZIP (All arguments are still supported)', action='store_true')
     parser.add_argument('--ONLY-BUILD', help='Only build, doesn\'t generate files', action='store_true')
     parser.add_argument('--NO-CMAKE', help='Doesn\'t execute CMAKE', action='store_false')
