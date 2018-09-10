@@ -134,10 +134,10 @@ elseif(UNIX)
     )
 endif()
 
-if(CMAKE_C_FLAGS MATCHES "^-m32 " OR CMAKE_C_FLAGS MATCHES " -m32 ")
-    set(BINARY_PREFIX "${{BINARY_PREFIX}}32")
-else()
+if(CMAKE_SIZEOF_VOID_P EQUAL 8) 
     set(BINARY_PREFIX "${{BINARY_PREFIX}}64")
+else()
+    set(BINARY_PREFIX "${{BINARY_PREFIX}}32")
 endif()
 
 set(LIBRARY_PATH "${{FMU_PATH}}/binaries/${{BINARY_PREFIX}}")
