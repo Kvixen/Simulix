@@ -6,6 +6,7 @@
 
 #include "{modelName}.h"
 #include "rtwtypes.h"
+#include "rtw_modelmap.h"
 #include <stdint.h>
 
 // include fmu header files, typedefs and macros
@@ -41,33 +42,25 @@ static fmi2Integer      simulation_ticks    = 0;
 enum type {{UNDEF, F32, F64, S32, S, B}};
 typedef struct {{
     enum type dataType;
-    union {{
-        void          * xxx;
-        float         * F32;
-        double        * F64;
-        int32_t       * S32;
-        fmi2Integer   * S;
-        boolean_T     * B;
-    }} ptr;
+    unsigned int index;
 }} ptr_elem;
 
-// data pointers for reals
-ptr_elem dataReal[ NUMBER_OF_REALS_IN_MODEL + 1 ]       = {{
+// data indices for reals
+static ptr_elem dataReal[ NUMBER_OF_REALS_IN_MODEL + 1 ]       = {{
     {realString}
-    {{UNDEF, NULL}}
+    {{UNDEF, 0}}
 }};
 
-// data pointers for integers
-ptr_elem dataInteger[ NUMBER_OF_INTEGERS_IN_MODEL + 1 ] = {{
-    {{S, (void *)&simulation_ticks}},
+// data indices for integers
+static ptr_elem dataInteger[ NUMBER_OF_INTEGERS_IN_MODEL + 1 ] = {{
     {intString}
-    {{UNDEF, NULL}}
+    {{UNDEF, 0}}
 }};
 
-// data pointers for booleans
-ptr_elem dataBoolean[ NUMBER_OF_BOOLEANS_IN_MODEL + 1 ] = {{
+// data indices for booleans
+static ptr_elem dataBoolean[ NUMBER_OF_BOOLEANS_IN_MODEL + 1 ] = {{
     {booleanString}
-    {{UNDEF, NULL}}
+    {{UNDEF, 0}}
 }};
 
 // called by fmi2Instantiate
@@ -98,11 +91,14 @@ static fmi2Real getReal(ModelInstance *comp, fmi2ValueReference vr)
 {{
     if(vr < NUMBER_OF_REALS_IN_MODEL)
     {{
+        rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
         if (dataReal[vr].dataType == F32) {{
-        return (fmi2Real)*(dataReal[vr].ptr.F32);
+            float* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+            return (fmi2Real)*ptr;
         }}
         else {{
-            return (fmi2Real)*(dataReal[vr].ptr.F64);
+            double* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+            return (fmi2Real)*ptr;
         }}
     }}
     else
@@ -116,11 +112,14 @@ static void setReal(ModelInstance *comp, fmi2ValueReference vr , fmi2Real value)
 {{
     if(vr < NUMBER_OF_REALS_IN_MODEL)
     {{
+        rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
         if (dataReal[vr].dataType == F32) {{
-            *(dataReal[vr].ptr.F32) = (float)value;
+            float* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+            *ptr = (float)value;
         }}
         else {{
-            *(dataReal[vr].ptr.F64) = (double)value;
+            double* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+            *ptr = (double)value;
         }}
     }}
     else
@@ -134,11 +133,14 @@ static fmi2Integer getInteger(ModelInstance *comp, fmi2ValueReference vr)
 {{
     if(vr < NUMBER_OF_INTEGERS_IN_MODEL)
     {{
+        rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
         if (dataReal[vr].dataType == S32) {{
-            return (fmi2Integer)*(dataInteger[vr].ptr.S32);
+            int32_t* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+            return (fmi2Integer)*ptr;
         }}
         else {{
-            return (fmi2Integer)*(dataInteger[vr].ptr.S);
+            fmi2Integer* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+            return (fmi2Integer)*ptr;
         }}
     }}
     else
@@ -152,11 +154,14 @@ static void setInteger(ModelInstance *comp, fmi2ValueReference vr , fmi2Integer 
 {{
     if(vr < NUMBER_OF_INTEGERS_IN_MODEL)
     {{
+        rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
         if (dataReal[vr].dataType == S32) {{
-            *(dataInteger[vr].ptr.S32) = (int32_t)value;
+            int32_t* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+            *ptr = (int32_t)value;
         }}
         else {{
-            *(dataInteger[vr].ptr.S) = (int)value;
+            fmi2Integer* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+            *ptr = (fmi2Integer)value;
         }}
     }}
     else
@@ -170,7 +175,9 @@ static fmi2Boolean getBoolean(ModelInstance *comp, fmi2ValueReference vr)
 {{
     if(vr < NUMBER_OF_BOOLEANS_IN_MODEL)
     {{
-        return (fmi2Boolean)*dataBoolean[vr].ptr.B;
+        rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
+        boolean_T* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+        return (fmi2Boolean)*ptr;
     }}
     else
     {{
@@ -183,7 +190,9 @@ static void setBoolean(ModelInstance *comp, fmi2ValueReference vr , fmi2Boolean 
 {{
     if(vr < NUMBER_OF_BOOLEANS_IN_MODEL)
     {{
-        *dataBoolean[vr].ptr.B = (boolean_T)value;
+        rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
+        boolean_T* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].index];
+        *ptr = (boolean_T)value;
     }}
     else
     {{
@@ -265,7 +274,7 @@ static size_t GetDllImageSize(void)
 
 /*!
  *****************************************************************************
- * Main loop of the EcuDll
+ * Main loop of the Dll
  *
  * Input data:
  *  @param hModule

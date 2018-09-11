@@ -100,8 +100,8 @@ def dllgen(dst, src, data):
         'parameter':'P'
     }
 
-    template_replace['numReal'] = int(data['numReal']) + 1 #Add one because we dont count the real current_time until now
-    template_replace['numInt'] = int(data['numInt']) + 1
+    template_replace['numReal'] = int(data['numReal'])
+    template_replace['numInt'] = int(data['numInt'])
     template_replace['numBoolean'] = int(data['numBoolean'])
     template_replace['stepSize'] = data['StepSize']
     template_replace['modelName'] = data['Model']
@@ -115,12 +115,11 @@ def dllgen(dst, src, data):
 
     for item in data['ModelVariables'][0]['ScalarVariable']:
         if 'Real' in item.keys():
-            real_string+= "{{F64, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
-
+            real_string+= "{{F64, {0}}},\n    ".format(item['index'])
         elif 'Integer' in item.keys():
-            int_string+= "{{S32, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
+            int_string+= "{{S32, {0}}},\n    ".format(item['index'])
         else:
-            boolean_string+= "{{B, (void *)&{0}_{1}.{2}}},\n    ".format(model_nameS, causality_dict[item['causality']], item['name'])
+            boolean_string+= "{{B, {0}}},\n    ".format(item['index'])
 
     template_replace['realString'] = real_string
     template_replace['intString'] = int_string
@@ -133,8 +132,10 @@ def main(dst, src):
     data = read_json_file("ModelOutputs.json")
     data["GUID"] = str(uuid.uuid4())
 
-    xmlgen(data)
     dllgen(dst, src, data)
+    # remove index key that must not be known to xmlgen
+    index_list = list(map(lambda d: d.pop('index'), data['ModelVariables'][0]['ScalarVariable']))
+    xmlgen(data)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate a C file for a FMU",prog="dllgen",usage="%(prog)s [options]")

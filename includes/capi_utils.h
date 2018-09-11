@@ -1,7 +1,7 @@
 /*
 
 Simulix generates an FMU from a simulink model source code.
- 
+
 Copyright (C) 2018 Scania CV AB and Simulix contributors
 
 This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /*
 As a special exception, you may create a larger work that contains
 some or all of the template files included in Simulix and distribute
-that work under terms of your choice, so long as that work isn't itself 
+that work under terms of your choice, so long as that work isn't itself
 a FMU compiler using the template files.
 
 This exception was added in version 1.0 of Simulix.
@@ -47,11 +47,13 @@ extern "C" {
 #define ROOT_INPUT_FLAG 0
 #define MODEL_PARAMETER_FLAG 1
 #define ROOT_OUTPUT_FLAG 2
+#define BLOCK_PARAMETER_FLAG 3
 
 struct ScalarVariable{
     char name[63];
     char value[50];
     uint8_T DataID;
+    uint_T index;
     int success;
 };
 static const struct ScalarVariable EmptyStruct;
@@ -67,20 +69,22 @@ extern void GetValueFromAdress( char*           paramName,
                                 uint_T*        actDims,
                                 uint_T         numDims,
                                 real_T         slope,
-                                real_T         bias);
+                                real_T         bias,
+                                uint_T         index);
 
-
-extern void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,  
+extern void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
                                       uint_T                    paramIdx);
 
-extern void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,  
+extern void GetBlockParameter(rtwCAPI_ModelMappingInfo* capiMap,
+                                      uint_T                    paramIdx);
+
+extern void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
                               uint_T                    signalIdx,
                               uint_T                    signalTypeFlag);
 
 extern struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
                                    uint_T                    index,
                                    uint_T                    flag);
-
 
 #ifdef __cplusplus
 }

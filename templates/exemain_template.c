@@ -11,15 +11,18 @@
 #include "cJSON.h"
 #define NAME_LENGTH_MAX             63 //The currently longest variable name according to Mathworks (ref/namelengthmax)
 
-int numReal = 0;
-int numInt = 0;
-int numBoolean = 0;
+unsigned int numReal = 0;
+unsigned int numInt = 0;
+unsigned int numBoolean = 0;
 
 #define GetNumInputs(mmi)            rtwCAPI_GetNumRootInputs(mmi)
 #define GetInputs(mmi)               rtwCAPI_GetRootInputs(mmi)
 
-#define GetNumParameters(mmi)        rtwCAPI_GetNumModelParameters(mmi)
-#define GetParameters(mmi)           rtwCAPI_GetModelParameters(mmi)
+#define GetNumModelParameters(mmi)   rtwCAPI_GetNumModelParameters(mmi)
+#define GetModelParameters(mmi)      rtwCAPI_GetModelParameters(mmi)
+
+#define GetNumBlockParameters(mmi)   rtwCAPI_GetNumBlockParameters(mmi)
+#define GetBlockParameters(mmi)      rtwCAPI_GetBlockParameters(mmi)
 
 #define GetNumOutputs(mmi)           rtwCAPI_GetNumRootOutputs(mmi)
 #define GetOutputs(mmi)              rtwCAPI_GetRootOutputs(mmi)
@@ -62,6 +65,7 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
     char variability[10];
     char initial[10];
     char causality[15];
+    char index[15];
 
     switch(FLAG) {{
         case ROOT_INPUT_FLAG:
@@ -71,7 +75,13 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             strcpy(causality, "input");
             break;
         case MODEL_PARAMETER_FLAG:
-            number = GetNumParameters(capiMap);
+            number = GetNumModelParameters(capiMap);
+            strcpy(variability, "tunable");
+            strcpy(initial, "exact");
+            strcpy(causality, "parameter");
+            break;
+        case BLOCK_PARAMETER_FLAG:
+            number = GetNumBlockParameters(capiMap);
             strcpy(variability, "tunable");
             strcpy(initial, "exact");
             strcpy(causality, "parameter");
@@ -100,13 +110,15 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
         cJSON_AddStringToObject(jsonSV, "causality", causality);
         cJSON_AddStringToObject(jsonSV, "description", sVariable.name);
         cJSON_AddStringToObject(jsonSV, "variability", variability);
+        sprintf(index, "%u", sVariable.index);
+        cJSON_AddStringToObject(jsonSV, "index", index);
 
         if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){{
-            sprintf(valueReference, "%i", numReal++);
+            sprintf(valueReference, "%u", numReal++);
         }} else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {{
-            sprintf(valueReference, "%i", numInt++);
+            sprintf(valueReference, "%u", numInt++);
         }} else {{
-            sprintf(valueReference, "%i", numBoolean++);
+            sprintf(valueReference, "%u", numBoolean++);
         }}
         cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
 
@@ -119,11 +131,11 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
             cJSON_AddItemToArray(startArray, startObject);
         }} else {{
             if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){{
-                sprintf(outputIndex, "%i", numReal);
+                sprintf(outputIndex, "%u", numReal);
             }} else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {{
-                sprintf(outputIndex, "%i", numInt);
+                sprintf(outputIndex, "%u", numInt);
             }} else {{
-                sprintf(outputIndex, "%i", numBoolean);
+                sprintf(outputIndex, "%u", numBoolean);
             }}
             outputObject = cJSON_CreateObject();
             cJSON_AddStringToObject(outputObject, "index", outputIndex);
@@ -162,6 +174,7 @@ int main(int argc, const char *argv[]) {{
 
             objectCreator(ROOT_INPUT_FLAG, root, ScalarVariables, capiMap);
             objectCreator(MODEL_PARAMETER_FLAG, root, ScalarVariables, capiMap);
+            objectCreator(BLOCK_PARAMETER_FLAG, root, ScalarVariables, capiMap);
             objectCreator(ROOT_OUTPUT_FLAG, root, ScalarVariables, capiMap);
             {{
                 cJSON *ModelVariables = cJSON_AddArrayToObject(root, "ModelVariables");
