@@ -62,7 +62,7 @@ def xmlgen(data):
     name = data["Model"]
 
     fmiMD = {"fmiVersion":"2.0", "modelName":name, "guid":data["GUID"], "numberOfEventIndicators":"0"}
-    co_simulation_dict = {"providesDirectionalDerivative":"false", "modelIdentifier":name, "canHandleVariableCommunicationStepSize":"true"}
+    co_simulation_dict = {"providesDirectionalDerivative":"false", "modelIdentifier":name, "canHandleVariableCommunicationStepSize":"false"}
     category_dictlist = [{"name":"logAll", "description":"-"}, {"name":"logError", "description":"-"}, {"name":"logFmiCall", "description":"-"}, {"name":"logEvent", "description":"-"}]
     step_size_dict = {"stepSize":step_size}
 
