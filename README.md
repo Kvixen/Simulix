@@ -147,10 +147,11 @@ Simulix comes with certain flags
 * `-tf:           Name of temp folder`
 
 *Just specify flag, not arguments:*
-* `--ONLY_BUILD:  Not generate new files, only build existing`
-* `--NO-TEMP   :  Doesn't delete the temp folder`
-* `--NO-CMAKE  :  Doesn't execute CMAKE`
-* `--NO-MAKE   :  Doesn't execute MAKE program`
+* `--DEBUG_BUILD: Do not build release configuration, but build debug configuration`
+* `--ONLY_BUILD : Do not regenerate files, only build existing`
+* `--NO-TEMP    : Do not delete the temp folder`
+* `--NO-CMAKE   : Do not execute CMAKE`
+* `--NO-MAKE    : Do not execute MAKE program`
 
 Here are some examples of executing Simulix
 
