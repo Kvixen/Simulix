@@ -2,8 +2,6 @@
 
 [FMU](https://en.wikipedia.org/wiki/Functional_Mock-up_Interface) builder for [Simulink](https://mathworks.com/products/simulink.html) models using the C-API.
 
-Also provides the ability to compile existing FMUs when the FMU is missing binaries for the current OS.
-
 ## Content
 * [License](#license)
 * [Usage](#usage)
