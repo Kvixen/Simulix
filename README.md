@@ -73,7 +73,7 @@ In order to use Simulix you can either
 
 <div id='linux'/>
 
-## Linux (Ubuntu)
+## Linux
 
 <div id='l-dependencies'/>
 
@@ -232,8 +232,7 @@ While we are in Alpha, we will list what we are currently supporting.
 * Windows
   * 32-bit: ✕
   * 64-bit: ✓
-* Linux: 
-  * Ubuntu: ✓
+* Linux: ✓
 * macOS: ?
 
 
