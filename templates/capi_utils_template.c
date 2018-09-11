@@ -10,9 +10,9 @@ struct ScalarVariable sVariable;
 void GetName(char *name){{
     const char s[2] = "/";
     char *token;
-   
+
     token = strtok(name, s);
-   
+
     while( token != NULL ) {{
         strcpy(name, token);
         token = strtok(NULL, s);
@@ -38,7 +38,8 @@ void GetValueFromAdress( char           *paramName,
                          uint_T*        actualDims,
                          uint_T         numDims,
                          real_T         slope,
-                         real_T         bias) {{
+                         real_T         bias,
+                         uint_T         index) {{
 
     uint_T numRows  = actualDims[0];
     uint_T numCols  = actualDims[1];
@@ -47,6 +48,7 @@ void GetValueFromAdress( char           *paramName,
 
     strcpy(sVariable.name, paramName);
     sVariable.DataID = slDataID;
+    sVariable.index = index;
 
     #ifdef FDEBUG
     printf("Debug in CAPI_UTILS.c, function GetValueFromAdress:\n\
@@ -142,7 +144,7 @@ CAPI_UTILS_GET_VALUE_FROM_ADRESS_DEFAULT:
 
 void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
                         uint_T                    paramIdx) {{
-    
+
     const rtwCAPI_ModelParameters* modelParams;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
     const rtwCAPI_DimensionMap*    dimMap;
@@ -168,7 +170,7 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     int    idx;
     real_T slope = 1.0;
     real_T bias  = 0.0;
-    unsigned short modParamFlag = 0; 
+    unsigned short modParamFlag = 0;
 
     /* Assert the parameter index is less than total number of parameters */
     assert(paramIdx < rtwCAPI_GetNumModelParameters(capiMap));
@@ -176,9 +178,9 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     /* Get modelParams, an array of rtwCAPI_ModelParameters structure  */
     modelParams = rtwCAPI_GetModelParameters(capiMap);
     if (modelParams == NULL) return;
-    
+
     /* Get Parameter Name */
-    paramName   = (char*)rtwCAPI_GetModelParameterName(modelParams, paramIdx); 
+    paramName   = (char*)rtwCAPI_GetModelParameterName(modelParams, paramIdx);
 
     /* Get Data Type attributes of the Model Parameter                       */
     /* Accessing the data type information from capiMap is a 3 step process  *
@@ -195,7 +197,7 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
 
     dataTypeMap = rtwCAPI_GetDataTypeMap(capiMap);
     if (dataTypeMap == NULL) return;
-    
+
     dataTypeIdx = rtwCAPI_GetModelParameterDataTypeIdx(modelParams, paramIdx);
     slDataID    = rtwCAPI_GetDataTypeSLId(dataTypeMap, dataTypeIdx);
     cDataName   = rtwCAPI_GetDataTypeCName(dataTypeMap,dataTypeIdx);
@@ -213,21 +215,21 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
      *       o index into the dimArray (dimArrayIdx)                         *
      * 5) Using numDims and the dimArrayIdx, get the actual dimensions from  *
      *    the dimArray                                                       *
-     *       uint_T ActualDims[numDims] = {{dimArray[dimArrayIdx],            *
+     *       uint_T ActualDims[numDims] = {{dimArray[dimArrayIdx],           *
      *                                     dimArray[dimArrayIdx+1],          *
-     *				       ...                                   *
-     *				       dimArray[dimArrayIdx+(numDims-1)]}}    *
+     *                     ...                                   *
+     *                     dimArray[dimArrayIdx+(numDims-1)]}}    *
      *    For e.g, scalar and 2-D parameters will have numDims = 2, So       *
-     *       uint_T ActualDims[2] = {{dimArray[dimArrayIdx],                  *
-     *                               dimArray[dimArrayIdx +1]}}               */
-    
+     *       uint_T ActualDims[2] = {{dimArray[dimArrayIdx],                 *
+     *                               dimArray[dimArrayIdx +1]}}              */
+
     dimMap   = rtwCAPI_GetDimensionMap(capiMap);
     dimArray = rtwCAPI_GetDimensionArray(capiMap);
 
     if ((dimMap == NULL) || (dimArray == NULL)) return;
 
     dimIndex    = rtwCAPI_GetModelParameterDimensionIdx(modelParams, paramIdx);
-    numDims     = rtwCAPI_GetNumDims(dimMap, dimIndex); 
+    numDims     = rtwCAPI_GetNumDims(dimMap, dimIndex);
     dimArrayIdx = rtwCAPI_GetDimArrayIndex(dimMap, dimIndex);
     orientation = rtwCAPI_GetOrientation(dimMap, dimIndex);
 
@@ -235,53 +237,52 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     for(idx=0; idx < numDims; idx++) {{
         actualDimensions[idx] = dimArray[dimArrayIdx + idx];
     }}
-    
+
     /* Get fixed-point information of the parameter */
     fxpMap = rtwCAPI_GetFixPtMap(capiMap);
     if (fxpMap == NULL) return;
-    
+
     fxpMapIdx = rtwCAPI_GetModelParameterFixPtIdx(modelParams, paramIdx);
     if(fxpMapIdx > 0) {{
         /* Only Fixed-point parameters have fxpMapIdx > 0 */
         real_T fracslope = rtwCAPI_GetFxpFracSlope(fxpMap,fxpMapIdx);
         int8_T expt      = rtwCAPI_GetFxpExponent(fxpMap,fxpMapIdx);
-        
-        /* slope = fractional slope * 2^exponent 
-         * fractional slope is also called Slope Adjustment Factor. 
+
+        /* slope = fractional slope * 2^exponent
+         * fractional slope is also called Slope Adjustment Factor.
          * Type "help fixdt" in MATLAB command window for more information
-         * on fixed point data types  
+         * on fixed point data types
          */
-        
+
         slope = fracslope*pow(2.0,expt);
         bias  = rtwCAPI_GetFxpBias(fxpMap,fxpMapIdx);
     }}
 
-    /* Get the address to this parameter                                     */
+    /* Get the address to this parameter */
     dataAddrMap = rtwCAPI_GetDataAddressMap(capiMap);
     addrIdx     = rtwCAPI_GetModelParameterAddrIdx(modelParams,paramIdx);
-    paramAddress= (void *) rtwCAPI_GetDataAddress(dataAddrMap,addrIdx); 
+    paramAddress= (void *) rtwCAPI_GetDataAddress(dataAddrMap,addrIdx);
 
     if (paramAddress == NULL) return;
-    
+
     GetValueFromAdress(paramName, paramAddress, slDataID, isComplex,
-                        actualDimensions, numDims, slope, bias);
+                        actualDimensions, numDims, slope, bias, addrIdx);
 
     free(actualDimensions);
     return;
 }}
 
-void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
-                uint_T                    signalIdx,
-                uint_T                    signalTypeFlag) {{
-    
-    const rtwCAPI_Signals*         signals;
+void GetBlockParameter(rtwCAPI_ModelMappingInfo* capiMap,
+                        uint_T                    paramIdx) {{
+
+    const rtwCAPI_BlockParameters* blockParams;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
     const rtwCAPI_DimensionMap*    dimMap;
     const rtwCAPI_FixPtMap*        fxpMap;
     const uint_T*                  dimArray;
     void**                         dataAddrMap;
 
-    char *signalName = malloc(256);
+    char_T        paramName[256];
     uint_T        addrIdx;
     uint16_T      dataTypeIdx;
     uint16_T      dimIndex;
@@ -299,7 +300,142 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     int    idx;
     real_T slope = 1.0;
     real_T bias  = 0.0;
-    unsigned short modParamFlag = 0; 
+    unsigned short modParamFlag = 0;
+
+    /* Assert the parameter index is less than total number of parameters */
+    assert(paramIdx < rtwCAPI_GetNumBlockParameters(capiMap));
+
+    /* Get blockParams, an array of rtwCAPI_BlockParameters structure  */
+    blockParams = rtwCAPI_GetBlockParameters(capiMap);
+    if (blockParams == NULL) return;
+
+    /* Get Parameter Name */
+    strcpy(paramName, rtwCAPI_GetBlockParameterBlockPath(blockParams, paramIdx));
+    GetName(paramName);
+    RemoveSpaces(paramName);
+    strcat(paramName, "_");
+    strcat(paramName, rtwCAPI_GetBlockParameterName(blockParams, paramIdx));
+
+    /* Get Data Type attributes of the Block Parameter                       */
+    /* Accessing the data type information from capiMap is a 3 step process  *
+     * 1) Get the dataTypeMap Array from capiMap.                            *
+     * 2) Get the index into the above array, dataTypeIdx, from BlockParameter*
+     *    structure. The index will point to a rtwCAPI_DataTypeMap structure.*
+     * 3) From the structure, get the member values of the structure, namely *
+     *       o Simulink Data ID, can be one of the enumerated value          *
+     *           SS_DOUBLE, SS_SINGLE, SS_INT8, SS_UINT8, SS_INT16, SS_UINT16*
+     *            , SS_INT32, SS_UINT32, SS_BOOLEAN                          *
+     *       o Complexity                                                    *
+     *       o Data Size                                                     *
+     *    For complete structure see matlabroot/rtw/c/src/rtw_capi.h         */
+
+    dataTypeMap = rtwCAPI_GetDataTypeMap(capiMap);
+    if (dataTypeMap == NULL) return;
+
+    dataTypeIdx = rtwCAPI_GetBlockParameterDataTypeIdx(blockParams, paramIdx);
+    slDataID    = rtwCAPI_GetDataTypeSLId(dataTypeMap, dataTypeIdx);
+    cDataName   = rtwCAPI_GetDataTypeCName(dataTypeMap,dataTypeIdx);
+    isComplex   = rtwCAPI_GetDataIsComplex(dataTypeMap,dataTypeIdx);
+
+    /* Get Dimensions of the Block Parameter                                 */
+    /* Accessing the dimension from capiMap is a 4 step process              *
+     * 1) Get the dimMap array, an array of CAPI_DimensionMap struct         *
+     * 2) Get the dimArray array, an array of all the dimensions in the Map  *
+     * 3) Get the index into the dimMap array (dimIdx) from BlockParameter   *
+     *    structure. the index will point to rtwCAPI_Dimension structure     *
+     * 4) From the rtwCAPI_Dimension structure, get the following information*
+     *       o orientation (scalar | vector | matrix)                        *
+     *       o Number of dimensions (numDims)                                *
+     *       o index into the dimArray (dimArrayIdx)                         *
+     * 5) Using numDims and the dimArrayIdx, get the actual dimensions from  *
+     *    the dimArray                                                       *
+     *       uint_T ActualDims[numDims] = {{dimArray[dimArrayIdx],           *
+     *                                     dimArray[dimArrayIdx+1],          *
+     *                     ...                                   *
+     *                     dimArray[dimArrayIdx+(numDims-1)]}}    *
+     *    For e.g, scalar and 2-D parameters will have numDims = 2, So       *
+     *       uint_T ActualDims[2] = {{dimArray[dimArrayIdx],                 *
+     *                               dimArray[dimArrayIdx +1]}}              */
+
+    dimMap   = rtwCAPI_GetDimensionMap(capiMap);
+    dimArray = rtwCAPI_GetDimensionArray(capiMap);
+
+    if ((dimMap == NULL) || (dimArray == NULL)) return;
+
+    dimIndex    = rtwCAPI_GetBlockParameterDimensionIdx(blockParams, paramIdx);
+    numDims     = rtwCAPI_GetNumDims(dimMap, dimIndex);
+    dimArrayIdx = rtwCAPI_GetDimArrayIndex(dimMap, dimIndex);
+    orientation = rtwCAPI_GetOrientation(dimMap, dimIndex);
+
+    actualDimensions = (uint_T *) malloc(numDims*sizeof(uint_T));
+    for(idx=0; idx < numDims; idx++) {{
+        actualDimensions[idx] = dimArray[dimArrayIdx + idx];
+    }}
+
+    /* Get fixed-point information of the parameter */
+    fxpMap = rtwCAPI_GetFixPtMap(capiMap);
+    if (fxpMap == NULL) return;
+
+    fxpMapIdx = rtwCAPI_GetBlockParameterFixPtIdx(blockParams, paramIdx);
+    if(fxpMapIdx > 0) {{
+        /* Only Fixed-point parameters have fxpMapIdx > 0 */
+        real_T fracslope = rtwCAPI_GetFxpFracSlope(fxpMap,fxpMapIdx);
+        int8_T expt      = rtwCAPI_GetFxpExponent(fxpMap,fxpMapIdx);
+
+        /* slope = fractional slope * 2^exponent
+         * fractional slope is also called Slope Adjustment Factor.
+         * Type "help fixdt" in MATLAB command window for more information
+         * on fixed point data types
+         */
+
+        slope = fracslope*pow(2.0,expt);
+        bias  = rtwCAPI_GetFxpBias(fxpMap,fxpMapIdx);
+    }}
+
+    /* Get the address to this parameter */
+    dataAddrMap = rtwCAPI_GetDataAddressMap(capiMap);
+    addrIdx     = rtwCAPI_GetBlockParameterAddrIdx(blockParams,paramIdx);
+    paramAddress= (void *) rtwCAPI_GetDataAddress(dataAddrMap,addrIdx);
+
+    if (paramAddress == NULL) return;
+
+    GetValueFromAdress(paramName, paramAddress, slDataID, isComplex,
+                        actualDimensions, numDims, slope, bias, addrIdx);
+
+    free(actualDimensions);
+    return;
+}}
+
+void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
+                uint_T                    signalIdx,
+                uint_T                    signalTypeFlag) {{
+
+    const rtwCAPI_Signals*         signals;
+    const rtwCAPI_DataTypeMap*     dataTypeMap;
+    const rtwCAPI_DimensionMap*    dimMap;
+    const rtwCAPI_FixPtMap*        fxpMap;
+    const uint_T*                  dimArray;
+    void**                         dataAddrMap;
+
+    char_T        signalName[256];
+    uint_T        addrIdx;
+    uint16_T      dataTypeIdx;
+    uint16_T      dimIndex;
+    uint16_T      fxpMapIdx;
+    uint8_T       slDataID;
+
+    void*                paramAddress;
+    const char_T*        cDataName;
+    unsigned short       isComplex;
+    uint8_T              numDims;
+    uint_T               dimArrayIdx;
+    rtwCAPI_Orientation  orientation;
+    uint_T*              actualDimensions;
+
+    int    idx;
+    real_T slope = 1.0;
+    real_T bias  = 0.0;
+    unsigned short modParamFlag = 0;
 
     switch(signalTypeFlag)
     {{
@@ -316,7 +452,7 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     }}
 
     if(signals == NULL) return;
-    
+
     /* Get Signal Name. This has to be done via the SignalBlockPath */
     strcpy(signalName, rtwCAPI_GetSignalBlockPath(signals, signalIdx));
     GetName(signalName);
@@ -338,7 +474,7 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
 
     dataTypeMap = rtwCAPI_GetDataTypeMap(capiMap);
     if (dataTypeMap == NULL) return;
-    
+
     dataTypeIdx = rtwCAPI_GetSignalDataTypeIdx(signals, signalIdx);
     slDataID    = rtwCAPI_GetDataTypeSLId(dataTypeMap, dataTypeIdx);
     cDataName   = rtwCAPI_GetDataTypeCName(dataTypeMap,dataTypeIdx);
@@ -356,21 +492,21 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
      *       o index into the dimArray (dimArrayIdx)                         *
      * 5) Using numDims and the dimArrayIdx, get the actual dimensions from  *
      *    the dimArray                                                       *
-     *       uint_T ActualDims[numDims] = {{dimArray[dimArrayIdx],            *
+     *       uint_T ActualDims[numDims] = {{dimArray[dimArrayIdx],           *
      *                                     dimArray[dimArrayIdx+1],          *
-     *				       ...                                   *
-     *				       dimArray[dimArrayIdx+(numDims-1)]}}    *
+     *                     ...                                   *
+     *                     dimArray[dimArrayIdx+(numDims-1)]}}    *
      *    For e.g, scalar and 2-D parameters will have numDims = 2, So       *
-     *       uint_T ActualDims[2] = {{dimArray[dimArrayIdx],                  *
-     *                               dimArray[dimArrayIdx +1]}}               */
-    
+     *       uint_T ActualDims[2] = {{dimArray[dimArrayIdx],                 *
+     *                               dimArray[dimArrayIdx +1]}}              */
+
     dimMap   = rtwCAPI_GetDimensionMap(capiMap);
     dimArray = rtwCAPI_GetDimensionArray(capiMap);
 
     if ((dimMap == NULL) || (dimArray == NULL)) return;
 
     dimIndex    = rtwCAPI_GetSignalDimensionIdx(signals, signalIdx);
-    numDims     = rtwCAPI_GetNumDims(dimMap, dimIndex); 
+    numDims     = rtwCAPI_GetNumDims(dimMap, dimIndex);
     dimArrayIdx = rtwCAPI_GetDimArrayIndex(dimMap, dimIndex);
     orientation = rtwCAPI_GetOrientation(dimMap, dimIndex);
 
@@ -378,37 +514,37 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     for(idx=0; idx < numDims; idx++) {{
         actualDimensions[idx] = dimArray[dimArrayIdx + idx];
     }}
-    
+
     /* Get fixed-point information of the parameter */
     fxpMap = rtwCAPI_GetFixPtMap(capiMap);
     if (fxpMap == NULL) return;
-    
+
     fxpMapIdx = rtwCAPI_GetSignalFixPtIdx(signals, signalIdx);
     if(fxpMapIdx > 0) {{
         /* Only Fixed-point parameters have fxpMapIdx > 0 */
         real_T fracslope = rtwCAPI_GetFxpFracSlope(fxpMap,fxpMapIdx);
         int8_T expt      = rtwCAPI_GetFxpExponent(fxpMap,fxpMapIdx);
-        
-        /* slope = fractional slope * 2^exponent 
-         * fractional slope is also called Slope Adjustment Factor. 
+
+        /* slope = fractional slope * 2^exponent
+         * fractional slope is also called Slope Adjustment Factor.
          * Type "help fixdt" in MATLAB command window for more information
-         * on fixed point data types  
+         * on fixed point data types
          */
-        
+
         slope = fracslope*pow(2.0,expt);
         bias  = rtwCAPI_GetFxpBias(fxpMap,fxpMapIdx);
     }}
 
-    /* Get the address to this parameter                                     */
+    /* Get the address to this parameter */
     dataAddrMap = rtwCAPI_GetDataAddressMap(capiMap);
     addrIdx     = rtwCAPI_GetSignalAddrIdx(signals,signalIdx);
-    paramAddress= (void *) rtwCAPI_GetDataAddress(dataAddrMap,addrIdx); 
+    paramAddress= (void *) rtwCAPI_GetDataAddress(dataAddrMap,addrIdx);
 
     if (paramAddress == NULL) return;
-    
+
     /* Print the parameter value */
     GetValueFromAdress(signalName, paramAddress, slDataID, isComplex,
-                        actualDimensions, numDims, slope, bias);
+                        actualDimensions, numDims, slope, bias, addrIdx);
 
     /* Modify parameter with itself */
     /* modParamflag is used as a flag to indicate whether you want to modify
@@ -424,16 +560,17 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
     return;
 }}
 
-
-
 struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
                                    uint_T                    index,
                                    uint_T                    flag) {{
-    sVariable = EmptyStruct; 
-                 
+    sVariable = EmptyStruct;
+
     switch(flag){{
         case MODEL_PARAMETER_FLAG:
             GetModelParameter(capiMap, index);
+            break;
+        case BLOCK_PARAMETER_FLAG:
+            GetBlockParameter(capiMap, index);
             break;
         case ROOT_INPUT_FLAG:
         case ROOT_OUTPUT_FLAG:
@@ -446,6 +583,3 @@ struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
     return sVariable;
 
 }}
-
-
-
