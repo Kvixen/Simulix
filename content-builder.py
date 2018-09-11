@@ -26,7 +26,7 @@ from os import getcwd, path, environ
 import collections
 import re
 
-SOURCE_REXEG = re.compile(r"^.+\\(\w+.c)$")
+SOURCE_REXEG = re.compile(r"(\w+.c)$")
 
 BAD_DLL_SOURCES = [
     "fmuTemplate.c"
@@ -73,7 +73,7 @@ def xmlgen(data):
     source_list = environ['SIMX_SOURCES_LIST'].split(';')
     source_list.append("dllmain.c")
     for source in source_list:
-        match = SOURCE_REXEG.match(source)
+        match = SOURCE_REXEG.search(source)
         if match and match.group(1) not in BAD_DLL_SOURCES:
             ET.SubElement(source_files_subelement, "File").set("name", match.group(1))
 
