@@ -31,8 +31,8 @@ This special exception applies to files containing this special exception text.
 The terms of the exception exists inside the text.
 
 */
-#ifndef _CAPI_UTILS_H_
-# define _CAPI_UTILS_H_
+#ifndef _SIMULIX_CAPI_UTILS_H_
+# define _SIMULIX_CAPI_UTILS_H_
 
 #include <stdio.h>
 #include <assert.h>

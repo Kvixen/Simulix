@@ -7,7 +7,7 @@
 #define TERMINATE_MODEL {modelName}_terminate()
 #include <stdlib.h>
 #include <stdio.h>
-#include "capi_utils.h"
+#include "Simulix_capi_utils.h"
 #include "cJSON.h"
 #define NAME_LENGTH_MAX             63 //The currently longest variable name according to Mathworks (ref/namelengthmax)
 
