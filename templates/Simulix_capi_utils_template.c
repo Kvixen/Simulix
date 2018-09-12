@@ -31,24 +31,26 @@ void RemoveSpaces(char* source){{
     *i = 0;
 }}
 
-void GetValueFromAdress( char           *paramName,
-                         void*          paramAddress,
-                         uint8_T        slDataID,
-                         unsigned short isComplex,
-                         uint_T*        actualDims,
-                         uint_T         numDims,
-                         real_T         slope,
-                         real_T         bias,
-                         uint_T         index) {{
+void GetValueFromAdress(char*          paramName,
+                        void*          paramAddress,
+                        uint8_T        slDataID,
+                        unsigned short isComplex,
+                        uint_T*        actualDims,
+                        uint_T         numDims,
+                        real_T         slope,
+                        real_T         bias,
+                        uint_T         addrIdx,
+                        uint_T         arrayIdx) {{
 
     uint_T numRows  = actualDims[0];
     uint_T numCols  = actualDims[1];
-    uint_T numPages = 0;
-    if (numDims == 3) numPages = actualDims[2];
+    uint_T numPages = (numDims == 3) ? actualDims[2] : 1;
+    uint_T numElems = numRows*numCols*numPages;
 
     strcpy(sVariable.name, paramName);
     sVariable.DataID = slDataID;
-    sVariable.index = index;
+    sVariable.addrIdx = addrIdx;
+    sVariable.arrayIdx = arrayIdx;
 
     #ifdef FDEBUG
     printf("Debug in Simulix_capi_utils.c, function GetValueFromAdress:\n\
@@ -61,26 +63,43 @@ void GetValueFromAdress( char           *paramName,
     slope          = %f,\n\
     bias           = %f\n", paramName, slDataID, isComplex ? "true" : "false" ,numRows,numCols, numPages, slope, bias);
     #endif
-    if(numRows > 1 || numCols > 1){{
+
+    if (numPages > 1) {{
+        /* not (yet) supported */
         goto CAPI_UTILS_GET_VALUE_FROM_ADRESS_DEFAULT;
     }}
-    switch(slDataID) {{
+    else if (arrayIdx >= numElems) {{
+        goto CAPI_UTILS_GET_VALUE_FROM_ADRESS_DEFAULT;
+    }}
+    else if (numRows > 1 || numCols > 1) {{
+        if (numRows > 1 && numCols > 1) {{
+            sVariable.nDims = 2;
+            sVariable.dims[0] = arrayIdx/numCols + 1;
+            sVariable.dims[1] = arrayIdx%numCols + 1;
+        }}
+        else {{
+            sVariable.nDims = 1;
+            sVariable.dims[0] = arrayIdx + 1;
+            sVariable.dims[1] = 1;
+        }}
+    }}
+    switch (slDataID) {{
         case SS_DOUBLE :
         {{
             real_T* paramVal = (real_T *) paramAddress;
-            sprintf(sVariable.value, "%f", paramVal[0]);
+            sprintf(sVariable.value, "%f", paramVal[arrayIdx]);
             break;
         }}
         case SS_SINGLE :
         {{
             real32_T* paramVal = (real32_T *) paramAddress;
-            sprintf(sVariable.value, "%f", paramVal[0]);
+            sprintf(sVariable.value, "%f", paramVal[arrayIdx]);
             break;
         }}
         case SS_INT8:
         {{
             int8_T* paramVal = (int8_T *) paramAddress;
-            int8_T intVal  = paramVal[0];
+            int8_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
@@ -88,7 +107,7 @@ void GetValueFromAdress( char           *paramName,
         case SS_UINT8:
         {{
             uint8_T* paramVal = (uint8_T *) paramAddress;
-            uint8_T intVal  = paramVal[0];
+            uint8_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
@@ -96,7 +115,7 @@ void GetValueFromAdress( char           *paramName,
         case SS_INT16:
         {{
             int16_T* paramVal = (int16_T *) paramAddress;
-            int16_T intVal  = paramVal[0];
+            int16_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
@@ -104,7 +123,7 @@ void GetValueFromAdress( char           *paramName,
         case SS_UINT16:
         {{
             uint16_T* paramVal = (uint16_T *) paramAddress;
-            uint16_T intVal  = paramVal[0];
+            uint16_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
@@ -112,7 +131,7 @@ void GetValueFromAdress( char           *paramName,
         case SS_INT32:
         {{
             int32_T* paramVal = (int32_T *) paramAddress;
-            int32_T intVal  = paramVal[0];
+            int32_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
@@ -121,7 +140,7 @@ void GetValueFromAdress( char           *paramName,
         case SS_UINT32:
         {{
             uint32_T* paramVal = (uint32_T *) paramAddress;
-            uint32_T intVal  = paramVal[0];
+            uint32_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
             sprintf(sVariable.value, "%d", realVal);
             break;
@@ -129,7 +148,7 @@ void GetValueFromAdress( char           *paramName,
         case SS_BOOLEAN:
         {{
             boolean_T* paramVal = (boolean_T *) paramAddress;
-            sprintf(sVariable.value, "%s", paramVal[0] ? "True" : "False");
+            sprintf(sVariable.value, "%s", paramVal[arrayIdx] ? "True" : "False");
             break;
         }}
         default:
@@ -143,7 +162,8 @@ CAPI_UTILS_GET_VALUE_FROM_ADRESS_DEFAULT:
 }}
 
 void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
-                        uint_T                    paramIdx) {{
+                       uint_T                    paramIdx,
+                       uint_T                    arrayIdx) {{
 
     const rtwCAPI_ModelParameters* modelParams;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
@@ -152,7 +172,7 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     const uint_T*                  dimArray;
     void**                         dataAddrMap;
 
-    char_T* paramName;
+    char_T*       paramName;
     uint_T        addrIdx;
     uint16_T      dataTypeIdx;
     uint16_T      dimIndex;
@@ -266,14 +286,15 @@ void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
     if (paramAddress == NULL) return;
 
     GetValueFromAdress(paramName, paramAddress, slDataID, isComplex,
-                        actualDimensions, numDims, slope, bias, addrIdx);
+                       actualDimensions, numDims, slope, bias, addrIdx, arrayIdx);
 
     free(actualDimensions);
     return;
 }}
 
 void GetBlockParameter(rtwCAPI_ModelMappingInfo* capiMap,
-                        uint_T                    paramIdx) {{
+                       uint_T                    paramIdx,
+                       uint_T                    arrayIdx) {{
 
     const rtwCAPI_BlockParameters* blockParams;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
@@ -400,15 +421,16 @@ void GetBlockParameter(rtwCAPI_ModelMappingInfo* capiMap,
     if (paramAddress == NULL) return;
 
     GetValueFromAdress(paramName, paramAddress, slDataID, isComplex,
-                        actualDimensions, numDims, slope, bias, addrIdx);
+                       actualDimensions, numDims, slope, bias, addrIdx, arrayIdx);
 
     free(actualDimensions);
     return;
 }}
 
 void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
-                uint_T                    signalIdx,
-                uint_T                    signalTypeFlag) {{
+               uint_T                    signalIdx,
+               uint_T                    signalTypeFlag,
+               uint_T                    arrayIdx) {{
 
     const rtwCAPI_Signals*         signals;
     const rtwCAPI_DataTypeMap*     dataTypeMap;
@@ -544,7 +566,7 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
 
     /* Print the parameter value */
     GetValueFromAdress(signalName, paramAddress, slDataID, isComplex,
-                        actualDimensions, numDims, slope, bias, addrIdx);
+                       actualDimensions, numDims, slope, bias, addrIdx, arrayIdx);
 
     /* Modify parameter with itself */
     /* modParamflag is used as a flag to indicate whether you want to modify
@@ -561,25 +583,25 @@ void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
 }}
 
 struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
-                                   uint_T                    index,
-                                   uint_T                    flag) {{
+                                  uint_T                    index,
+                                  uint_T                    flag,
+                                  uint_T                    arrayIdx) {{
     sVariable = EmptyStruct;
 
     switch(flag){{
         case MODEL_PARAMETER_FLAG:
-            GetModelParameter(capiMap, index);
+            GetModelParameter(capiMap, index, arrayIdx);
             break;
         case BLOCK_PARAMETER_FLAG:
-            GetBlockParameter(capiMap, index);
+            GetBlockParameter(capiMap, index, arrayIdx);
             break;
         case ROOT_INPUT_FLAG:
         case ROOT_OUTPUT_FLAG:
-            GetSignal(capiMap, index, flag);
+            GetSignal(capiMap, index, flag, arrayIdx);
             break;
         default:
-            printf("Flag passed to GetVariable() was %i, not handled.", flag);
+            printf("Flag passed to GetVariable() was %u, not handled.", flag);
     }}
 
     return sVariable;
-
 }}

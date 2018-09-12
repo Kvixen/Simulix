@@ -115,11 +115,11 @@ def dllgen(dst, src, data):
 
     for item in data['ModelVariables'][0]['ScalarVariable']:
         if 'Real' in item.keys():
-            real_string+= "{{F64, {0}}},\n    ".format(item['index'])
+            real_string+= "{{F64, {0}, {1}}},\n    ".format(item['index'], item['offset'])
         elif 'Integer' in item.keys():
-            int_string+= "{{S32, {0}}},\n    ".format(item['index'])
+            int_string+= "{{S32, {0}, {1}}},\n    ".format(item['index'], item['offset'])
         else:
-            boolean_string+= "{{B, {0}}},\n    ".format(item['index'])
+            boolean_string+= "{{B, {0}, {1}}},\n    ".format(item['index'], item['offset'])
 
     template_replace['realString'] = real_string
     template_replace['intString'] = int_string
@@ -133,8 +133,9 @@ def main(dst, src):
     data["GUID"] = str(uuid.uuid4())
 
     dllgen(dst, src, data)
-    # remove index key that must not be known to xmlgen
+    # remove index and offset keys that must not be known to xmlgen
     index_list = list(map(lambda d: d.pop('index'), data['ModelVariables'][0]['ScalarVariable']))
+    offset_list = list(map(lambda d: d.pop('offset'), data['ModelVariables'][0]['ScalarVariable']))
     xmlgen(data)
 
 if __name__ == '__main__':
