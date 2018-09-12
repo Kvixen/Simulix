@@ -117,10 +117,11 @@ def handle_zip(dst, zip_path):
             # Next, we split it with '_' in order to get rid of _grt_rtw
             # And we join together all elements except the last two so we support model names with underscores.
             # '_'.join(<code-in-here>.split('_')[:-2])
-            environ['SIMX_MODEL_NAME'] = '_'.join(listdir(path.join(dst, line))[0].split('_')[:-2])
             for folder_path in listdir(path.join(dst, line)):
-                if path.isdir(path.join(dst, line + "/" + folder_path)):
-                    TEMPLATE_REPLACE['modelName'] = '_'.join(listdir(path.join(dst, line))[0].split('_')[:-2])
+                if path.isdir(path.join(dst, line, folder_path)):
+                    modelName = '_'.join(folder_path.split('_')[:-2])
+                    environ['SIMX_MODEL_NAME'] = modelName
+                    TEMPLATE_REPLACE['modelName'] = modelName
                     break
             if TEMPLATE_REPLACE['folderName'] == TEMPLATE_REPLACE['modelName']:
                 rename(path.join(dst, TEMPLATE_REPLACE['folderName']), path.join(dst, "old_" + TEMPLATE_REPLACE['folderName']))

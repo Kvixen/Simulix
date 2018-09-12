@@ -10,4 +10,3 @@ def main(dst, src, name):
         rename(path.join(dst, name + '.zip'), name + ".fmu")
     except FileExistsError:
         exit("Archive %s already exists." % (name))
-        
