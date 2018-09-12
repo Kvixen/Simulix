@@ -1,7 +1,7 @@
 #include "{modelName}.h"
 #include <stddef.h>
 #include <assert.h>
-#include "capi_utils.h"
+#include "Simulix_capi_utils.h"
 #include <string.h>
 
 
@@ -51,7 +51,7 @@ void GetValueFromAdress( char           *paramName,
     sVariable.index = index;
 
     #ifdef FDEBUG
-    printf("Debug in CAPI_UTILS.c, function GetValueFromAdress:\n\
+    printf("Debug in Simulix_capi_utils.c, function GetValueFromAdress:\n\
     Parameter Name = %s,\n\
     slDataID       = %i,\n\
     isComplex      = %s,\n\

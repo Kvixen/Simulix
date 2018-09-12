@@ -71,7 +71,7 @@ def xmlgen(data):
     source_files_subelement = ET.SubElement(ET.SubElement(root,"CoSimulation",co_simulation_dict), "SourceFiles")
     # $ENV{SIMX_SOURCE_LIST} is set in unpack.py
     source_list = environ['SIMX_SOURCES_LIST'].split(';')
-    source_list.append("dllmain.c")
+    source_list.append("Simulix_dllmain.c")
     for source in source_list:
         match = SOURCE_REXEG.search(source)
         if match and match.group(1) not in BAD_DLL_SOURCES:
@@ -124,7 +124,7 @@ def dllgen(dst, src, data):
     template_replace['realString'] = real_string
     template_replace['intString'] = int_string
     template_replace['booleanString'] = boolean_string
-    with open(path.join(dst, 'dllmain.c'), 'w') as dllmain:
+    with open(path.join(dst, 'Simulix_dllmain.c'), 'w') as dllmain:
         with open(src, 'r') as dllmainTemplate:
             dllmain.write(dllmainTemplate.read().format(**template_replace))
 
@@ -139,7 +139,7 @@ def main(dst, src):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate a C file for a FMU",prog="dllgen",usage="%(prog)s [options]")
-    parser.add_argument('-o', help='Path to dllmain.c output', default=getcwd())
-    parser.add_argument('-t', help='Path to template file', default=path.join(path.dirname(path.realpath(__file__)), 'templates/dllmain_template.c'))
+    parser.add_argument('-o', help='Path to Simulix_dllmain.c output', default=getcwd())
+    parser.add_argument('-t', help='Path to template file', default=path.join(path.dirname(path.realpath(__file__)), 'templates/Simulix_dllmain_template.c'))
     args = parser.parse_args()
     main(args.o, args.t)

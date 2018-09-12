@@ -31,11 +31,11 @@ TEMPLATE_REPLACE = {
 
 BAD_SOURCES = {
     "rt_main.c",
-    "exemain.c",
+    "Simulix_exemain.c",
     "cJSON.c",
-    "capi_utils.c",
+    "Simulix_capi_utils.c",
     "cJSON.h",
-    "capi_utils.h"
+    "Simulix_capi_utils.h"
 }
 
 LIST_OF_SOURCES = []
@@ -45,7 +45,7 @@ MAT_VERSION_PATTERN = re.compile(r"^(R20)\d\d(a|b)$")
 #Match path/to/file/index.c path/to/other/file/func.h
 SOURCE_OR_HEADER_PATTERN = re.compile(r"^(.)+(\.h|\.c)$")
 
-GENERATED_CODE_LICENSE = "templates/cg_license.txt"
+GENERATED_CODE_LICENSE = "templates/Simulix_cg_license.txt"
 
 # General functions
 
@@ -130,8 +130,8 @@ def handle_zip(dst, zip_path):
 def generate_template_files(src, dst, temp_dst=None):
     if not temp_dst:
         temp_dst = dst
-    generate_template_file(src, temp_dst, "templates/capi_utils_template.c", "includes/capi_utils.c", license=True)
-    generate_template_file(src, temp_dst, "templates/exemain_template.c", "exemain.c", license=True)
+    generate_template_file(src, temp_dst, "templates/Simulix_capi_utils_template.c", "includes/Simulix_capi_utils.c", license=True)
+    generate_template_file(src, temp_dst, "templates/Simulix_exemain_template.c", "Simulix_exemain.c", license=True)
     generate_template_file(src, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
 
 def handle_extension(extension_path, src, dst):
@@ -143,20 +143,20 @@ def handle_extension(extension_path, src, dst):
         except AttributeError:
             pass
         if path.isdir(path.join(extension_path, "templates")):
-            if path.isfile(path.join(extension_path, "templates/exemain_template.c")):
-                generate_template_file(extension_path, dst, "templates/exemain_template.c", "exemain.c")
+            if path.isfile(path.join(extension_path, "templates/Simulix_exemain_template.c")):
+                generate_template_file(extension_path, dst, "templates/Simulix_exemain_template.c", "Simulix_exemain.c")
             else:
-                generate_template_file(src, dst,"templates/exemain_template.c", "exemain.c")
+                generate_template_file(src, dst,"templates/Simulix_exemain_template.c", "Simulix_exemain.c")
 
             if path.isfile(path.join(extension_path, "templates/CMakeLists.txt")):
                 generate_template_file(extension_path, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
             else:
                 generate_template_file(src, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
 
-            if path.isfile(path.join(extension_path, "templates/capi_utils_template.c")):
-                generate_template_file(extension_path, dst, "templates/capi_utils_template.c", "includes/capi_utils.c")
+            if path.isfile(path.join(extension_path, "templates/Simulix_capi_utils_template.c")):
+                generate_template_file(extension_path, dst, "templates/Simulix_capi_utils_template.c", "includes/Simulix_capi_utils.c")
             else:
-                generate_template_file(src, dst, "templates/capi_utils_template.c", "includes/capi_utils.c")
+                generate_template_file(src, dst, "templates/Simulix_capi_utils_template.c", "includes/Simulix_capi_utils.c")
         else:
             generate_template_files(src, dst)   
         return True

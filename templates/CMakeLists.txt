@@ -62,9 +62,9 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
 
         # These sources are generated or copied by Simulix, needed to build the executable
         set(EXECUTABLE_SOURCES
-            "${{GENERATED_FILES_PATH}}/exemain.c"
+            "${{GENERATED_FILES_PATH}}/Simulix_exemain.c"
             "${{GENERATED_FILES_PATH}}/includes/cJSON.c"
-            "${{GENERATED_FILES_PATH}}/includes/capi_utils.c"
+            "${{GENERATED_FILES_PATH}}/includes/Simulix_capi_utils.c"
         )
 
         find_package(PythonInterp 3 REQUIRED)
@@ -90,7 +90,7 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
         )
 
         add_custom_command(
-            OUTPUT ${{FMU_PATH}}/sources/dllmain.c
+            OUTPUT ${{FMU_PATH}}/sources/Simulix_dllmain.c
             DEPENDS main
             COMMAND echo "Executing main executable"
             COMMAND ./main
@@ -120,7 +120,7 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
             )
         endif()
     endif()
-    list(APPEND PRESRCS "${{FMU_PATH}}/sources/dllmain.c")
+    list(APPEND PRESRCS "${{FMU_PATH}}/sources/Simulix_dllmain.c")
 endif()
 
 add_library(
@@ -158,6 +158,4 @@ set_target_properties(
     PREFIX ""
 )
 
-
 include_directories("${{FMU_PATH}}/sources")
-
