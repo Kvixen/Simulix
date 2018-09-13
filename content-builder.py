@@ -48,7 +48,7 @@ def create_xml_subtree(root, name, dict_tree):
                 if isinstance(v2, list): #type(v2) == list:
                     create_xml_subtree(k1_ele, k2, v2)
                 else:
-                    if k2 == 'start':
+                    if k2 == 'start' and name == 'Real':
                         try:
                             v2 = str(float(v2))
                         except ValueError:
