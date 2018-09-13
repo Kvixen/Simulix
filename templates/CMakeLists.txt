@@ -110,7 +110,6 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
         foreach(FILE_NAME ${{LIBRARY_SOURCES}})
             configure_file("${{GENERATED_FILES_PATH}}/libraryincludes/${{FILE_NAME}}" "${{FMU_PATH}}/sources" COPYONLY)
         endforeach()
-        configure_file("${{GENERATED_FILES_PATH}}/libraryincludes/model.png" "${{FMU_PATH}}/documentation")
         configure_file("${{GENERATED_FILES_PATH}}/libraryincludes/fmusdk_license.txt" "${{FMU_PATH}}/documentation")
 
         if(UNIX)
