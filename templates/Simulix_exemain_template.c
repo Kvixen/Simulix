@@ -27,7 +27,7 @@ unsigned int numBoolean = 0;
 #define GetNumOutputs(mmi)           rtwCAPI_GetNumRootOutputs(mmi)
 #define GetOutputs(mmi)              rtwCAPI_GetRootOutputs(mmi)
 
-char *_getDataType(uint8_T index){{
+static char *_getDataType(uint8_T index){{
     switch(index){{
         case 0:
         case 1:
@@ -47,47 +47,97 @@ char *_getDataType(uint8_T index){{
 
 #define GetDataType(num)              _getDataType(num)
 
-void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* capiMap) {{
+static addObject(int flag, struct ScalarVariable* sVariable, char* causality, char* variability, char* initial, cJSON *ScalarVariables, cJSON *Unknown) {{
+    char valueReference[15];
+    char index[15];
+    char name[512];
+    cJSON *startArray;
+    cJSON* jsonSV = cJSON_CreateObject();
+    if (sVariable->nDims == 0) {{
+        sprintf(name, "%s", sVariable->name);
+    }}
+    else if (sVariable->nDims == 1) {{
+        sprintf(name, "%s[%u]", sVariable->name, sVariable->dims[0]);
+    }}
+    else if (sVariable->nDims == 2) {{
+        sprintf(name, "%s[%u,%u]", sVariable->name, sVariable->dims[0], sVariable->dims[1]);
+    }}
+    cJSON_AddStringToObject(jsonSV, "name", name);
+    cJSON_AddStringToObject(jsonSV, "causality", causality);
+    cJSON_AddStringToObject(jsonSV, "description", sVariable->name);
+    cJSON_AddStringToObject(jsonSV, "variability", variability);
+    sprintf(index, "%u", sVariable->addrIdx);
+    cJSON_AddStringToObject(jsonSV, "index", index);
+    sprintf(index, "%u", sVariable->arrayIdx);
+    cJSON_AddStringToObject(jsonSV, "offset", index);
 
-    int number, i;
+    if (strcmp(GetDataType(sVariable->DataID), "Real") == 0) {{
+        sprintf(valueReference, "%u", numReal++);
+    }} else if (strcmp(GetDataType(sVariable->DataID), "Integer") == 0) {{
+        sprintf(valueReference, "%u", numInt++);
+    }} else {{
+        sprintf(valueReference, "%u", numBoolean++);
+    }}
+    cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
+
+    startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable->DataID));
+
+    if (flag != ROOT_OUTPUT_FLAG) {{
+        cJSON *startObject;
+        cJSON_AddStringToObject(jsonSV, "initial", initial);
+        startObject = cJSON_CreateObject();
+        cJSON_AddStringToObject(startObject, "start", sVariable->value);
+        cJSON_AddItemToArray(startArray, startObject);
+    }} else {{
+        cJSON *outputObject;
+        char outputIndex[15];
+        if (strcmp(GetDataType(sVariable->DataID), "Real") == 0) {{
+            sprintf(outputIndex, "%u", numReal);
+        }} else if (strcmp(GetDataType(sVariable->DataID), "Integer") == 0) {{
+            sprintf(outputIndex, "%u", numInt);
+        }} else {{
+            sprintf(outputIndex, "%u", numBoolean);
+        }}
+        outputObject = cJSON_CreateObject();
+        cJSON_AddStringToObject(outputObject, "index", outputIndex);
+        cJSON_AddItemToArray(Unknown, outputObject);
+    }}
+    cJSON_AddItemToArray(ScalarVariables, jsonSV);
+}}
+
+static void objectCreator(int flag, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelMappingInfo* capiMap) {{
+    unsigned int numVars, varIdx;
     struct ScalarVariable sVariable;
-    cJSON *jsonSV = NULL;
-    cJSON *startArray = NULL;
-    cJSON *startObject = NULL;
     cJSON *ModelStructure = NULL;
     cJSON *outputChildObject = NULL;
     cJSON *Outputs = NULL;
     cJSON *Unknown = NULL;
     cJSON *UnknownChildObject = NULL;
-    cJSON *outputObject = NULL;
-    char outputIndex[5];
-    char valueReference[5];
     char variability[10];
     char initial[10];
     char causality[15];
-    char index[15];
 
-    switch(FLAG) {{
+    switch(flag) {{
         case ROOT_INPUT_FLAG:
-            number = GetNumInputs(capiMap);
+            numVars = GetNumInputs(capiMap);
             strcpy(variability, "discrete");
             strcpy(initial, "approx");
             strcpy(causality, "input");
             break;
         case MODEL_PARAMETER_FLAG:
-            number = GetNumModelParameters(capiMap);
+            numVars = GetNumModelParameters(capiMap);
             strcpy(variability, "tunable");
             strcpy(initial, "exact");
             strcpy(causality, "parameter");
             break;
         case BLOCK_PARAMETER_FLAG:
-            number = GetNumBlockParameters(capiMap);
+            numVars = GetNumBlockParameters(capiMap);
             strcpy(variability, "tunable");
             strcpy(initial, "exact");
             strcpy(causality, "parameter");
             break;
         case ROOT_OUTPUT_FLAG:
-            number = GetNumOutputs(capiMap);
+            numVars = GetNumOutputs(capiMap);
             strcpy(variability, "discrete");
             strcpy(causality, "output");
             ModelStructure = cJSON_AddArrayToObject(root, "ModelStructure");
@@ -99,58 +149,26 @@ void objectCreator(int FLAG, cJSON *root, cJSON *ScalarVariables, rtwCAPI_ModelM
     }}
 
     #ifdef FDEBUG
-    printf("Debug in MAIN.c, function objectCreator:\n\
-    Number of %s    = %i,\n", FLAG == ROOT_INPUT_FLAG ? "inputs" : FLAG == ROOT_OUTPUT_FLAG ? "outputs" : "parameters", number);
+    printf("Debug in Simulix_exemain.c, function objectCreator:\n\
+    Number of %s    = %u,\n", flag == ROOT_INPUT_FLAG ? "inputs" : flag == ROOT_OUTPUT_FLAG ? "outputs" : "parameters", numVars);
     #endif
-    for (i=0; i < number; i++) {{
-        sVariable = GetVariable(capiMap, i, FLAG);
-        if(!sVariable.success){{continue;}}
-        jsonSV = cJSON_CreateObject();
-        cJSON_AddStringToObject(jsonSV, "name", sVariable.name);
-        cJSON_AddStringToObject(jsonSV, "causality", causality);
-        cJSON_AddStringToObject(jsonSV, "description", sVariable.name);
-        cJSON_AddStringToObject(jsonSV, "variability", variability);
-        sprintf(index, "%u", sVariable.index);
-        cJSON_AddStringToObject(jsonSV, "index", index);
 
-        if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){{
-            sprintf(valueReference, "%u", numReal++);
-        }} else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {{
-            sprintf(valueReference, "%u", numInt++);
-        }} else {{
-            sprintf(valueReference, "%u", numBoolean++);
-        }}
-        cJSON_AddStringToObject(jsonSV, "valueReference", valueReference);
-
-        startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable.DataID));
-
-        if(FLAG != ROOT_OUTPUT_FLAG){{
-            cJSON_AddStringToObject(jsonSV, "initial", initial);
-            startObject = cJSON_CreateObject();
-            cJSON_AddStringToObject(startObject, "start", sVariable.value);
-            cJSON_AddItemToArray(startArray, startObject);
-        }} else {{
-            if(strcmp(GetDataType(sVariable.DataID), "Real") == 0){{
-                sprintf(outputIndex, "%u", numReal);
-            }} else if (strcmp(GetDataType(sVariable.DataID), "Integer") == 0) {{
-                sprintf(outputIndex, "%u", numInt);
-            }} else {{
-                sprintf(outputIndex, "%u", numBoolean);
+    for (varIdx = 0; varIdx < numVars; varIdx++) {{
+        unsigned int arrayIdx = 0;
+        do {{
+            sVariable = GetVariable(capiMap, varIdx, flag, arrayIdx++);
+            if (sVariable.success) {{
+               addObject(flag, &sVariable, causality, variability, initial, ScalarVariables, Unknown);
             }}
-            outputObject = cJSON_CreateObject();
-            cJSON_AddStringToObject(outputObject, "index", outputIndex);
-            cJSON_AddItemToArray(Unknown, outputObject);
-        }}
-        cJSON_AddItemToArray(ScalarVariables, jsonSV);
+        }} while (sVariable.success && sVariable.nDims);
     }}
-    if(FLAG == ROOT_OUTPUT_FLAG){{
+    if (flag == ROOT_OUTPUT_FLAG) {{
         cJSON_AddItemToArray(Outputs, UnknownChildObject);
         cJSON_AddArrayToObject(outputChildObject, "Derivatives");
         cJSON_AddArrayToObject(outputChildObject, "InitialUnknowns");
         cJSON_AddItemToArray(ModelStructure, outputChildObject);
     }}
 }}
-
 
 int main(int argc, const char *argv[]) {{
 

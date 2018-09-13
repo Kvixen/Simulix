@@ -49,42 +49,50 @@ extern "C" {
 #define ROOT_OUTPUT_FLAG 2
 #define BLOCK_PARAMETER_FLAG 3
 
-struct ScalarVariable{
+struct ScalarVariable {
     char name[63];
     char value[50];
     uint8_T DataID;
-    uint_T index;
+    uint8_T nDims;
+    uint_T addrIdx;
+    uint_T arrayIdx;
+    uint_T dims[2];
     int success;
 };
-static const struct ScalarVariable EmptyStruct;
+static const struct ScalarVariable EmptyStruct = {"", "", 0, 0, 0, 0, {1, 1}};
 
 extern void GetName(char* name);
 
 extern void RemoveSpaces(char* source);
 
-extern void GetValueFromAdress( char*           paramName,
-                                void*          paramAddress,
-                                uint8_T        slDataId,
-                                unsigned short isComplex,
-                                uint_T*        actDims,
-                                uint_T         numDims,
-                                real_T         slope,
-                                real_T         bias,
-                                uint_T         index);
+extern void GetValueFromAdress(char*          paramName,
+                               void*          paramAddress,
+                               uint8_T        slDataId,
+                               unsigned short isComplex,
+                               uint_T*        actDims,
+                               uint_T         numDims,
+                               real_T         slope,
+                               real_T         bias,
+                               uint_T         addrIdx,
+                               uint_T         arrayIdx);
 
 extern void GetModelParameter(rtwCAPI_ModelMappingInfo* capiMap,
-                                      uint_T                    paramIdx);
+                              uint_T                    paramIdx,
+                              uint_T                    arrayIdx);
 
 extern void GetBlockParameter(rtwCAPI_ModelMappingInfo* capiMap,
-                                      uint_T                    paramIdx);
+                              uint_T                    paramIdx,
+                              uint_T                    arrayIdx);
 
 extern void GetSignal(rtwCAPI_ModelMappingInfo* capiMap,
-                              uint_T                    signalIdx,
-                              uint_T                    signalTypeFlag);
+                      uint_T                    signalIdx,
+                      uint_T                    signalTypeFlag,
+                      uint_T                    arrayIdx);
 
 extern struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
-                                   uint_T                    index,
-                                   uint_T                    flag);
+                                         uint_T                    index,
+                                         uint_T                    flag,
+                                         uint_T                    arrayIdx);
 
 #ifdef __cplusplus
 }
