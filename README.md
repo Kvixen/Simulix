@@ -107,7 +107,7 @@ Optional for cross compiling to Windows
     ```sh
     git clone https://github.com/Kvixen/Simulix.git
     cd Simulix
-    python install -r requirements.txt
+    pip install -r requirements.txt
     ```
 
 ## Exporting your model from Simulink
