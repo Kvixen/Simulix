@@ -168,23 +168,12 @@ def handle_extension(extension_path, src, dst):
 def copy_directories(src, dst):
     copy_directory(path.join(src, 'includes'), path.join(dst, 'includes'))
     copy_directory(path.join(src, 'libraryincludes'), path.join(dst, 'libraryincludes'))
+    copy_directory(path.join(src, 'licenses'), path.join(dst, 'licenses'))
 
 def generate_files(src, dst, zip_path, zip_name, extension_path, temp_path):
     """
     Extracts content from zip in zip_path
     Generates and copies neccesary files
-    
-
-    Parameters:
-        src:
-            Source of template files, should be 
-            {path_to_cgen.py}/includes unless specified otherwise.
-
-        dst:
-            Destination of generated file(s).
-
-        zip_path:
-            Path to generated Zip.
     """
     environ['SIMX_EXE'] = "1"
     TEMPLATE_REPLACE['path'] = path.dirname(path.realpath(__file__)).replace('\\', '/')

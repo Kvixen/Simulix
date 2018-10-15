@@ -88,16 +88,12 @@ def xmlgen(data):
     ET.ElementTree(root).write(path.join('modelDescription.xml'),
         encoding='utf-8', xml_declaration=True, method='xml', pretty_print=True)
 
-def dllgen(dst, src, data):
+def dllgen(dst, data):
+
+    src = path.join(path.dirname(path.realpath(__file__)), 'templates/') 
 
     template_replace = {
 
-    }
-
-    causality_dict = {
-        'input':'U',
-        'output':'Y',
-        'parameter':'P'
     }
 
     template_replace['numReal'] = int(data['numReal'])
@@ -106,8 +102,6 @@ def dllgen(dst, src, data):
     template_replace['stepSize'] = data['StepSize']
     template_replace['modelName'] = data['Model']
     template_replace['GUID'] = data['GUID']
-    model_name = data['Model']
-    model_nameS = model_name[:29]
 
     real_string = ""
     int_string = ""
@@ -125,14 +119,16 @@ def dllgen(dst, src, data):
     template_replace['intString'] = int_string
     template_replace['booleanString'] = boolean_string
     with open(path.join(dst, 'Simulix_dllmain.c'), 'w') as dllmain:
-        with open(src, 'r') as dllmainTemplate:
+        with open(path.join(src, "Simulix_cg_license.txt"), 'r') as license_text:
+            dllmain.write(license_text.read())
+        with open(path.join(src, "Simulix_dllmain_template.c"), 'r') as dllmainTemplate:
             dllmain.write(dllmainTemplate.read().format(**template_replace))
 
-def main(dst, src):
+def main(dst):
     data = read_json_file("ModelOutputs.json")
     data["GUID"] = str(uuid.uuid4())
 
-    dllgen(dst, src, data)
+    dllgen(dst, data)
     # remove index and offset keys that must not be known to xmlgen
     index_list = list(map(lambda d: d.pop('index'), data['ModelVariables'][0]['ScalarVariable']))
     offset_list = list(map(lambda d: d.pop('offset'), data['ModelVariables'][0]['ScalarVariable']))
@@ -141,6 +137,5 @@ def main(dst, src):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate a C file for a FMU",prog="dllgen",usage="%(prog)s [options]")
     parser.add_argument('-o', help='Path to Simulix_dllmain.c output', default=getcwd())
-    parser.add_argument('-t', help='Path to template file', default=path.join(path.dirname(path.realpath(__file__)), 'templates/Simulix_dllmain_template.c'))
     args = parser.parse_args()
-    main(args.o, args.t)
+    main(args.o)
