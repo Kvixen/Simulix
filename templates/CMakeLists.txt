@@ -106,11 +106,11 @@ if(PC_DEFINITIONS MATCHES "^SIMULIX" OR PC_DEFINITIONS MATCHES ";SIMULIX")
             "fmuTemplate.c"
             "fmuTemplate.h"
         )
-        message(STATUS "GENERATED_FILES_PATH: ${{GENERATED_FILES_PATH}}")
         foreach(FILE_NAME ${{LIBRARY_SOURCES}})
             configure_file("${{GENERATED_FILES_PATH}}/libraryincludes/${{FILE_NAME}}" "${{FMU_PATH}}/sources" COPYONLY)
         endforeach()
-        configure_file("${{GENERATED_FILES_PATH}}/libraryincludes/fmusdk_license.txt" "${{FMU_PATH}}/documentation")
+        configure_file("${{GENERATED_FILES_PATH}}/licenses/fmusdk_license.txt" "${{FMU_PATH}}/documentation")
+        configure_file("${{GENERATED_FILES_PATH}}/licenses/simulix_license.txt" "${{FMU_PATH}}/documentation")
 
         if(UNIX)
             target_link_libraries(
