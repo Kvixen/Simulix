@@ -35,7 +35,7 @@ from shutil import rmtree
 def main():
     args.p = path.join(getcwd(), args.p)
     temp_folder_path = path.join(args.p, args.tf)
-    # CMake outputs syntax er
+    # Fix CMAKE path errors
     temp_folder_path = temp_folder_path.replace('\\', '/')
     environ['SIMX_TEMP_DIR'] = temp_folder_path
 
@@ -48,7 +48,7 @@ def main():
     if not args.ONLY_BUILD:
         print("Generating files")
         #if not args.FMU:
-        generate_files(args.t, args.p, args.zp, args.ZN, args.e, temp_folder_path)
+        generate_files(args.t, args.p, args.zp, args.ZN, temp_folder_path)
         #else:
             #generate_files_fmu(args.t, args.p, args.zp, args.ZN, temp_folder_path)
     build(args.p, args.f, args.m, args.NO_CMAKE, args.NO_MAKE, args.DEBUG_BUILD)
@@ -67,7 +67,6 @@ if __name__ == "__main__":
     parser.add_argument('-zp', help='Path to zipfile', default=getcwd())
     parser.add_argument('-m', help='Makefile program')
     parser.add_argument('-f', help='Build folder name', default='build')
-    parser.add_argument('-e', help='Path to extension')
     parser.add_argument('-tf', help='Name of temp folder', default='temp_folder')
     #parser.add_argument('--CC', help='Crosscompile (ALPHA! LINUX ONLY!)', action='store_true')
     parser.add_argument('--NO-TEMP', help='Doesn\'t delete the temp folder', action='store_true')

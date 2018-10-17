@@ -135,42 +135,12 @@ def generate_template_files(src, dst, temp_dst=None):
     generate_template_file(src, temp_dst, "templates/Simulix_exemain_template.c", "Simulix_exemain.c", license=True)
     generate_template_file(src, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
 
-def handle_extension(extension_path, src, dst):
-    if path.isfile(path.join(extension_path, "extension.py")):
-        sys.path.append(extension_path)
-        import extension
-        try:
-            TEMPLATE_REPLACE.update(extension.get_template_info(TEMPLATE_REPLACE))
-        except AttributeError:
-            pass
-        if path.isdir(path.join(extension_path, "templates")):
-            if path.isfile(path.join(extension_path, "templates/Simulix_exemain_template.c")):
-                generate_template_file(extension_path, dst, "templates/Simulix_exemain_template.c", "Simulix_exemain.c")
-            else:
-                generate_template_file(src, dst,"templates/Simulix_exemain_template.c", "Simulix_exemain.c")
-
-            if path.isfile(path.join(extension_path, "templates/CMakeLists.txt")):
-                generate_template_file(extension_path, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
-            else:
-                generate_template_file(src, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
-
-            if path.isfile(path.join(extension_path, "templates/Simulix_capi_utils_template.c")):
-                generate_template_file(extension_path, dst, "templates/Simulix_capi_utils_template.c", "includes/Simulix_capi_utils.c")
-            else:
-                generate_template_file(src, dst, "templates/Simulix_capi_utils_template.c", "includes/Simulix_capi_utils.c")
-        else:
-            generate_template_files(src, dst)   
-        return True
-    else:
-        return False
-    return False
-
 def copy_directories(src, dst):
     copy_directory(path.join(src, 'includes'), path.join(dst, 'includes'))
     copy_directory(path.join(src, 'libraryincludes'), path.join(dst, 'libraryincludes'))
     copy_directory(path.join(src, 'licenses'), path.join(dst, 'licenses'))
 
-def generate_files(src, dst, zip_path, zip_name, extension_path, temp_path):
+def generate_files(src, dst, zip_path, zip_name, temp_path):
     """
     Extracts content from zip in zip_path
     Generates and copies neccesary files
@@ -186,13 +156,7 @@ def generate_files(src, dst, zip_path, zip_name, extension_path, temp_path):
         exit("Couldn't find the specified ZIP file")
     handle_zip(temp_path, zip_path)
     copy_directories(src, temp_path)
-    # Extensions will overwrite whatever handle_zip has put in the TEMPLATE_REPLACE
-    # This can be useful and harmful so use extensions carefully
-    extension = False
-    if extension_path:
-        extension = handle_extension(extension_path, src, dst) 
-    if not extension or not extension_path:
-        generate_template_files(src, dst, temp_path)
+    generate_template_files(src, dst, temp_path)
     add_definitions(temp_path, dst)
     extract_file_names(temp_path)
     # This is used by content-builder to add a list of sources to modelDescription.xml
@@ -233,19 +197,3 @@ def generate_files_fmu(src, dst, fmu_path, fmu_name, temp_path):
         exit("Couldn't find the specified FMU file")
     handle_fmu(dst, fmu_path)
     generate_template_file(src, dst, 'templates/CMakeLists.txt', 'CMakeLists.txt')
-
-# Main
-
-def main():
-    with tempfile.TemporaryDirectory() as dirpath:
-        generate_files(args.t, args.p, args.zp, args.ZN, args.e, dirpath)  
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generating necessary files for an FMU",prog="unpack",usage="%(prog)s [options]")
-    parser.add_argument('-p', default=getcwd(), help='Path for generated files')
-    parser.add_argument('-t', help='Path to templates and includes folders', default=path.abspath(path.dirname(sys.argv[0])))
-    parser.add_argument('ZN', nargs='?', help='Name of zipfile generated from matlab', default='default')
-    parser.add_argument('-zp', help='Path to zipfile, if not executing folder', default=getcwd())
-    parser.add_argument('-e', help='Path to extension')
-    args = parser.parse_args()
-    main()
