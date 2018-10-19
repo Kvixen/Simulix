@@ -45,7 +45,7 @@ MAT_VERSION_PATTERN = re.compile(r"^(R20)\d\d(a|b)$")
 #Match path/to/file/index.c path/to/other/file/func.h
 SOURCE_OR_HEADER_PATTERN = re.compile(r"^(.)+(\.h|\.c)$")
 
-GENERATED_CODE_LICENSE = "templates/Simulix_cg_license.txt"
+GENERATED_CODE_LICENSE = "Simulix_cg_license.txt"
 
 # General functions
 
@@ -93,6 +93,16 @@ def make_directory(dst, dir_name):
 
 # Zip Functions
 def handle_zip(dst, zip_path):
+    """
+    Unpacks a zip to destination and finds information about Matlab version and model name.
+
+    Args:
+        dst      (str): Destination path
+        zip_path (str): A temporary destionation (If left None will be same as dst)
+
+    Returns:
+        None
+    """
     zip_ref = zipfile.ZipFile(zip_path, 'r')
     zip_ref.extractall(dst)
     root_dirs = []
@@ -101,22 +111,16 @@ def handle_zip(dst, zip_path):
         if r_dir not in root_dirs:
             root_dirs.append(r_dir)
     zip_ref.close()
+    # Loop through the 2-3 folders inside the zip
+    # The zip can contain the following folders where the first two are essential to Simulix
+    # 20xxb or 20xxb where x is a number representing the current year (2018b)
+    # model_name_grt_rtw (model_name is gonna be replaced with the name of the Simulink model)
+    # otherFiles
     for line in root_dirs:
         if MAT_VERSION_PATTERN.match(line):
-            #environ['SIMX_MATLAB_VERSION']
             TEMPLATE_REPLACE['matlabVersion'] = line
         elif line != "otherFiles":
-            #environ['SIMX_GEN_FOLDER_NAME'] = line
             TEMPLATE_REPLACE['folderName'] = line
-            # The model name in a generated grt code is inside a folder called <model_name>_grt_rtw
-            # Inside this zip there's only 2-3 folders. One of them is neither matching the pattern regex nor called "otherFiles"
-            # This folder contains the mentioned folder above. When we find a directory following the rules above we do the following:
-            # Look for directories in the above mentioned folder:
-            # listdir(path.join(dst, line))[0]
-            # This will produce a list with only one element which we will access. 
-            # Next, we split it with '_' in order to get rid of _grt_rtw
-            # And we join together all elements except the last two so we support model names with underscores.
-            # '_'.join(<code-in-here>.split('_')[:-2])
             for folder_path in listdir(path.join(dst, line)):
                 if path.isdir(path.join(dst, line, folder_path)):
                     modelName = '_'.join(folder_path.split('_')[:-2])
@@ -129,13 +133,36 @@ def handle_zip(dst, zip_path):
             TEMPLATE_REPLACE['modelNameS'] = TEMPLATE_REPLACE['modelName'][:28]
 
 def generate_template_files(src, dst, temp_dst=None):
+    """
+    Generates template files C-api utilities and exemain to the temporary folder and a CMakeLists to the dst folder.
+
+    Args:
+        src      (str): Source path for the templates folder
+        dst      (str): Destination path
+        temp_dst (str): A temporary destionation (If left None will be same as dst)
+
+    Returns:
+        None
+    """
+    # All template files are inside templates directory
+    src = path.join(src, "templates")
     if not temp_dst:
         temp_dst = dst
-    generate_template_file(src, temp_dst, "templates/Simulix_capi_utils_template.c", "includes/Simulix_capi_utils.c", license=True)
-    generate_template_file(src, temp_dst, "templates/Simulix_exemain_template.c", "Simulix_exemain.c", license=True)
-    generate_template_file(src, dst, "templates/CMakeLists.txt", "CMakeLists.txt")
+    generate_template_file(src, temp_dst, "Simulix_capi_utils_template.c", "includes/Simulix_capi_utils.c", license=True)
+    generate_template_file(src, temp_dst, "Simulix_exemain_template.c", "Simulix_exemain.c", license=True)
+    generate_template_file(src, dst, "CMakeLists.txt", "CMakeLists.txt")
 
 def copy_directories(src, dst):
+    """
+    Copies directories includes, libraryincludes and licenses from source to destination
+
+    Args:
+        src (str): Source path for the above mentioned folders
+        dst (str): Destination path
+
+    Returns:
+        None
+    """
     copy_directory(path.join(src, 'includes'), path.join(dst, 'includes'))
     copy_directory(path.join(src, 'libraryincludes'), path.join(dst, 'libraryincludes'))
     copy_directory(path.join(src, 'licenses'), path.join(dst, 'licenses'))
