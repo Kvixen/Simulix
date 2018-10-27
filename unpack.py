@@ -50,6 +50,22 @@ GENERATED_CODE_LICENSE = "Simulix_cg_license.txt"
 # General functions
 
 def generate_template_file(src, dst, template_file_name, file_name, license=False):
+    """
+    Generates a template file using the .format function with the global variable TEMPLATE_REPLACE.
+    string.Formatter.format (https://docs.python.org/3.4/library/string.html#string.Formatter.format).
+    
+
+
+    Args:
+        src                 (str) : Source path of template_file_name
+        dst                 (str) : Destination path of generated template file
+       template_file_name   (str) : File name for template
+       file_name            (str) : File name for generated file
+       license              (bool): Boolean to include license (templates/Simulix_cg_license.txt). Defaults to False.
+
+    Returns:
+        None
+    """
     with open(path.join(dst, file_name), 'w') as generated_file:
         if license:
             with open(path.join(src, GENERATED_CODE_LICENSE), 'r') as license_file:
@@ -58,12 +74,33 @@ def generate_template_file(src, dst, template_file_name, file_name, license=Fals
             generated_file.write(template_file.read().format(**TEMPLATE_REPLACE))
 
 def find_file(dst, file_name):
+    """
+    Walks in directory and all sub-directories in dst to find file_name.
+
+    Args:
+        dst         (str): Path to recursive search
+        file_name   (str): File name to look for
+
+    Returns:
+        Path for file if found else None
+    """
     for root, dirs, files in walk(dst):
         if file_name in files:
             return path.join(root, file_name)
     return None
 
 def add_definitions(defines_path, cmakelist_path):
+    """
+    Add definitions exported by Simulink which contains inside file defines.txt and adds it to the cmake script.
+    Also adds definition SIMULIX for other functionallity inside the script (This was added for the planned repack FMU function).
+
+    Args:
+        defines_path    (str): Path where defines.txt exist
+        cmake_list_path (str): Path where the CMakeLists exist
+
+    Returns:
+        None
+    """
     path_to_define = find_file(defines_path, "defines.txt")
     if path_to_define:
         with open(path.join(cmakelist_path, "CMakeLists.txt"), 'r+') as cmake_file:
@@ -77,6 +114,16 @@ def add_definitions(defines_path, cmakelist_path):
             cmake_file.write(')\n' + content)
 
 def copy_directory(src, dst):
+    """
+    Copies directory src and all files within and puts it in dst.
+
+    Args:
+        src      (str): Directory to copy
+        dst      (str): Destination path
+        
+    Returns:
+        None
+    """
     if not path.exists(dst):
         makedirs(dst)
     for item in listdir(src):
@@ -86,10 +133,6 @@ def copy_directory(src, dst):
             copytree(s, d, False, None)
         else:
             copy2(s, d)
-
-def make_directory(dst, dir_name):
-    if not path.isdir(path.join(dst, dir_name)):
-        makedirs(path.join(dst, dir_name))
 
 # Zip Functions
 def handle_zip(dst, zip_path):
