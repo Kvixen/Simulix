@@ -14,9 +14,6 @@
       * [Installation](#l-installation)
   * [Exporting your model from Simulink](#exporting-your-model-from-simulink)
   * [Running Simulix](#running-simulix)
-* [WIKI](#wiki)
-* [Currently Work In Progress](#currently-work-in-progress)
-* [Support](#support)
 
 ## License
 
