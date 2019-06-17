@@ -164,8 +164,6 @@ static void objectCreator(int flag, cJSON *root, cJSON *ScalarVariables, rtwCAPI
     }}
     if (flag == ROOT_OUTPUT_FLAG) {{
         cJSON_AddItemToArray(Outputs, UnknownChildObject);
-        cJSON_AddArrayToObject(outputChildObject, "Derivatives");
-        cJSON_AddArrayToObject(outputChildObject, "InitialUnknowns");
         cJSON_AddItemToArray(ModelStructure, outputChildObject);
     }}
 }}
