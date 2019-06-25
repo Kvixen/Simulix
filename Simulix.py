@@ -26,12 +26,11 @@ from crosscompile import main as cross_compile
 from pack import main as pack_fmu
 import argparse
 import time
-from os import getcwd, path, mkdir, environ
+from os import getcwd, path, mkdir, environ, makedirs
 import sys
 from platform import system
 from shutil import rmtree
  
-
 def main():
     args.p = path.join(getcwd(), args.p)
     temp_folder_path = path.join(args.p, args.tf)
@@ -39,16 +38,22 @@ def main():
     temp_folder_path = temp_folder_path.replace('\\', '/')
     environ['SIMX_TEMP_DIR'] = temp_folder_path
 
-    if path.isdir(temp_folder_path):
-        rmtree(temp_folder_path)
-    mkdir(temp_folder_path)
+    if args.ZN.split('.')[-1] == "zip":
+        zip_path = path.join(args.zp, args.ZN)
+    else:
+        zip_path = path.join(args.zp, args.ZN + ".zip")
+    if not path.isfile(zip_path):
+        exit("Couldn't find the specified ZIP file")
+
+    if path.isdir(args.p):
+        rmtree(args.p)
+    makedirs(args.p)
 
     if args.ONLY_BUILD and not args.NO_MAKE and not args.NO_CMAKE:
         exit("Can't run without building and making")
     if not args.ONLY_BUILD:
-        print("Generating files")
         #if not args.FMU:
-        generate_files(args.t, args.p, args.zp, args.ZN, args.e, temp_folder_path)
+        generate_files(args.t, args.p, zip_path, args.ZN, args.e, temp_folder_path)
         #else:
             #generate_files_fmu(args.t, args.p, args.zp, args.ZN, temp_folder_path)
     build(args.p, args.f, args.m, args.NO_CMAKE, args.NO_MAKE, args.DEBUG_BUILD)

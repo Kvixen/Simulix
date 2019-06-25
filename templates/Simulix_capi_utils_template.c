@@ -101,7 +101,7 @@ void GetValueFromAdress(char*          paramName,
             int8_T* paramVal = (int8_T *) paramAddress;
             int8_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
-            sprintf(sVariable.value, "%d", realVal);
+            sprintf(sVariable.value, "%d", (int)realVal);
             break;
         }}
         case SS_UINT8:
@@ -109,7 +109,7 @@ void GetValueFromAdress(char*          paramName,
             uint8_T* paramVal = (uint8_T *) paramAddress;
             uint8_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
-            sprintf(sVariable.value, "%d", realVal);
+            sprintf(sVariable.value, "%d", (int)realVal);
             break;
         }}
         case SS_INT16:
@@ -117,7 +117,7 @@ void GetValueFromAdress(char*          paramName,
             int16_T* paramVal = (int16_T *) paramAddress;
             int16_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
-            sprintf(sVariable.value, "%d", realVal);
+            sprintf(sVariable.value, "%d", (int)realVal);
             break;
         }}
         case SS_UINT16:
@@ -125,7 +125,7 @@ void GetValueFromAdress(char*          paramName,
             uint16_T* paramVal = (uint16_T *) paramAddress;
             uint16_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
-            sprintf(sVariable.value, "%d", realVal);
+            sprintf(sVariable.value, "%d", (int)realVal);
             break;
         }}
         case SS_INT32:
@@ -133,7 +133,7 @@ void GetValueFromAdress(char*          paramName,
             int32_T* paramVal = (int32_T *) paramAddress;
             int32_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
-            sprintf(sVariable.value, "%d", realVal);
+            sprintf(sVariable.value, "%d", (int)realVal);
             break;
         }}
 
@@ -142,7 +142,7 @@ void GetValueFromAdress(char*          paramName,
             uint32_T* paramVal = (uint32_T *) paramAddress;
             uint32_T intVal  = paramVal[arrayIdx];
             real_T  realVal = slope*(intVal) + bias;
-            sprintf(sVariable.value, "%d", realVal);
+            sprintf(sVariable.value, "%d", (int)realVal);
             break;
         }}
         case SS_BOOLEAN:

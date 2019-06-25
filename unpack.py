@@ -21,7 +21,7 @@ from os import listdir, getcwd, path, makedirs, walk, rename, environ
 import xml.etree.ElementTree
 import sys
 import argparse
-from shutil import copy2, copytree, copyfile
+from shutil import copy2, copytree, copyfile, rmtree
 import zipfile
 import re
 import tempfile
@@ -178,12 +178,7 @@ def generate_files(src, dst, zip_path, zip_name, extension_path, temp_path):
     environ['SIMX_EXE'] = "1"
     TEMPLATE_REPLACE['path'] = path.dirname(path.realpath(__file__)).replace('\\', '/')
 
-    if zip_name.split('.')[-1] == "zip":
-        zip_path = path.join(zip_path, zip_name)
-    else:
-        zip_path = path.join(zip_path, zip_name + ".zip")
-    if not path.isfile(zip_path):
-        exit("Couldn't find the specified ZIP file")
+    print("Generating files")
     handle_zip(temp_path, zip_path)
     copy_directories(src, temp_path)
     # Extensions will overwrite whatever handle_zip has put in the TEMPLATE_REPLACE

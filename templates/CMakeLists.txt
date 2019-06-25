@@ -140,6 +140,7 @@ elseif(UNIX)
     )
 endif()
 
+# This checks the system for 32 or 64 bit
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(BINARY_PREFIX "${{BINARY_PREFIX}}64")
 else()
