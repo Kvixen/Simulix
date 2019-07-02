@@ -82,13 +82,7 @@ static addObject(int flag, struct ScalarVariable* sVariable, char* causality, ch
 
     startArray = cJSON_AddArrayToObject(jsonSV, GetDataType(sVariable->DataID));
 
-    if (flag != ROOT_OUTPUT_FLAG) {{
-        cJSON *startObject;
-        cJSON_AddStringToObject(jsonSV, "initial", initial);
-        startObject = cJSON_CreateObject();
-        cJSON_AddStringToObject(startObject, "start", sVariable->value);
-        cJSON_AddItemToArray(startArray, startObject);
-    }} else {{
+    if(flag == ROOT_OUTPUT_FLAG){{
         cJSON *outputObject;
         char outputIndex[15];
         if (strcmp(GetDataType(sVariable->DataID), "Real") == 0) {{
@@ -101,6 +95,17 @@ static addObject(int flag, struct ScalarVariable* sVariable, char* causality, ch
         outputObject = cJSON_CreateObject();
         cJSON_AddStringToObject(outputObject, "index", outputIndex);
         cJSON_AddItemToArray(Unknown, outputObject);
+    }} else if (flag == ROOT_INPUT_FLAG) {{
+        cJSON *startObject;
+        startObject = cJSON_CreateObject();
+        cJSON_AddStringToObject(startObject, "start", sVariable->value);
+        cJSON_AddItemToArray(startArray, startObject);
+    }} else {{
+        cJSON *startObject;
+        cJSON_AddStringToObject(jsonSV, "initial", initial);
+        startObject = cJSON_CreateObject();
+        cJSON_AddStringToObject(startObject, "start", sVariable->value);
+        cJSON_AddItemToArray(startArray, startObject);
     }}
     cJSON_AddItemToArray(ScalarVariables, jsonSV);
 }}
@@ -121,7 +126,6 @@ static void objectCreator(int flag, cJSON *root, cJSON *ScalarVariables, rtwCAPI
         case ROOT_INPUT_FLAG:
             numVars = GetNumInputs(capiMap);
             strcpy(variability, "discrete");
-            strcpy(initial, "approx");
             strcpy(causality, "input");
             break;
         case MODEL_PARAMETER_FLAG:
