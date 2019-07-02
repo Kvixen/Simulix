@@ -139,14 +139,14 @@ static fmi2Integer getInteger(ModelInstance *comp, fmi2ValueReference vr)
     if (vr < NUMBER_OF_INTEGERS_IN_MODEL)
     {{
         rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
-        if (dataReal[vr].dataType == S32) {{
-            int32_t* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].addrIdx];
-            ptr += dataReal[vr].arrayIdx;
+        if (dataInteger[vr].dataType == S32) {{
+            int32_t* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataInteger[vr].addrIdx];
+            ptr += dataInteger[vr].arrayIdx;
             return (fmi2Integer)*ptr;
         }}
         else {{
-            fmi2Integer* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].addrIdx];
-            ptr += dataReal[vr].arrayIdx;
+            fmi2Integer* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataInteger[vr].addrIdx];
+            ptr += dataInteger[vr].arrayIdx;
             return (fmi2Integer)*ptr;
         }}
     }}
@@ -162,14 +162,14 @@ static void setInteger(ModelInstance *comp, fmi2ValueReference vr , fmi2Integer 
     if (vr < NUMBER_OF_INTEGERS_IN_MODEL)
     {{
         rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
-        if (dataReal[vr].dataType == S32) {{
-            int32_t* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].addrIdx];
-            ptr += dataReal[vr].arrayIdx;
+        if (dataInteger[vr].dataType == S32) {{
+            int32_t* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataInteger[vr].addrIdx];
+            ptr += dataInteger[vr].arrayIdx;
             *ptr = (int32_t)value;
         }}
         else {{
-            fmi2Integer* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].addrIdx];
-            ptr += dataReal[vr].arrayIdx;
+            fmi2Integer* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataInteger[vr].addrIdx];
+            ptr += dataInteger[vr].arrayIdx;
             *ptr = (fmi2Integer)value;
         }}
     }}
@@ -185,8 +185,8 @@ static fmi2Boolean getBoolean(ModelInstance *comp, fmi2ValueReference vr)
     if (vr < NUMBER_OF_BOOLEANS_IN_MODEL)
     {{
         rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
-        boolean_T* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].addrIdx];
-        ptr += dataReal[vr].arrayIdx;
+        boolean_T* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataBoolean[vr].addrIdx];
+        ptr += dataBoolean[vr].arrayIdx;
         return (fmi2Boolean)*ptr;
     }}
     else
@@ -201,8 +201,8 @@ static void setBoolean(ModelInstance *comp, fmi2ValueReference vr , fmi2Boolean 
     if (vr < NUMBER_OF_BOOLEANS_IN_MODEL)
     {{
         rtwCAPI_ModelMappingInfo* capiMap = &(rtmGetDataMapInfo({modelName}_M).mmi);
-        boolean_T* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataReal[vr].addrIdx];
-        ptr += dataReal[vr].arrayIdx;
+        boolean_T* ptr = rtwCAPI_GetDataAddressMap(capiMap)[dataBoolean[vr].addrIdx];
+        ptr += dataBoolean[vr].arrayIdx;
         *ptr = (boolean_T)value;
     }}
     else
