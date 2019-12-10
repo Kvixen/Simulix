@@ -45,9 +45,9 @@ def main():
     if not path.isfile(zip_path):
         exit("Couldn't find the specified ZIP file")
 
-    if path.isdir(args.p):
-        rmtree(args.p)
-    makedirs(args.p)
+    if path.isdir(temp_folder_path):
+        rmtree(temp_folder_path)
+    makedirs(temp_folder_path)
 
     if args.ONLY_BUILD and not args.NO_MAKE and not args.NO_CMAKE:
         exit("Can't run without building and making")
