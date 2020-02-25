@@ -3,15 +3,9 @@
 #include <assert.h>
 #include "Simulix_capi_utils.h"
 #include <string.h>
-#include <stdbool.h>
-#include <setjmp.h>
-#include <stdio.h>
-#include "sx_assert_int.h"
+
 
 struct ScalarVariable sVariable;
-
-jmp_buf fmu_exit;
-bool has_jmp = false;
 
 void GetName(char *name){{
     const char s[2] = "/";
@@ -610,13 +604,4 @@ struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
     }}
 
     return sVariable;
-}}
-
-/*TODO proper logging */
-void AssertFunc(int cond, const char *file, int line, const char *msg) {{
-	if (cond)
-		return;
-	fprintf(stderr, "%s:%d: %s\n", file, line, msg);
-	if (has_jmp)
-		longjmp(fmu_exit, 1);
 }}

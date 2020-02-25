@@ -94,8 +94,6 @@ extern struct ScalarVariable GetVariable(rtwCAPI_ModelMappingInfo* capiMap,
                                          uint_T                    flag,
                                          uint_T                    arrayIdx);
 
-extern void AssertFunc(int cond, const char *file, int line, const char *msg);
-
 #ifdef __cplusplus
 }
 #endif

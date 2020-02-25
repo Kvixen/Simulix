@@ -8,6 +8,8 @@
 #include "rtwtypes.h"
 #include "rtw_modelmap.h"
 #include <stdint.h>
+#include <stdbool.h>
+#include <setjmp.h>
 
 // include fmu header files, typedefs and macros
 #include "fmuTemplate.h"

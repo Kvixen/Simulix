@@ -9,7 +9,9 @@
 
 #include "Simulix_capi_utils.h"
 
-#define sx_assert(expr, msg) AssertFunc((expr), __FILE__, __LINE__, (msg))
+extern void sx_assert_f(int cond, const char *file, int line, const char *msg);
+
+#define sx_assert(expr, msg) sx_assert_f((expr), __FILE__, __LINE__, (msg))
 
 #define utAssert(expr) sx_assert((expr), "Assertion " #expr " failed")
 
