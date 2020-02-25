@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "rt_assert.h"
+#include "sx_assert.h"
 #include "sx_assert_int.h"
 
 jmp_buf fmu_exit;
