@@ -221,13 +221,13 @@ static void eventUpdate(ModelInstance *comp, fmi2EventInfo *eventInfo, int isTim
     fmi2Boolean error = fmi2False;
 
     if (isTimeEvent) {{
-    	if (setjmp(fmu_exit)) {{
-    		/* Assertion failed in model. */
-    		has_jmp = false;
-    		eventInfo->terminateSimulation = fmi2True;
-    		return;
-    	}}
-    	has_jmp = true;
+        if (setjmp(fmu_exit)) {{
+            /* Assertion failed in model. */
+            has_jmp = false;
+            eventInfo->terminateSimulation = fmi2True;
+            return;
+        }}
+        has_jmp = true;
         while (current_time < (comp->time - 0.1 * step_size) )
         {{
             {modelName}_step();
