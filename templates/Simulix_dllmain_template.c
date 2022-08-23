@@ -8,9 +8,13 @@
 #include "rtwtypes.h"
 #include "rtw_modelmap.h"
 #include <stdint.h>
+#include <stdbool.h>
+#include <setjmp.h>
 
 // include fmu header files, typedefs and macros
 #include "fmuTemplate.h"
+
+#include "sx_assert_int.h"
 
 //! System DLL base address
 size_t dllBaseAddress_U32 = 0;
@@ -217,6 +221,13 @@ static void eventUpdate(ModelInstance *comp, fmi2EventInfo *eventInfo, int isTim
     fmi2Boolean error = fmi2False;
 
     if (isTimeEvent) {{
+        if (setjmp(fmu_exit)) {{
+            /* Assertion failed in model. */
+            has_jmp = false;
+            eventInfo->terminateSimulation = fmi2True;
+            return;
+        }}
+        has_jmp = true;
         while (current_time < (comp->time - 0.1 * step_size) )
         {{
             {modelName}_step();
@@ -224,6 +235,7 @@ static void eventUpdate(ModelInstance *comp, fmi2EventInfo *eventInfo, int isTim
             {modelName}_time += 1;         // Only for Vision/Testlogger that cannot handle double-presicion floats
             simulation_ticks    += 1;
         }}
+        has_jmp = false;
 
         /*
         {{

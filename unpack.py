@@ -29,7 +29,11 @@ import tempfile
 TEMPLATE_REPLACE = {
 }
 
+# Matching paths are always included (regardless of BAD_SOURCES etc.).
+GOOD_SOURCE_PATTERN = re.compile(r"includes/rt_assert\.h$")
+
 BAD_SOURCES = {
+    "rt_assert.h",
     "rt_main.c",
     "Simulix_exemain.c",
     "cJSON.c",
@@ -196,9 +200,12 @@ def generate_files(src, dst, zip_path, zip_name, extension_path, temp_path):
 def extract_file_names(dst):
     for root, dirs, files in walk(dst):
         for file in files:
-            if not file in BAD_SOURCES and SOURCE_OR_HEADER_PATTERN.search(file):
+            p = path.join(root, file)
+            if (GOOD_SOURCE_PATTERN.search(p)
+                or not file in BAD_SOURCES
+                   and SOURCE_OR_HEADER_PATTERN.search(file)):
                 LIST_OF_SOURCES.append(path.join(root, file))
-                
+
 # Fmu Functions
 def handle_fmu(dst, fmu_path):
     file_name, file_ext = path.splitext(fmu_path)
