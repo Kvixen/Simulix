@@ -65,16 +65,16 @@ def find_file(dst, file_name):
 
 def add_definitions(defines_path, cmakelist_path):
     path_to_define = find_file(defines_path, "defines.txt")
-    if path_to_define:
-        with open(path.join(cmakelist_path, "CMakeLists.txt"), 'r+') as cmake_file:
-            content = cmake_file.read()
-            cmake_file.seek(0,0)
-            cmake_file.write('add_definitions(-DSIMULIX ')
+    with open(path.join(cmakelist_path, "CMakeLists.txt"), 'r+') as cmake_file:
+        content = cmake_file.read()
+        cmake_file.seek(0,0)
+        cmake_file.write('add_definitions(-DSIMULIX ')
+        if path_to_define:
             with open(path_to_define, 'r+') as defines_file:
                 defines_file.write("SIMULIX")
                 for line in defines_file:
                     cmake_file.write("-D{0} ".format(line.rstrip('\r\n')))
-            cmake_file.write(')\n' + content)
+        cmake_file.write(')\n' + content)
 
 def copy_directory(src, dst):
     if not path.exists(dst):
