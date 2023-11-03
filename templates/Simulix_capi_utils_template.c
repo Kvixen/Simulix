@@ -74,8 +74,8 @@ void GetValueFromAdress(char*          paramName,
     else if (numRows > 1 || numCols > 1) {{
         if (numRows > 1 && numCols > 1) {{
             sVariable.nDims = 2;
-            sVariable.dims[0] = arrayIdx/numCols + 1;
-            sVariable.dims[1] = arrayIdx%numCols + 1;
+            sVariable.dims[0] = arrayIdx%numRows + 1;
+            sVariable.dims[1] = arrayIdx/numRows + 1;
         }}
         else {{
             sVariable.nDims = 1;
